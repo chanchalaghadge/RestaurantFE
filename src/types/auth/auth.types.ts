@@ -9,3 +9,25 @@ export interface LoginResponse {
   userId: number;
   userName: string;
 }
+
+export type ForgotPasswordMethod = "email" | "phone";
+
+export interface ForgotPasswordRequest {
+  method: ForgotPasswordMethod;
+  identifier: string;
+}
+
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}

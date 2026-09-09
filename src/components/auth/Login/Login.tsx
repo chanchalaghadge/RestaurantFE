@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
 import "./Login.css";
 
@@ -41,16 +41,20 @@ function Login() {
       return;
     }
 
-    alert("Invalid credentials. Use admin@restaurant.com / admin123 for testing.");
+    alert("Invalid credentials. Use rohit@rohit.com / 123 for testing.");
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1>Restaurant</h1>
+        <div className="login-brand">
+          <span className="brand-icon">🍽️</span>
+          <h1>Restaurant</h1>
+        </div>
+
         <h2>Login</h2>
 
-        <form onSubmit={handleSubmit}>
+        <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
 
@@ -81,6 +85,7 @@ function Login() {
 
               <button
                 type="button"
+                className="show-password-button"
                 onClick={() => setShowPassword((previous) => !previous)}
               >
                 {showPassword ? "Hide" : "Show"}
@@ -88,7 +93,13 @@ function Login() {
             </div>
           </div>
 
-          <button type="submit">
+          <div className="login-options">
+            <Link to="/forgot-password" className="forgot-link">
+              Forgot Password?
+            </Link>
+          </div>
+
+          <button type="submit" className="login-button">
             Login
           </button>
         </form>
