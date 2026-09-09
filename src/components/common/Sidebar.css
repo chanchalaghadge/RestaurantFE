@@ -1,0 +1,32 @@
+.sidebar {
+  width: 240px;
+  min-height: calc(100vh - 60px);
+  background: #222;
+  color: white;
+}
+
+.sidebar-title {
+  padding: 20px;
+  border-bottom: 1px solid #444;
+}
+
+.sidebar-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-menu a {
+  padding: 14px 20px;
+  color: #ffffff;
+  text-decoration: none;
+  border-bottom: 1px solid #333;
+}
+
+.sidebar-menu a:hover {
+  background: #444;
+}
