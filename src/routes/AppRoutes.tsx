@@ -6,6 +6,8 @@ import {
 } from "react-router-dom";
 
 import Login from "../components/auth/Login/Login";
+import ForgotPassword from "../components/auth/ForgotPassword/ForgotPassword";
+import ResetPassword from "../components/auth/ResetPassword/ResetPassword";
 import Dashboard from "../components/Dashboard/Dashboard";
 import MainLayout from "../layouts/MainLayout";
 
@@ -19,6 +21,12 @@ function AppRoutes() {
 
         {/* Login */}
         <Route path="/login" element={<Login />} />
+
+        {/* Forgot Password */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Reset Password */}
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Main application layout */}
         <Route element={<MainLayout />}>
