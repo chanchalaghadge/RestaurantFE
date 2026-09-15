@@ -10,6 +10,7 @@ const pageNames: Record<string, string> = {
   "/customers": "Customers",
   "/reports": "Reports",
   "/settings": "Settings",
+  "/signup": "Sign Up",
 };
 
 function UnderDevelopment() {
@@ -30,7 +31,7 @@ function UnderDevelopment() {
         <span className="development-label">Coming soon</span>
         <h1 id="development-title">{pageName} is under development</h1>
         <p>This workspace is being prepared for your restaurant team. The category module is ready, and this section will follow soon.</p>
-        <Link className="development-button" to="/categories">Back to Categories</Link>
+        <Link className="development-button" to="/dashboard">Back to Dashboard</Link>
       </div>
     </section>
   );

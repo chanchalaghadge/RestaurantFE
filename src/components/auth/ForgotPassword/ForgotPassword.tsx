@@ -11,7 +11,6 @@ const DEMO_OTP = "123456";
 
 function ForgotPassword() {
   const navigate = useNavigate();
-  const [method, setMethod] = useState<ForgotPasswordMethod>("email");
   const [identifier, setIdentifier] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -53,6 +52,7 @@ function ForgotPassword() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const method: ForgotPasswordMethod = identifier.includes("@") ? "email" : "phone";
     const request: ForgotPasswordRequest = {
       method,
       identifier,
@@ -110,48 +110,20 @@ function ForgotPassword() {
           <p>Choose how you want to receive the OTP.</p>
         </div>
 
-        <div className="method-switch">
-          <button
-            type="button"
-            className={method === "email" ? "method-button active" : "method-button"}
-            onClick={() => {
-              setMethod("email");
-              setMessage("");
-              setOtpSent(false);
-              setOtp("");
-            }}
-          >
-            Email
-          </button>
-          <button
-            type="button"
-            className={method === "phone" ? "method-button active" : "method-button"}
-            onClick={() => {
-              setMethod("phone");
-              setMessage("");
-              setOtpSent(false);
-              setOtp("");
-            }}
-          >
-            Phone Number
-          </button>
-        </div>
-
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="identifier">
-              {method === "email" ? "Email Address" : "Phone Number"}
+              Email or Phone Number
             </label>
             <input
               id="identifier"
               name="identifier"
-              type={method === "email" ? "email" : "tel"}
+              type="text"
               value={identifier}
               onChange={(event) => setIdentifier(event.target.value)}
-              placeholder={
-                method === "email" ? "Enter your email" : "Enter your phone number"
-              }
-              autoComplete={method === "email" ? "email" : "tel"}
+              placeholder="Enter email or phone number"
+              autoComplete="username"
+              inputMode="email"
               className="form-control"
             />
           </div>

@@ -2,7 +2,6 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 
 import Login from "../components/auth/Login/Login";
@@ -17,6 +16,10 @@ import CategoryViewPage from "../components/Categories/pages/CategoryViewPage";
 import CategoryGallery from "../components/Categories/pages/CategoryGallery";
 import UnderDevelopment from "../components/common/UnderDevelopment/UnderDevelopment";
 import AddMenuItemPage from "../components/MenuItems/pages/AddMenuItemPage";
+import Landing from "../components/Landing/Landing";
+import LandingMenu from "../components/Landing/pages/LandingMenu";
+import LandingAbout from "../components/Landing/pages/LandingAbout";
+import LandingContact from "../components/Landing/pages/LandingContact";
 
 function AppRoutes() {
   return (
@@ -24,7 +27,10 @@ function AppRoutes() {
       <Routes>
 
         {/* Default route */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/public-menu" element={<LandingMenu />} />
+        <Route path="/about" element={<LandingAbout />} />
+        <Route path="/contact" element={<LandingContact />} />
 
         {/* Login */}
         <Route path="/login" element={<Login />} />
@@ -34,6 +40,7 @@ function AppRoutes() {
 
         {/* Reset Password */}
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/signup" element={<UnderDevelopment />} />
 
         {/* Main application layout */}
         <Route element={<MainLayout />}>

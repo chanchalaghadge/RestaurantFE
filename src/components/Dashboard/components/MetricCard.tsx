@@ -1,0 +1,3 @@
+import type { Metric } from "../../../types/dashboard/dashboard.types";
+function MetricCard({ metric }: { metric: Metric }) { return <article className="dashboard-metric"><div className={`metric-icon ${metric.tone}`}>{metric.icon}</div><div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><em>↗ &nbsp;{metric.change}</em><small>vs. yesterday</small></div><div className={`metric-sparkline ${metric.tone}`}><i /><i /><i /><i /><i /></div></article>; }
+export default MetricCard;
