@@ -10,7 +10,13 @@ import ForgotPassword from "../components/auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "../components/auth/ResetPassword/ResetPassword";
 import Dashboard from "../components/Dashboard/Dashboard";
 import MainLayout from "../layouts/MainLayout";
-import Categories from "../components/Categories/Categories";
+import CategoryListPage from "../components/Categories/pages/CategoryListPage";
+import CategoryCreatePage from "../components/Categories/pages/CategoryCreatePage";
+import CategoryEditPage from "../components/Categories/pages/CategoryEditPage";
+import CategoryViewPage from "../components/Categories/pages/CategoryViewPage";
+import CategoryGallery from "../components/Categories/pages/CategoryGallery";
+import UnderDevelopment from "../components/common/UnderDevelopment/UnderDevelopment";
+import AddMenuItemPage from "../components/MenuItems/pages/AddMenuItemPage";
 
 function AppRoutes() {
   return (
@@ -34,7 +40,19 @@ function AppRoutes() {
 
           {/* Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/categories" element={<Categories />} />
+          <Route path="/categories" element={<CategoryListPage />} />
+          <Route path="/categories/new" element={<CategoryCreatePage />} />
+          <Route path="/categories/gallery" element={<CategoryGallery />} />
+          <Route path="/categories/:id/edit" element={<CategoryEditPage />} />
+          <Route path="/categories/:id" element={<CategoryViewPage />} />
+          <Route path="/menu" element={<UnderDevelopment />} />
+          <Route path="/menu/add" element={<AddMenuItemPage />} />
+          <Route path="/ingredients" element={<UnderDevelopment />} />
+          <Route path="/orders" element={<UnderDevelopment />} />
+          <Route path="/reservations" element={<UnderDevelopment />} />
+          <Route path="/customers" element={<UnderDevelopment />} />
+          <Route path="/reports" element={<UnderDevelopment />} />
+          <Route path="/settings" element={<UnderDevelopment />} />
 
         </Route>
 
