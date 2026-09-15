@@ -11,12 +11,11 @@ function Header() {
   return (
     <header className="header">
       <div className="header-left">
-        <h2>Restaurant Management</h2>
+        <label className="global-search">⌕ <input placeholder="Search categories, menu items..." /></label>
       </div>
 
       <div className="header-right">
-        <span>Admin</span>
-        <button onClick={handleLogout}>Logout</button>
+        <button className="notification" aria-label="Notifications">♧<i /></button><div className="profile"><span className="avatar">A</span><span><strong>Admin</strong><small>Restaurant Manager</small></span><b>⌄</b></div><button className="logout-button" onClick={handleLogout}>Logout</button>
       </div>
     </header>
   );

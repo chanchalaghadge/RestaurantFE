@@ -10,6 +10,7 @@ import ForgotPassword from "../components/auth/ForgotPassword/ForgotPassword";
 import ResetPassword from "../components/auth/ResetPassword/ResetPassword";
 import Dashboard from "../components/Dashboard/Dashboard";
 import MainLayout from "../layouts/MainLayout";
+import Categories from "../components/Categories/Categories";
 
 function AppRoutes() {
   return (
@@ -33,6 +34,7 @@ function AppRoutes() {
 
           {/* Dashboard */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/categories" element={<Categories />} />
 
         </Route>
 
