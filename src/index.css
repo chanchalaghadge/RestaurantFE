@@ -11,4 +11,15 @@ body,
   min-height: 100%;
 }
 
-body { font-family: "Trebuchet MS", "Segoe UI", sans-serif; background: #f6f8fc; color: #333; }
+body { font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-weight: 500; background: #f6f8fc; color: #333; }
+
+button,
+input,
+select,
+textarea { font-family: inherit; }
+
+h1,
+h2,
+h3,
+strong,
+b { font-weight: 700; }
