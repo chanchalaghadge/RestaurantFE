@@ -1,0 +1,8 @@
+.main-layout { min-height: 100vh; background: #f6f8fc; }
+
+.layout-body {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+.main-content { flex: 1; min-width: 0; padding: 22px 21px; overflow: auto; }

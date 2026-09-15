@@ -1,0 +1,151 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #eef2f3 0%, #d9e7e3 100%);
+  padding: 40px 16px;
+}
+
+.login-card {
+  width: min(460px, 92vw);
+  padding: 34px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #164e63;
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #183b42;
+  text-align: center;
+}
+
+.login-card h2 {
+  text-align: center;
+  color: #183b42;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 16px 0 22px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  display: block;
+  color: #344054;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #c4b5a9;
+  background: #ffffff;
+  color: #344054;
+  font-size: 14px;
+  outline: none;
+  transition: border 220ms ease, box-shadow 220ms ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #164e63;
+  box-shadow: 0 0 0 3px rgba(22, 78, 99, 0.12);
+}
+
+.password-container {
+  display: flex;
+  gap: 8px;
+}
+
+.password-container input {
+  flex: 1;
+}
+
+.show-password-button {
+  min-width: 78px;
+  border: none;
+  border-radius: 10px;
+  background: #495057;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.show-password-button:hover {
+  background: #164e63;
+}
+
+.login-options {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.forgot-link {
+  color: #164e63;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  color: #0d3544;
+  text-decoration: underline;
+}
+
+.login-button {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #164e63;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 220ms ease, background 220ms ease, box-shadow 220ms ease;
+}
+
+.login-button:hover {
+  background: #0d3544;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
