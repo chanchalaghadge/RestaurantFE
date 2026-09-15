@@ -1,4 +1,5 @@
 export type MenuItemStatus = "Active" | "Inactive";
+export type DietaryType = "Veg" | "Non-Veg";
 
 export type MenuItemOption = {
   name: string;
@@ -6,6 +7,8 @@ export type MenuItemOption = {
 };
 
 export type MenuItem = {
+  id: string;
+  code: string;
   name: string;
   category: string;
   description: string;
@@ -14,5 +17,6 @@ export type MenuItem = {
   calories: number;
   ingredients: string;
   status: MenuItemStatus;
+  dietary: DietaryType;
   image: string;
 };

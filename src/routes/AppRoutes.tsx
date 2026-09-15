@@ -15,7 +15,8 @@ import CategoryEditPage from "../components/Categories/pages/CategoryEditPage";
 import CategoryViewPage from "../components/Categories/pages/CategoryViewPage";
 import CategoryGallery from "../components/Categories/pages/CategoryGallery";
 import UnderDevelopment from "../components/common/UnderDevelopment/UnderDevelopment";
-import AddMenuItemPage from "../components/MenuItems/pages/AddMenuItemPage";
+import AddMenuItemPage from "../components/MenuItems/pages/AddMenuItemPage.tsx";
+import MenuItemsListPage from "../components/MenuItems/pages/MenuItemsListPage";
 import Landing from "../components/Landing/Landing";
 import LandingMenu from "../components/Landing/pages/LandingMenu";
 import LandingAbout from "../components/Landing/pages/LandingAbout";
@@ -52,7 +53,7 @@ function AppRoutes() {
           <Route path="/categories/gallery" element={<CategoryGallery />} />
           <Route path="/categories/:id/edit" element={<CategoryEditPage />} />
           <Route path="/categories/:id" element={<CategoryViewPage />} />
-          <Route path="/menu" element={<UnderDevelopment />} />
+          <Route path="/menu" element={<MenuItemsListPage />} />
           <Route path="/menu/add" element={<AddMenuItemPage />} />
           <Route path="/ingredients" element={<UnderDevelopment />} />
           <Route path="/orders" element={<UnderDevelopment />} />
