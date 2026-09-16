@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { customers as initialCustomers } from "../data/customer.data";
+import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import "../Customers.css";
 
 function CustomerListPage() {
@@ -194,28 +195,12 @@ function CustomerListPage() {
       </section>
 
       {customerToDelete && (
-        <div className="customer-delete-modal-backdrop" onClick={() => setCustomerToDelete(null)}>
-          <div className="customer-delete-modal" onClick={(event) => event.stopPropagation()}>
-            <div className="customer-delete-header">
-              <h3>Delete Customer</h3>
-              <button type="button" className="icon-close" onClick={() => setCustomerToDelete(null)}>
-                ×
-              </button>
-            </div>
-            <div className="customer-delete-body">
-              <p>Are you sure you want to delete <strong>{customerToDelete.name}</strong>?</p>
-              <p className="customer-delete-note">This action cannot be undone. All customer data including order history will be permanently removed.</p>
-            </div>
-            <div className="customer-delete-actions">
-              <button type="button" className="secondary-button" onClick={() => setCustomerToDelete(null)}>
-                Cancel
-              </button>
-              <button type="button" className="danger-button" onClick={confirmDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDeleteModal
+          itemName={customerToDelete.name}
+          itemType="Customer"
+          onCancel={() => setCustomerToDelete(null)}
+          onConfirm={confirmDelete}
+        />
       )}
     </>
   );

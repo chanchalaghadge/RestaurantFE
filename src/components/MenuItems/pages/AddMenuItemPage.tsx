@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { categories } from "../../Categories/data/category.data";
+import { menuItems } from "../data/menu-item.data";
 import type { DietaryType, MenuItemStatus } from "../../../types/menu/menu-item.types";
 import "../MenuItems.css";
 
@@ -8,9 +9,12 @@ type EditableOption = { name: string; amount: string };
 type EditableOptionGroup = { name: string; required: boolean; options: EditableOption[] };
 
 const biryaniImage = "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=420&h=320&fit=crop";
+const MENU_ITEMS_STORAGE_KEY = "restaurant-menu-items";
 
 function AddMenuItemPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const existingItem = id ? menuItems.find((item) => item.id === id) : undefined;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("Chicken Biryani");
   const [category, setCategory] = useState("Biryani");
@@ -25,6 +29,20 @@ function AddMenuItemPage() {
   const [editingGroup, setEditingGroup] = useState<number | null>(null);
   const [optionGroups, setOptionGroups] = useState<EditableOptionGroup[]>([]);
 
+  useEffect(() => {
+    if (!existingItem) return;
+    setName(existingItem.name);
+    setCategory(existingItem.category);
+    setDietary(existingItem.dietary);
+    setDescription(existingItem.description);
+    setPrice(String(existingItem.price));
+    setStatus(existingItem.status);
+    setPrepTime(String(existingItem.preparationTime));
+    setCalories(String(existingItem.calories));
+    setIngredients(existingItem.ingredients);
+    setImage(existingItem.image);
+  }, [existingItem]);
+
   const updateGroup = (groupIndex: number, update: Partial<EditableOptionGroup>) => setOptionGroups((groups) => groups.map((group, index) => index === groupIndex ? { ...group, ...update } : group));
   const updateOption = (groupIndex: number, optionIndex: number, field: keyof EditableOption, value: string) => setOptionGroups((groups) => groups.map((group, index) => index === groupIndex ? { ...group, options: group.options.map((option, position) => position === optionIndex ? { ...option, [field]: value } : option) } : group));
   const addOption = (groupIndex: number) => setOptionGroups((groups) => groups.map((group, index) => index === groupIndex ? { ...group, options: [...group.options, { name: "New option", amount: "0.00" }] } : group));
@@ -37,8 +55,8 @@ function AddMenuItemPage() {
   const basePrice = Number(price) || 0;
 
   return <section className="menu-item-page">
-    <div className="menu-item-heading"><div><div className="breadcrumb"><Link to="/dashboard">Home</Link><span>/</span><Link to="/menu">Menu</Link><span>/</span><strong>Add Menu Item</strong></div><h1>Add New Menu Item</h1><p>Create a new menu item and assign it to a category.</p></div></div>
-    <form className="menu-item-form" onSubmit={(event) => { event.preventDefault(); navigate("/menu"); }}>
+    <div className="menu-item-heading"><div><div className="breadcrumb"><Link to="/dashboard">Home</Link><span>/</span><Link to="/menu">Menu</Link><span>/</span><strong>{id ? "Edit Menu Item" : "Add Menu Item"}</strong></div><h1>{id ? "Edit Menu Item" : "Add New Menu Item"}</h1><p>{id ? "Update the menu item details and save your changes." : "Create a new menu item and assign it to a category."}</p></div></div>
+    <form className="menu-item-form" onSubmit={(event) => { event.preventDefault(); const storedItems = localStorage.getItem(MENU_ITEMS_STORAGE_KEY); const currentItems = storedItems ? JSON.parse(storedItems) : menuItems; const savedItem = { id: existingItem?.id ?? name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""), code: existingItem?.code ?? `ITEM${currentItems.length + 1}`, name, category, description, price: basePrice, preparationTime: Number(prepTime) || 0, calories: Number(calories) || 0, ingredients, status, dietary, image }; const updatedItems = existingItem ? currentItems.map((item: typeof savedItem) => item.id === savedItem.id ? savedItem : item) : [...currentItems, savedItem]; localStorage.setItem(MENU_ITEMS_STORAGE_KEY, JSON.stringify(updatedItems)); navigate("/menu"); }}>
       <div className="menu-item-top-grid">
         <section className="menu-panel basic-panel"><h2>▣ &nbsp; Basic Information</h2><label>Item Name <b>*</b><input required value={name} onChange={(event) => setName(event.target.value)} /><small>{name.length}/100</small></label><label>Category <b>*</b><select value={category} onChange={(event) => setCategory(event.target.value)}><option>Biryani</option>{categories.map((item) => <option key={item.id}>{item.name}</option>)}</select></label><label className="wide-field">Description <b>*</b><textarea required value={description} onChange={(event) => setDescription(event.target.value)} /><small>{description.length}/500</small></label><div className="price-status"><label>Price <b>*</b><div className="currency-input"><span>₹</span><input required value={price} onChange={(event) => setPrice(event.target.value)} /></div></label><label>Status <b>*</b><div className="status-toggle"><button type="button" className={status === "Active" ? "selected" : ""} onClick={() => setStatus("Active")}>Active</button><button type="button" className={status === "Inactive" ? "inactive-selected" : ""} onClick={() => setStatus("Inactive")}>Inactive</button></div></label></div><label className="dietary-field">Dietary Type <b>*</b><div className="dietary-toggle"><button type="button" className={dietary === "Veg" ? "selected" : ""} onClick={() => setDietary("Veg")}>● Veg</button><button type="button" className={dietary === "Non-Veg" ? "selected non-veg-selected" : ""} onClick={() => setDietary("Non-Veg")}>● Non-Veg</button></div></label></section>
         <section className="menu-panel image-panel"><h2>▣ &nbsp; Item Image</h2><button type="button" className="menu-upload" onClick={() => fileInputRef.current?.click()}><span>▣</span><strong>Click to upload or drag and drop</strong><small>Supports: JPG, PNG, WebP (Max. 5MB)</small></button><input ref={fileInputRef} className="hidden-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (file) setImage(URL.createObjectURL(file)); }} /><h3>Preview</h3><div className="menu-image-preview"><img src={image} alt={name} /><button type="button" onClick={() => setImage("")}>▢ Remove</button></div></section>

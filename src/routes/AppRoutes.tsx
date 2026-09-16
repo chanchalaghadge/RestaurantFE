@@ -59,6 +59,7 @@ function AppRoutes() {
           <Route path="/categories/:id" element={<CategoryViewPage />} />
           <Route path="/menu" element={<MenuItemsListPage />} />
           <Route path="/menu/add" element={<AddMenuItemPage />} />
+          <Route path="/menu/:id/edit" element={<AddMenuItemPage />} />
           <Route path="/ingredients" element={<UnderDevelopment />} />
           <Route path="/orders" element={<UnderDevelopment />} />
           <Route path="/reservations" element={<UnderDevelopment />} />
