@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ResetPasswordRequest, ResetPasswordResponse } from "../../../types/auth/auth.types";
+import type { ResetPasswordResponse } from "../../../types/auth/auth.types";
 import "./ResetPassword.css";
 
 function ResetPassword() {
@@ -30,11 +30,6 @@ function ResetPassword() {
       setMessageType("error");
       return;
     }
-
-    const request: ResetPasswordRequest = {
-      password,
-      confirmPassword,
-    };
 
     const response: ResetPasswordResponse = {
       success: true,
