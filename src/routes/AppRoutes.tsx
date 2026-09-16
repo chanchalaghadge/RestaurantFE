@@ -21,6 +21,10 @@ import Landing from "../components/Landing/Landing";
 import LandingMenu from "../components/Landing/pages/LandingMenu";
 import LandingAbout from "../components/Landing/pages/LandingAbout";
 import LandingContact from "../components/Landing/pages/LandingContact";
+import CustomerListPage from "../components/Customers/pages/CustomerListPage";
+import CustomerCreatePage from "../components/Customers/pages/CustomerCreatePage";
+import CustomerEditPage from "../components/Customers/pages/CustomerEditPage";
+import CustomerViewPage from "../components/Customers/pages/CustomerViewPage";
 
 function AppRoutes() {
   return (
@@ -55,10 +59,14 @@ function AppRoutes() {
           <Route path="/categories/:id" element={<CategoryViewPage />} />
           <Route path="/menu" element={<MenuItemsListPage />} />
           <Route path="/menu/add" element={<AddMenuItemPage />} />
+          <Route path="/menu/:id/edit" element={<AddMenuItemPage />} />
           <Route path="/ingredients" element={<UnderDevelopment />} />
           <Route path="/orders" element={<UnderDevelopment />} />
           <Route path="/reservations" element={<UnderDevelopment />} />
-          <Route path="/customers" element={<UnderDevelopment />} />
+          <Route path="/customers" element={<CustomerListPage />} />
+          <Route path="/customers/new" element={<CustomerCreatePage />} />
+          <Route path="/customers/:id/edit" element={<CustomerEditPage />} />
+          <Route path="/customers/:id" element={<CustomerViewPage />} />
           <Route path="/reports" element={<UnderDevelopment />} />
           <Route path="/settings" element={<UnderDevelopment />} />
 
