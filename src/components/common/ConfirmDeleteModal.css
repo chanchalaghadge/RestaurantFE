@@ -1,0 +1,123 @@
+.confirm-delete-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15, 27, 45, 0.58);
+  backdrop-filter: blur(3px);
+}
+
+.confirm-delete-modal {
+  position: relative;
+  width: min(410px, 100%);
+  padding: 30px 30px 24px;
+  border: 1px solid #e7ebf2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(16, 31, 53, 0.24);
+  text-align: center;
+  animation: confirm-delete-enter 180ms ease-out;
+}
+
+.confirm-delete-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #8b98aa;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.confirm-delete-close:hover,
+.confirm-delete-close:focus-visible {
+  background: #f4f6f9;
+  color: #33445d;
+  outline: none;
+}
+
+.confirm-delete-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border: 8px solid #fff0f0;
+  border-radius: 50%;
+  background: #ffe0e0;
+  color: #e34d52;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.confirm-delete-modal h2 {
+  margin: 0 0 10px;
+  color: #1c2d47;
+  font-size: 19px;
+}
+
+.confirm-delete-modal p {
+  margin: 0 0 8px;
+  color: #536681;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.confirm-delete-modal p strong {
+  color: #263a57;
+}
+
+.confirm-delete-modal small {
+  display: block;
+  color: #8a98aa;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.confirm-delete-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.confirm-delete-actions button {
+  min-width: 112px;
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.confirm-delete-cancel {
+  border: 1px solid #dce4ef;
+  background: #fff;
+  color: #526681;
+}
+
+.confirm-delete-submit {
+  border: 1px solid #e34d52;
+  background: #e34d52;
+  color: #fff;
+}
+
+.confirm-delete-submit:hover,
+.confirm-delete-submit:focus-visible {
+  background: #c93e44;
+  border-color: #c93e44;
+  outline: none;
+}
+
+@keyframes confirm-delete-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

@@ -1,0 +1,8 @@
+import { Link } from "react-router-dom";
+import "../LandingPages.css";
+
+function LandingAbout() {
+  return <main className="landing-page-content"><nav className="public-page-nav"><Link className="landing-brand" to="/"><span>♨</span><strong>Foodie</strong><small>Good Food · Happy People</small></Link><div><Link to="/">Home</Link><Link to="/public-menu">Menu</Link><Link className="active" to="/about">About</Link><Link to="/contact">Contact</Link></div><Link className="public-sign-in" to="/login">Sign In</Link></nav><section className="about-layout"><div className="about-copy"><em>Our story</em><h1>Good food is better when shared.</h1><p>Foodie began with a simple idea: bring people together around honest, delicious food. Every dish is prepared with quality ingredients, thoughtful recipes, and the warmth of a neighborhood kitchen.</p><p>From quick lunches to celebrations with family and friends, we make every visit feel special.</p><Link className="public-cta" to="/public-menu">Explore Our Menu →</Link></div><img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=900&h=700&fit=crop" alt="Friends enjoying a meal together" /></section><section className="about-values"><article><strong>01</strong><h2>Fresh ingredients</h2><p>We choose ingredients for flavor, quality, and freshness.</p></article><article><strong>02</strong><h2>Made with care</h2><p>Our kitchen team brings skill and heart to every plate.</p></article><article><strong>03</strong><h2>Happy people</h2><p>Great service and warm moments are part of every meal.</p></article></section></main>;
+}
+
+export default LandingAbout;

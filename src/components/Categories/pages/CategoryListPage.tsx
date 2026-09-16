@@ -1,0 +1,172 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import CategoryHeader from "../components/CategoryHeader";
+import CategoryStats from "../components/CategoryStats";
+import { categories } from "../data/category.data";
+import type { Category } from "../../../types/category/category.types";
+import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
+
+function CategoryListPage() {
+  const [categoryList, setCategoryList] = useState<Category[]>(categories);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("All Status");
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const visibleCategories = categoryList.filter(
+    (category) =>
+      category.name.toLowerCase().includes(search.toLowerCase()) &&
+      (status === "All Status" || category.status === status),
+  );
+  return (
+    <section className="categories-page">
+      <CategoryHeader
+        title="Manage Categories"
+        description="Organize your menu with categories. You can add, edit, delete, and manage the status of each category."
+        action={
+          <Link className="primary-button" to="/categories/new">
+            <span>+</span> Add New Category
+          </Link>
+        }
+      />
+      <CategoryStats />
+      <div className="category-panel">
+        <div className="panel-header">
+          <h2>Category List</h2>
+          <div className="filters">
+            <label className="search-box">
+              <span>⌕</span>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search categories..."
+              />
+            </label>
+            <select
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+            >
+              <option>All Status</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+            <select defaultValue="All Categories">
+              <option>All Categories</option>
+            </select>
+            <button
+              className="reset-button"
+              onClick={() => {
+                setSearch("");
+                setStatus("All Status");
+              }}
+            >
+              ↻ Reset
+            </button>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" aria-label="Select all categories" />
+                </th>
+                <th>Image</th>
+                <th>Category Name</th>
+                <th>Description</th>
+                <th>Menu Items</th>
+                <th>Status</th>
+                <th>Sort Order</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleCategories.map((category, index) => (
+                <tr key={category.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      aria-label={`Select ${category.name}`}
+                    />
+                  </td>
+                  <td>
+                    <img
+                      className="category-image"
+                      src={category.image}
+                      alt={category.name}
+                    />
+                  </td>
+                  <td>
+                    <Link
+                      className="category-name"
+                      to={`/categories/${category.id}`}
+                    >
+                      {category.name}
+                    </Link>
+                    <small>{category.slug}</small>
+                  </td>
+                  <td className="description">{category.description}</td>
+                  <td>{category.items}</td>
+                  <td>
+                    <span className={`status ${category.status.toLowerCase()}`}>
+                      {category.status}
+                    </span>
+                  </td>
+                  <td>
+                    {index + 1}
+                    <span className="drag">⠿</span>
+                  </td>
+                  <td>
+                    <div className="row-actions">
+                      <Link
+                        to={`/categories/${category.id}/edit`}
+                        aria-label={`Edit ${category.name}`}
+                      >
+                        ↗
+                      </Link>
+                      <Link
+                        to={`/categories/${category.id}`}
+                        aria-label={`View ${category.name}`}
+                      >
+                        ◉
+                      </Link>
+                      <button
+                        className="delete"
+                        aria-label={`Delete ${category.name}`}
+                        onClick={() => setCategoryToDelete(category)}
+                      >
+                        ♲
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="table-footer">
+          <span>
+            Showing 1 to {visibleCategories.length} of {categoryList.length}{" "}
+            categories
+          </span>
+          <div>
+            <button>‹</button>
+            <button className="current">1</button>
+            <button>›</button>
+          </div>
+        </div>
+      </div>
+      {categoryToDelete && (
+        <ConfirmDeleteModal
+          itemName={categoryToDelete.name}
+          itemType="Category"
+          onCancel={() => setCategoryToDelete(null)}
+          onConfirm={() => {
+            setCategoryList((current) => current.filter((category) => category.id !== categoryToDelete.id));
+            setCategoryToDelete(null);
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
+export default CategoryListPage;

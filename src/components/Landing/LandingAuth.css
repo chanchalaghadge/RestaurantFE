@@ -1,0 +1,74 @@
+.landing-sign-in-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landing-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid #dce3ec;
+  border-radius: 10px;
+  background: #fff;
+  color: #61728b;
+}
+
+.landing-input > span {
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.landing-input input {
+  min-width: 0;
+  flex: 1;
+  height: 42px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #263651;
+  font: inherit;
+  font-size: 11px;
+}
+
+.landing-input:focus-within {
+  border-color: #ff9f0b;
+  box-shadow: 0 0 0 3px #ff9f0b1f;
+}
+
+.landing-eye {
+  width: 34px;
+  height: 34px;
+  margin-right: 5px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #76869d;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.landing-eye:hover,
+.landing-eye:focus-visible {
+  color: #ff8e00;
+  background: #fff4e1;
+  outline: 0;
+}
+
+.landing-sign-in-form .remember {
+  margin: 1px 0 3px;
+}
+
+.landing-login-error {
+  margin: -3px 0 0;
+  color: #cf4054;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  .landing-sign-in-form {
+    gap: 10px;
+  }
+}
