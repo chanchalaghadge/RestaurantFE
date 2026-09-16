@@ -32,7 +32,7 @@ function Sidebar() {
           )}
         </div>
         <NavLink to="/orders">▤ <span>Orders</span><i>3</i></NavLink>
-        <NavLink to="/reservations">▦ <span>Reservations</span></NavLink>
+        <NavLink to="/tables">▦ <span>Tables</span></NavLink>
         <NavLink to="/customers">♟ <span>Customers</span></NavLink>
         <NavLink to="/reports">▥ <span>Reports</span></NavLink>
         <NavLink to="/settings">⚙ <span>Settings</span></NavLink>

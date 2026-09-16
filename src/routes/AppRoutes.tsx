@@ -25,6 +25,8 @@ import CustomerListPage from "../components/Customers/pages/CustomerListPage";
 import CustomerCreatePage from "../components/Customers/pages/CustomerCreatePage";
 import CustomerEditPage from "../components/Customers/pages/CustomerEditPage";
 import CustomerViewPage from "../components/Customers/pages/CustomerViewPage";
+import OrdersPage from "../components/Orders/OrdersPage";
+import TablesPage from "../components/Tables/TablesPage";
 
 function AppRoutes() {
   return (
@@ -61,8 +63,9 @@ function AppRoutes() {
           <Route path="/menu/add" element={<AddMenuItemPage />} />
           <Route path="/menu/:id/edit" element={<AddMenuItemPage />} />
           <Route path="/ingredients" element={<UnderDevelopment />} />
-          <Route path="/orders" element={<UnderDevelopment />} />
-          <Route path="/reservations" element={<UnderDevelopment />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/tables" element={<TablesPage />} />
+          <Route path="/reservations" element={<TablesPage />} />
           <Route path="/customers" element={<CustomerListPage />} />
           <Route path="/customers/new" element={<CustomerCreatePage />} />
           <Route path="/customers/:id/edit" element={<CustomerEditPage />} />

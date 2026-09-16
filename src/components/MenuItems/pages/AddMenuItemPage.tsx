@@ -14,7 +14,7 @@ const MENU_ITEMS_STORAGE_KEY = "restaurant-menu-items";
 function AddMenuItemPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const existingItem = id ? menuItems.find((item) => item.id === id) : undefined;
+  const existingItem = id ? (() => { const stored = localStorage.getItem(MENU_ITEMS_STORAGE_KEY); const items = stored ? JSON.parse(stored) as typeof menuItems : menuItems; return items.find((item) => item.id === id); })() : undefined;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("Chicken Biryani");
   const [category, setCategory] = useState("Biryani");
