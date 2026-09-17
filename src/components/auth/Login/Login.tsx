@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
+import { authApi } from "../../../api/auth.api";
 import "./Login.css";
-
-const TEST_EMAIL = "rohit@rohit.com";
-const TEST_PASSWORD = "123";
 
 function Login() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<LoginRequest>({
-    email: TEST_EMAIL,
-    password: TEST_PASSWORD,
+    email: "",
+    password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -25,7 +25,7 @@ function Login() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!formData.email || !formData.password) {
@@ -33,15 +33,18 @@ function Login() {
       return;
     }
 
-    if (
-      formData.email.trim().toLowerCase() === TEST_EMAIL &&
-      formData.password === TEST_PASSWORD
-    ) {
+    try {
+      setSubmitting(true);
+      setError("");
+      const result = await authApi.login(formData.email.trim(), formData.password);
+      localStorage.setItem("restaurant-access-token", result.token);
+      localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
       navigate("/dashboard");
-      return;
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to sign in.");
+    } finally {
+      setSubmitting(false);
     }
-
-    alert("Invalid credentials. Use rohit@rohit.com / 123 for testing.");
   };
 
   return (
@@ -106,8 +109,9 @@ function Login() {
           </div>
 
           <button type="submit" className="login-button">
-            Login
+            {submitting ? "Signing in..." : "Login"}
           </button>
+          {error && <p role="alert" className="login-error">{error}</p>}
         </form>
       </div>
     </div>

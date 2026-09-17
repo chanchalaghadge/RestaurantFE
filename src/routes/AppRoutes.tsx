@@ -25,6 +25,10 @@ import CustomerListPage from "../components/Customers/pages/CustomerListPage";
 import CustomerCreatePage from "../components/Customers/pages/CustomerCreatePage";
 import CustomerEditPage from "../components/Customers/pages/CustomerEditPage";
 import CustomerViewPage from "../components/Customers/pages/CustomerViewPage";
+import OrdersPage from "../components/Orders/OrdersPage";
+import TablesPage from "../components/Tables/TablesPage";
+import UsersPage from "../components/Users/UsersPage";
+import UserFormPage from "../components/Users/UserFormPage";
 
 function AppRoutes() {
   return (
@@ -45,7 +49,7 @@ function AppRoutes() {
 
         {/* Reset Password */}
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/signup" element={<UnderDevelopment />} />
+        <Route path="/signup" element={<UserFormPage />} />
 
         {/* Main application layout */}
         <Route element={<MainLayout />}>
@@ -61,12 +65,16 @@ function AppRoutes() {
           <Route path="/menu/add" element={<AddMenuItemPage />} />
           <Route path="/menu/:id/edit" element={<AddMenuItemPage />} />
           <Route path="/ingredients" element={<UnderDevelopment />} />
-          <Route path="/orders" element={<UnderDevelopment />} />
-          <Route path="/reservations" element={<UnderDevelopment />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/tables" element={<TablesPage />} />
+          <Route path="/reservations" element={<TablesPage />} />
           <Route path="/customers" element={<CustomerListPage />} />
           <Route path="/customers/new" element={<CustomerCreatePage />} />
           <Route path="/customers/:id/edit" element={<CustomerEditPage />} />
           <Route path="/customers/:id" element={<CustomerViewPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/users/new" element={<UserFormPage />} />
+          <Route path="/users/:id/edit" element={<UserFormPage />} />
           <Route path="/reports" element={<UnderDevelopment />} />
           <Route path="/settings" element={<UnderDevelopment />} />
 

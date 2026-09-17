@@ -1,0 +1,3 @@
+import { api } from "./client";
+export type DashboardApi = { totalRevenue: number; todayRevenue: number; totalOrders: number; todayOrders: number; totalCustomers: number; activeMenuItems: number; statusCounts: Record<string, number>; days: Array<{ date: string; label: string; revenue: number; orders: number }>; popular: Array<{ name: string; quantity: number; revenue: number }>; recent: Array<{ id: number; customerName: string; status: string; totalAmount: number; createdAtUtc: string; itemCount: number }> };
+export const dashboardApi = { get: () => api<DashboardApi>("/api/dashboard"), seed: () => api<unknown>("/api/dashboard/seed-sample-data", { method: "POST" }) };

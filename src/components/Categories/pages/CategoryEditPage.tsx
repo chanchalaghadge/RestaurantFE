@@ -1,8 +1,8 @@
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import CategoryHeader from "../components/CategoryHeader";
 import CategoryForm from "../components/CategoryForm";
-import { categories } from "../data/category.data";
+import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 
-function CategoryEditPage() { const { id } = useParams(); const category = categories.find((item) => item.id === id) ?? categories[0]; return <section className="categories-page category-detail-page"><CategoryHeader title={`Edit ${category.name}`} description="Update the category details and menu visibility settings." action={<Link className="secondary-button" to={`/categories/${category.id}`}>← View Category</Link>} /><div className="form-panel"><div className="form-panel-heading"><h2>Edit Category Details</h2><p>Changes will be reflected across the menu immediately.</p></div><CategoryForm category={category} mode="edit" /></div></section>; }
-
+function CategoryEditPage() { const { id } = useParams(); const [category, setCategory] = useState<CategoryApi | null>(null); const [error, setError] = useState(""); useEffect(() => { if (id) categoriesApi.get(Number(id)).then(setCategory).catch((e: unknown) => setError(e instanceof Error ? e.message : "Unable to load category.")); }, [id]); if (error) return <p>{error}</p>; if (!category) return <p>Loading category...</p>; return <section className="categories-page category-detail-page"><CategoryHeader title={`Edit ${category.name}`} description="Update category details." /><div className="form-panel"><CategoryForm category={category} mode="edit" /></div></section>; }
 export default CategoryEditPage;
