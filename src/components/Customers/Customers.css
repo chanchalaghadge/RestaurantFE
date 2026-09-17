@@ -847,3 +847,8 @@
   word-break: normal;
   white-space: normal;
 }
+
+.list-empty-state { display: grid; justify-items: center; gap: 7px; min-height: 230px; padding: 35px 20px; color: #73829a; text-align: center; }
+.list-empty-state > span { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: #edf4ff; color: #2d6eea; font-size: 25px; animation: empty-state-float 2.2s ease-in-out infinite; }
+.list-empty-state strong { color: #243c5c; font-size: 14px; }.list-empty-state p { margin: 0 0 6px; font-size: 11px; }
+@keyframes empty-state-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }

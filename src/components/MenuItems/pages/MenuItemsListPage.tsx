@@ -4,26 +4,28 @@ import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import "../MenuItems.css";
 import { menuItemsApi, type MenuItemApi } from "../../../api/menu-items.api";
+import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 
 function MenuItemsListPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All Categories");
+  const [categoryId, setCategoryId] = useState("");
+  const [categories, setCategories] = useState<CategoryApi[]>([]);
   const [dietary, setDietary] = useState("All Dietary");
   const [status, setStatus] = useState("All Status");
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [error, setError] = useState("");
-  useEffect(() => { menuItemsApi.list({ search, status: status === "All Status" ? undefined : status }).then((data) => setItems(data.map((item: MenuItemApi) => ({ id: String(item.id), code: item.code, name: item.name, category: item.categoryName, description: item.description, price: item.price, preparationTime: item.preparationTimeMinutes, calories: item.calories ?? 0, ingredients: item.ingredients ?? "", status: item.status, dietary: item.dietaryType, image: item.imageUrl ?? "" })))).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load menu items.")); }, [search, status]);
+  useEffect(() => { categoriesApi.list().then(setCategories).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load categories.")); }, []);
+  useEffect(() => { menuItemsApi.list({ search, categoryId: categoryId ? Number(categoryId) : undefined, status: status === "All Status" ? undefined : status }).then((data) => setItems(data.map((item: MenuItemApi) => ({ id: String(item.id), code: item.code, name: item.name, category: item.categoryName, description: item.description, price: item.price, preparationTime: item.preparationTimeMinutes, calories: item.calories ?? 0, ingredients: item.ingredients ?? "", status: item.status, dietary: item.dietaryType, image: item.imageUrl ?? "" })))).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load menu items.")); }, [search, categoryId, status]);
   const visibleItems = useMemo(
     () =>
       items.filter(
         (item) =>
           item.name.toLowerCase().includes(search.toLowerCase()) &&
-          (category === "All Categories" || item.category === category) &&
           (dietary === "All Dietary" || item.dietary === dietary) &&
           (status === "All Status" || item.status === status),
       ),
-    [items, search, category, dietary, status],
+    [items, search, dietary, status],
   );
 
   const handleDelete = (item: MenuItem) => {
@@ -99,21 +101,11 @@ function MenuItemsListPage() {
           <label>
             Category
             <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
+              value={categoryId}
+              onChange={(event) => setCategoryId(event.target.value)}
             >
-              <option>All Categories</option>
-              {[
-                "Pizza",
-                "Burgers",
-                "Pasta",
-                "Salads",
-                "Beverages",
-                "Desserts",
-                "Appetizers",
-              ].map((item) => (
-                <option key={item}>{item}</option>
-              ))}
+              <option value="">All Categories</option>
+              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
           </label>
           <label>
@@ -149,7 +141,7 @@ function MenuItemsListPage() {
             className="clear-filters"
             onClick={() => {
               setSearch("");
-              setCategory("All Categories");
+              setCategoryId("");
               setDietary("All Dietary");
               setStatus("All Status");
             }}
@@ -176,7 +168,7 @@ function MenuItemsListPage() {
               </tr>
             </thead>
             <tbody>
-              {visibleItems.map((item) => (
+              {visibleItems.length ? visibleItems.map((item) => (
                 <tr key={item.id}>
                   <td>
                     <input type="checkbox" aria-label={`Select ${item.name}`} />
@@ -231,7 +223,7 @@ function MenuItemsListPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : <tr><td colSpan={10}><div className="list-empty-state"><span>🍽</span><strong>No items yet</strong><p>Add your first menu item to begin building your menu.</p><Link className="primary-button" to="/menu/add">Add New Item</Link></div></td></tr>}
             </tbody>
           </table>
         </div>
