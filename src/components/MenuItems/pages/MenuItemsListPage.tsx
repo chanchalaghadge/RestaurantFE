@@ -1,22 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { menuItems } from "../data/menu-item.data";
 import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import "../MenuItems.css";
-
-const MENU_ITEMS_STORAGE_KEY = "restaurant-menu-items";
+import { menuItemsApi, type MenuItemApi } from "../../../api/menu-items.api";
 
 function MenuItemsListPage() {
-  const [items, setItems] = useState<MenuItem[]>(() => {
-    const storedItems = localStorage.getItem(MENU_ITEMS_STORAGE_KEY);
-    return storedItems ? (JSON.parse(storedItems) as MenuItem[]) : menuItems;
-  });
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All Categories");
   const [dietary, setDietary] = useState("All Dietary");
   const [status, setStatus] = useState("All Status");
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => { menuItemsApi.list({ search, status: status === "All Status" ? undefined : status }).then((data) => setItems(data.map((item: MenuItemApi) => ({ id: String(item.id), code: item.code, name: item.name, category: item.categoryName, description: item.description, price: item.price, preparationTime: item.preparationTimeMinutes, calories: item.calories ?? 0, ingredients: item.ingredients ?? "", status: item.status, dietary: item.dietaryType, image: item.imageUrl ?? "" })))).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load menu items.")); }, [search, status]);
   const visibleItems = useMemo(
     () =>
       items.filter(
@@ -30,10 +27,7 @@ function MenuItemsListPage() {
   );
 
   const handleDelete = (item: MenuItem) => {
-    const updatedItems = items.filter((currentItem) => currentItem.id !== item.id);
-    setItems(updatedItems);
-    localStorage.setItem(MENU_ITEMS_STORAGE_KEY, JSON.stringify(updatedItems));
-    setItemToDelete(null);
+    menuItemsApi.remove(Number(item.id)).then(() => { setItems((current) => current.filter((currentItem) => currentItem.id !== item.id)); setItemToDelete(null); }).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to delete menu item."));
   };
 
   return (
@@ -57,6 +51,7 @@ function MenuItemsListPage() {
           <span>+</span> Add New Item
         </Link>
       </div>
+      {error && <p role="alert">{error}</p>}
       <div className="item-stats">
         <article>
           <span className="item-stat-icon green">♜</span>
