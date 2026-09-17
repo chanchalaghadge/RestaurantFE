@@ -27,15 +27,13 @@ function Sidebar() {
               <NavLink to="/menu">All Items</NavLink>
               <NavLink to="/categories">Categories</NavLink>
               <NavLink to="/menu/add">Add Menu Item</NavLink>
-              <NavLink to="/ingredients">Ingredients</NavLink>
             </div>
           )}
         </div>
         <NavLink to="/orders">▤ <span>Orders</span><i>3</i></NavLink>
         <NavLink to="/tables">▦ <span>Tables</span></NavLink>
         <NavLink to="/customers">♟ <span>Customers</span></NavLink>
-        <NavLink to="/reports">▥ <span>Reports</span></NavLink>
-        <NavLink to="/settings">⚙ <span>Settings</span></NavLink>
+        <NavLink to="/users">♙ <span>Users</span></NavLink>
       </nav>
       <div className="sidebar-promo"><div className="promo-image" /><strong>Good Food<br />Happy Customers</strong><p>Manage your menu categories to make it easy for customers to find their favorite dishes.</p><em /></div>
     </aside>

@@ -175,9 +175,22 @@
 
 .customers-table {
   width: 100%;
+  min-width: 940px;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
+
+/* The API-backed list has eight columns (the old local mock had a select-all column). */
+.customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 23%; }
+.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 14%; }
+.customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 20%; }
+.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 9%; }
+.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 9%; }
+.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 8%; }
+.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 11%; }
+.customers-table th:nth-child(8), .customers-table td:nth-child(8) { width: 6%; white-space: nowrap; }
+
+.customers-page .customer-stats { grid-template-columns: minmax(180px, 260px); }
 
 .customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 42px; }
 .customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 24%; }
@@ -811,3 +824,31 @@
     width: 100%;
   }
 }
+
+/* API customer table: override the legacy nine-column mock-table widths above. */
+.customers-table {
+  min-width: 940px;
+  table-layout: auto;
+}
+
+.customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 23%; }
+.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 14%; }
+.customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 20%; }
+.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 9%; }
+.customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 9%; }
+.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 8%; }
+.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 11%; }
+.customers-table th:nth-child(8), .customers-table td:nth-child(8) { width: 6%; white-space: nowrap; }
+
+.customers-table .customer-name,
+.customers-table .customer-name strong {
+  min-width: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: normal;
+}
+
+.list-empty-state { display: grid; justify-items: center; gap: 7px; min-height: 230px; padding: 35px 20px; color: #73829a; text-align: center; }
+.list-empty-state > span { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: #edf4ff; color: #2d6eea; font-size: 25px; animation: empty-state-float 2.2s ease-in-out infinite; }
+.list-empty-state strong { color: #243c5c; font-size: 14px; }.list-empty-state p { margin: 0 0 6px; font-size: 11px; }
+@keyframes empty-state-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }

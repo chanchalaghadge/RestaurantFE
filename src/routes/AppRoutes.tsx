@@ -27,6 +27,8 @@ import CustomerEditPage from "../components/Customers/pages/CustomerEditPage";
 import CustomerViewPage from "../components/Customers/pages/CustomerViewPage";
 import OrdersPage from "../components/Orders/OrdersPage";
 import TablesPage from "../components/Tables/TablesPage";
+import UsersPage from "../components/Users/UsersPage";
+import UserFormPage from "../components/Users/UserFormPage";
 
 function AppRoutes() {
   return (
@@ -47,7 +49,7 @@ function AppRoutes() {
 
         {/* Reset Password */}
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/signup" element={<UnderDevelopment />} />
+        <Route path="/signup" element={<UserFormPage />} />
 
         {/* Main application layout */}
         <Route element={<MainLayout />}>
@@ -70,6 +72,9 @@ function AppRoutes() {
           <Route path="/customers/new" element={<CustomerCreatePage />} />
           <Route path="/customers/:id/edit" element={<CustomerEditPage />} />
           <Route path="/customers/:id" element={<CustomerViewPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/users/new" element={<UserFormPage />} />
+          <Route path="/users/:id/edit" element={<UserFormPage />} />
           <Route path="/reports" element={<UnderDevelopment />} />
           <Route path="/settings" element={<UnderDevelopment />} />
 

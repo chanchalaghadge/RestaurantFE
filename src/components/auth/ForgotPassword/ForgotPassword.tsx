@@ -3,11 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import type {
   ForgotPasswordMethod,
   ForgotPasswordRequest,
-  ForgotPasswordResponse,
 } from "../../../types/auth/auth.types";
+import { authApi } from "../../../api/auth.api";
 import "./ForgotPassword.css";
-
-const DEMO_OTP = "123456";
 
 function ForgotPassword() {
   const navigate = useNavigate();
@@ -49,7 +47,7 @@ function ForgotPassword() {
     return true;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const method: ForgotPasswordMethod = identifier.includes("@") ? "email" : "phone";
@@ -63,17 +61,16 @@ function ForgotPassword() {
         return;
       }
 
-      const response: ForgotPasswordResponse = {
-        success: true,
-        message:
-          request.method === "email"
-            ? `OTP sent successfully to ${request.identifier}.`
-            : `OTP sent successfully to ${request.identifier}.`,
-      };
-
-      setOtpSent(true);
-      setMessage(response.message);
-      setMessageType("success");
+      try {
+        await authApi.forgotPassword(request.identifier, request.method === "email" ? "Email" : "Sms");
+        sessionStorage.setItem("restaurant-password-reset-user", request.identifier);
+        setOtpSent(true);
+        setMessage(`OTP sent successfully to ${request.identifier}.`);
+        setMessageType("success");
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Unable to send OTP.");
+        setMessageType("error");
+      }
       return;
     }
 
@@ -83,18 +80,15 @@ function ForgotPassword() {
       return;
     }
 
-    if (otp.trim() !== DEMO_OTP) {
-      setMessage("Wrong OTP. Please enter the correct OTP.");
+    try {
+      await authApi.verifyOtp(identifier, otp.trim());
+      setMessage("OTP verified successfully. Redirecting to reset password...");
+      setMessageType("success");
+      setTimeout(() => navigate("/reset-password"), 800);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Wrong OTP. Please try again.");
       setMessageType("error");
-      return;
     }
-
-    setMessage("OTP verified successfully. Redirecting to reset password...");
-    setMessageType("success");
-
-    setTimeout(() => {
-      navigate("/reset-password");
-    }, 800);
   };
 
   return (

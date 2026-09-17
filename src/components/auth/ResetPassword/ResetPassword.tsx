@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import type { ResetPasswordResponse } from "../../../types/auth/auth.types";
+import { authApi } from "../../../api/auth.api";
 import "./ResetPassword.css";
 
 function ResetPassword() {
@@ -10,7 +10,7 @@ function ResetPassword() {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "info">("info");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!password.trim() || !confirmPassword.trim()) {
@@ -31,17 +31,18 @@ function ResetPassword() {
       return;
     }
 
-    const response: ResetPasswordResponse = {
-      success: true,
-      message: "Password reset successful. Redirecting to login...",
-    };
-
-    setMessage(response.message);
-    setMessageType("success");
-
-    setTimeout(() => {
-      navigate("/login");
-    }, 1200);
+    const userName = sessionStorage.getItem("restaurant-password-reset-user");
+    if (!userName) { setMessage("Your reset session has expired. Start again from Forgot Password."); setMessageType("error"); return; }
+    try {
+      await authApi.resetPassword(userName, password);
+      sessionStorage.removeItem("restaurant-password-reset-user");
+      setMessage("Password reset successful. Redirecting to login...");
+      setMessageType("success");
+      setTimeout(() => navigate("/login"), 1200);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to reset password.");
+      setMessageType("error");
+    }
   };
 
   return (
