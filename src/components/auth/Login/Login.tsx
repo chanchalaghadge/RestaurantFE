@@ -4,15 +4,12 @@ import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
 import "./Login.css";
 
-const TEST_EMAIL = "rohit@rohit.com";
-const TEST_PASSWORD = "123";
-
 function Login() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<LoginRequest>({
-    email: TEST_EMAIL,
-    password: TEST_PASSWORD,
+    email: "",
+    password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -41,7 +38,7 @@ function Login() {
       setError("");
       const result = await authApi.login(formData.email.trim(), formData.password);
       localStorage.setItem("restaurant-access-token", result.token);
-      localStorage.setItem("restaurant-user", JSON.stringify({ id: result.userId, name: result.userName }));
+      localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
       navigate("/dashboard");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to sign in.");

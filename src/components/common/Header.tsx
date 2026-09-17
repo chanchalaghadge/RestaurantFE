@@ -5,6 +5,8 @@ function Header() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    localStorage.removeItem("restaurant-access-token");
+    localStorage.removeItem("restaurant-user");
     navigate("/");
   };
 

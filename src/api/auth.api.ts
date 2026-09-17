@@ -1,5 +1,7 @@
 import { api } from "./client";
-export type LoginResult = { token: string; refreshToken?: string; userId: number; userName: string };
+import type { UserApi } from "./users.api";
+
+export type LoginResult = { token: string; expiresAt: string; user: UserApi };
 export const authApi = {
   login: (email: string, password: string) => api<LoginResult>("/api/Auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   forgotPassword: (userName: string, otpMethod: "Email" | "Sms") => api<unknown>("/api/Auth/forgot-password", { method: "POST", body: JSON.stringify({ userName, otpMethod }) }),

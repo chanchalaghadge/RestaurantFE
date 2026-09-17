@@ -13,3 +13,4 @@
 .items-table .list-empty-state strong { color: #243c5c; font-size: 14px; }.items-table .list-empty-state p { margin: 0 0 6px; font-size: 11px; }
 @keyframes empty-state-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 .remove-option { border: 0; color: #e75c6d; background: transparent; cursor: pointer; font-size: 15px; }.remove-option:disabled { opacity: .35; cursor: not-allowed; }.preview-image-empty { display: grid; width: 83px; height: 80px; place-items: center; border-radius: 5px; color: #8190a6; background: #f2f5fa; font-size: 9px; }.menu-form-error { margin: 10px 0 0; color: #c63f51; font-size: 11px; }
+.image-panel { display: flex; flex-direction: column; gap: 9px; }.image-panel .menu-image-preview { margin-top: 2px; }@media (max-width: 1050px) { .image-panel { grid-column: 1 / -1; } }
