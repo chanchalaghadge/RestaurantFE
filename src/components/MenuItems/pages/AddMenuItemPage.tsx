@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import { menuItemsApi, type MenuItemUpsert, type MenuOptionGroup } from "../../../api/menu-items.api";
 import { uploadMenuItemImage } from "../../../api/uploads.api";
+import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import "../MenuItems.css";
 
 const emptyMenuItem = (): MenuItemUpsert => ({
@@ -84,7 +85,7 @@ function AddMenuItemPage() {
         <section className="menu-panel image-panel"><h2>Item Image</h2>
           <button type="button" className="menu-upload" onClick={() => fileInputRef.current?.click()} disabled={uploading}><span>▣</span><strong>{uploading ? "Uploading image..." : "Click to upload an image"}</strong><small>PNG, JPG, WebP · Max. 5 MB</small></button>
           <input ref={fileInputRef} className="hidden-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => void selectImage(event.target.files?.[0])} />
-          {form.imageUrl && <div className="menu-image-preview"><img src={form.imageUrl} alt={form.name || "Menu item"} /><button type="button" onClick={() => update("imageUrl", "")}>Remove</button></div>}
+          <div className="menu-image-preview"><img src={imageUrl(form.imageUrl)} onError={useDefaultImageOnError} alt={form.name || "Menu item"} />{form.imageUrl && <button type="button" onClick={() => update("imageUrl", "")}>Remove</button>}</div>
         </section>
         <section className="menu-panel additional-panel"><h2>Additional Details</h2><div className="two-fields"><label>Preparation Time (minutes)<input type="number" min="0" value={form.preparationTimeMinutes} onChange={(event) => update("preparationTimeMinutes", Number(event.target.value))} /></label><label>Calories<input type="number" min="0" value={form.calories ?? ""} onChange={(event) => update("calories", event.target.value ? Number(event.target.value) : undefined)} /></label></div><label>Ingredients<textarea value={form.ingredients ?? ""} onChange={(event) => update("ingredients", event.target.value)} /></label><label>Tags<input value={form.tags ?? ""} onChange={(event) => update("tags", event.target.value)} placeholder="Comma-separated tags" /></label></section>
       </div>

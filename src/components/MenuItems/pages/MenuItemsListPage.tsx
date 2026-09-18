@@ -4,6 +4,7 @@ import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import "../MenuItems.css";
 import { menuItemsApi, type MenuItemApi, type MenuItemSummary } from "../../../api/menu-items.api";
+import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 
 function MenuItemsListPage() {
@@ -177,7 +178,7 @@ function MenuItemsListPage() {
                     <input type="checkbox" aria-label={`Select ${item.name}`} />
                   </td>
                   <td>
-                    <img src={item.image} alt={item.name} />
+                    <img src={imageUrl(item.image)} onError={useDefaultImageOnError} alt={item.name} />
                   </td>
                   <td>
                     <Link to={`/menu/${item.id}/edit`} className="item-name">
