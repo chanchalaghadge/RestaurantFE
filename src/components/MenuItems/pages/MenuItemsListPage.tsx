@@ -37,7 +37,7 @@ function MenuItemsListPage() {
   };
 
   return (
-    <section className="items-page">
+    <section className="items-page items-list-page">
       <div className="items-heading">
         <div>
           <div className="breadcrumb">
