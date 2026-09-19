@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
+import OrderHistoryModal from "../common/OrderHistoryModal";
 import { menuItemsApi, type MenuItemApi } from "../../api/menu-items.api";
 import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/orders.api";
 import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
+import { exportToPdf } from "../../utils/pdfExport";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
@@ -15,6 +17,7 @@ function OrdersPage() {
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
   const [deleting, setDeleting] = useState<OrderApi | null>(null);
+  const [showHistory, setShowHistory] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | OrderApi["status"]>("All");
   const [search, setSearch] = useState("");
@@ -72,6 +75,19 @@ function OrdersPage() {
     exportToCsv(sortedData, columns, `orders-export-${generateTimestamp()}.csv`);
   };
 
+  const handlePdfExport = () => {
+    const columns = [
+      { key: 'id', label: 'Order #' },
+      { key: 'customerName', label: 'Customer' },
+      { key: 'tableNumber', label: 'Table', formatter: (val: number | undefined) => val ? String(val) : 'N/A' },
+      { key: 'orderType', label: 'Type', formatter: (val: string) => val === 'DineIn' ? 'Dine In' : val },
+      { key: 'totalAmount', label: 'Total', formatter: (val: number) => `₹${val.toFixed(2)}` },
+      { key: 'status', label: 'Status' },
+      { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
+    ];
+    exportToPdf(sortedData, columns, 'Orders Report');
+  };
+
   if (loading) {
     return (
       <section className="orders-page">
@@ -98,7 +114,10 @@ function OrdersPage() {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={sortedData.length === 0}>
-            📥 Export CSV
+            📥 CSV
+          </button>
+          <button className="secondary-button" onClick={handlePdfExport} disabled={sortedData.length === 0}>
+            📄 PDF
           </button>
           <button className="primary-button" onClick={() => setEditing("new")}>＋ Create Order</button>
         </div>
@@ -155,6 +174,7 @@ function OrdersPage() {
                   <td>₹{order.totalAmount.toFixed(2)}</td>
                   <td><span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
                   <td className="order-actions">
+                    <button title="View history" onClick={() => setShowHistory(order.id)}>📜</button>
                     <button title="Edit order" onClick={() => setEditing(order)}>✎</button>
                     {order.status !== "Completed" && <button title="Complete payment" onClick={() => void pay(order)}>💳</button>}
                     <button title="Delete order" onClick={() => setDeleting(order)}>♲</button>
@@ -178,6 +198,7 @@ function OrdersPage() {
       </div>
       {editing && <OrderForm order={editing === "new" ? undefined : editing} onClose={() => setEditing(null)} onSaved={load} />}
       {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} />}
+      {showHistory && <OrderHistoryModal orderId={showHistory} onClose={() => setShowHistory(null)} />}
     </section>
   );
 }

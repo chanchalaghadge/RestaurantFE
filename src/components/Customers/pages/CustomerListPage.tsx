@@ -6,6 +6,7 @@ import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
 import { useTableSort } from "../../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
+import { exportToPdf } from "../../../utils/pdfExport";
 import "../Customers.css";
 
 function CustomerListPage() {
@@ -51,6 +52,19 @@ function CustomerListPage() {
     ];
     exportToCsv(sortedData, columns, `customers-export-${generateTimestamp()}.csv`);
   };
+
+  const handlePdfExport = () => {
+    const columns = [
+      { key: 'fullName', label: 'Customer Name' },
+      { key: 'phone', label: 'Phone Number' },
+      { key: 'email', label: 'Email', formatter: (val: string) => val || 'N/A' },
+      { key: 'status', label: 'Status' },
+      { key: 'tier', label: 'Customer Tier' },
+      { key: 'totalOrders', label: 'Total Orders' },
+      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
+    ];
+    exportToPdf(sortedData, columns, 'Customer Report');
+  };
   
   if (loading) {
     return (
@@ -78,7 +92,10 @@ function CustomerListPage() {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={sortedData.length === 0}>
-            📥 Export CSV
+            📥 CSV
+          </button>
+          <button className="secondary-button" onClick={handlePdfExport} disabled={sortedData.length === 0}>
+            📄 PDF
           </button>
           <Link className="primary-button" to="/customers/new">＋ Add New Customer</Link>
         </div>

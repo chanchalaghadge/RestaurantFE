@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
 import "./Header.css";
 
 function Header() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem("restaurant-access-token");
@@ -22,6 +24,14 @@ function Header() {
       </div>
 
       <div className="header-right">
+        <button 
+          className="theme-toggle" 
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
         <button 
           className="notification" 
           aria-label="Notifications"

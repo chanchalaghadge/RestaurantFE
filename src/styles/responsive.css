@@ -1,0 +1,382 @@
+/* Mobile Responsiveness Improvements */
+
+/* Base responsive styles */
+@media (max-width: 768px) {
+  /* Header */
+  .header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .header-left,
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .global-search {
+    flex: 1;
+  }
+  
+  .header-right {
+    order: 2;
+  }
+  
+  /* Dashboard */
+  .dashboard-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .dashboard-date {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .dashboard-date-group {
+    border-right: none;
+    padding-right: 0;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-middle {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-tables {
+    grid-template-columns: 1fr;
+  }
+  
+  .performance-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Orders */
+  .orders-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .order-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .order-tools {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .order-tools label {
+    width: 100%;
+  }
+  
+  .order-tools select,
+  .order-tools button {
+    width: 100%;
+  }
+  
+  .orders-card {
+    overflow-x: auto;
+  }
+  
+  /* Tables */
+  .tables-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .table-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .table-detail {
+    margin-top: 20px;
+  }
+  
+  /* Users */
+  .users-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .users-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .users-toolbar label {
+    width: 100%;
+  }
+  
+  /* Customers */
+  .customer-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .customer-page-header > div {
+    width: 100%;
+  }
+  
+  .customer-filters {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .customer-filters label,
+  .customer-filters select,
+  .customer-filters button {
+    width: 100%;
+  }
+  
+  .customer-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Categories */
+  .category-list-page .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .filters {
+    width: 100%;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  /* Menu Items */
+  .items-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .items-filters {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .items-filters label,
+  .items-filters select {
+    width: 100%;
+  }
+  
+  .item-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Tables in general */
+  .orders-table-wrap,
+  .users-table-wrap,
+  .customers-table-wrap,
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Footer actions */
+  .orders-footer,
+  .users-footer,
+  .customers-footer,
+  .table-footer {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  /* Buttons */
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Modals */
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .order-editor,
+  .table-editor {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  /* Breadcrumb */
+  .breadcrumb {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Even smaller screens */
+  .metrics-grid,
+  .performance-grid,
+  .table-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-metric {
+    min-height: 90px;
+  }
+  
+  .performance-card {
+    padding: 10px;
+  }
+  
+  .orders-tabs button {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  /* Table responsiveness */
+  .orders-table,
+  .users-table,
+  .customers-table {
+    font-size: 10px;
+  }
+  
+  .orders-table th,
+  .orders-table td,
+  .users-table th,
+  .users-table td,
+  .customers-table th,
+  .customers-table td {
+    padding: 8px 4px;
+  }
+  
+  /* Action buttons in tables */
+  .order-actions,
+  .user-actions,
+  .customer-row-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .order-actions button,
+  .user-actions button,
+  .customer-row-actions button {
+    width: 100%;
+    min-width: 80px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-middle {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .sales-panel {
+    grid-column: 1 / -1;
+  }
+  
+  .performance-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .table-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .dashboard-middle {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .performance-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Touch-friendly improvements */
+@media (pointer: coarse) {
+  button,
+  a,
+  select,
+  input[type="checkbox"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .theme-toggle {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .order-actions button,
+  .user-actions button,
+  .customer-row-actions button {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .chart-bar,
+  .donut-chart {
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Print styles */
+@media print {
+  .header,
+  .sidebar,
+  .orders-tools,
+  .users-toolbar,
+  .customer-filters,
+  .theme-toggle,
+  .notification,
+  .logout-button,
+  .order-actions,
+  .user-actions,
+  .customer-row-actions {
+    display: none !important;
+  }
+  
+  .orders-page,
+  .users-page,
+  .customers-page,
+  .categories-page,
+  .dashboard-page {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .orders-table,
+  .users-table,
+  .customers-table {
+    font-size: 10pt;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+}
