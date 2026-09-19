@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Breadcrumb from "../common/Breadcrumb";
 import { usersApi, type UserCreate } from "../../api/users.api";
 import "./Users.css";
 
@@ -29,7 +30,39 @@ function UserFormPage() {
     finally { setSaving(false); }
   };
   const title = editing ? "Edit User" : signingUp ? "Create Account" : "Add New User";
-  return <section className="user-form-page"><div className="users-breadcrumb">{signingUp ? <Link to="/login">Login</Link> : <><Link to="/dashboard">Home</Link><span>/</span><Link to="/users">Users</Link></>}<span>/</span><strong>{title}</strong></div><h1>{title}</h1><p>{signingUp ? "Create an account to access the restaurant portal." : "Create a secure account for a member of your restaurant team."}</p><form className="user-form" onSubmit={submit}><section><h2>Account details</h2><div className="user-form-grid"><label>First Name <b>*</b><input required autoComplete="given-name" value={form.firstName} onChange={(event) => update("firstName", event.target.value)} /></label><label>Last Name<input autoComplete="family-name" value={form.lastName} onChange={(event) => update("lastName", event.target.value)} /></label><label>Email <b>*</b><input required type="email" autoComplete="email" value={form.email} onChange={(event) => update("email", event.target.value)} /></label><label>Phone Number<input type="tel" autoComplete="tel" value={form.phoneNumber} onChange={(event) => update("phoneNumber", event.target.value)} /></label>{!editing && <><label>Password <b>*</b><input required minLength={8} type="password" autoComplete="new-password" value={form.password} onChange={(event) => update("password", event.target.value)} /><small>At least 8 characters.</small></label><label>Confirm Password <b>*</b><input required minLength={8} type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label></>}</div></section>{error && <p className="users-error" role="alert">{error}</p>}<div className="user-form-actions"><button type="button" onClick={() => navigate(-1)}>Cancel</button><button className="primary-button" disabled={saving} type="submit">{saving ? "Saving..." : editing ? "Save Changes" : signingUp ? "Create Account" : "Create User"}</button></div></form></section>;
+  const breadcrumbItems = signingUp
+    ? [{ label: 'Login', path: '/login' }, { label: title }]
+    : [{ label: 'Home', path: '/dashboard' }, { label: 'Users', path: '/users' }, { label: title }];
+
+  return (
+    <section className="user-form-page">
+      <Breadcrumb items={breadcrumbItems} />
+      <h1>{title}</h1>
+      <p>{signingUp ? "Create an account to access the restaurant portal." : "Create a secure account for a member of your restaurant team."}</p>
+      <form className="user-form" onSubmit={submit}>
+        <section>
+          <h2>Account details</h2>
+          <div className="user-form-grid">
+            <label>First Name <b>*</b><input required autoComplete="given-name" value={form.firstName} onChange={(event) => update("firstName", event.target.value)} /></label>
+            <label>Last Name<input autoComplete="family-name" value={form.lastName} onChange={(event) => update("lastName", event.target.value)} /></label>
+            <label>Email <b>*</b><input required type="email" autoComplete="email" value={form.email} onChange={(event) => update("email", event.target.value)} /></label>
+            <label>Phone Number<input type="tel" autoComplete="tel" value={form.phoneNumber} onChange={(event) => update("phoneNumber", event.target.value)} /></label>
+            {!editing && (
+              <>
+                <label>Password <b>*</b><input required minLength={8} type="password" autoComplete="new-password" value={form.password} onChange={(event) => update("password", event.target.value)} /><small>At least 8 characters.</small></label>
+                <label>Confirm Password <b>*</b><input required minLength={8} type="password" autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label>
+              </>
+            )}
+          </div>
+        </section>
+        {error && <p className="users-error" role="alert">{error}</p>}
+        <div className="user-form-actions">
+          <button type="button" onClick={() => navigate(-1)}>Cancel</button>
+          <button className="primary-button" disabled={saving} type="submit">{saving ? "Saving..." : editing ? "Save Changes" : signingUp ? "Create Account" : "Create User"}</button>
+        </div>
+      </form>
+    </section>
+  );
 }
 
 export default UserFormPage;

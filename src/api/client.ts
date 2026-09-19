@@ -1,5 +1,11 @@
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net";
 
+// Add configuration validation
+if (!import.meta.env.VITE_API_BASE_URL && import.meta.env.DEV) {
+  console.warn("⚠️ VITE_API_BASE_URL not set. Using default API URL.");
+  console.warn("Create a .env file with: VITE_API_BASE_URL=your_api_url");
+}
+
 export type ApiResponse<T> = { success: boolean; message: string; data: T; errorCode?: string };
 
 export class ApiError extends Error {

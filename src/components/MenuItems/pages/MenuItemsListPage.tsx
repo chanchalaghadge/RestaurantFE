@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
+import LoadingSpinner from "../../common/LoadingSpinner";
+import Breadcrumb from "../../common/Breadcrumb";
 import "../MenuItems.css";
 import { menuItemsApi, type MenuItemApi, type MenuItemSummary } from "../../../api/menu-items.api";
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
@@ -17,10 +19,20 @@ function MenuItemsListPage() {
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState<MenuItemSummary>({ totalItems: 0, activeItems: 0, categoryCount: 0, variationCount: 0 });
+  const [loading, setLoading] = useState(true);
   const loadSummary = () => menuItemsApi.summary().then(setSummary).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load menu summary."));
   useEffect(() => { categoriesApi.list().then(setCategories).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load categories.")); }, []);
   useEffect(() => { void loadSummary(); }, []);
-  useEffect(() => { menuItemsApi.list({ search, categoryId: categoryId ? Number(categoryId) : undefined, status: status === "All Status" ? undefined : status }).then((data) => setItems(data.map((item: MenuItemApi) => ({ id: String(item.id), code: item.code, name: item.name, category: item.categoryName, description: item.description, price: item.price, preparationTime: item.preparationTimeMinutes, calories: item.calories ?? 0, ingredients: item.ingredients ?? "", status: item.status, dietary: item.dietaryType, image: item.imageUrl ?? "" })))).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to load menu items.")); }, [search, categoryId, status]);
+  useEffect(() => { 
+    setLoading(true);
+    menuItemsApi.list({ search, categoryId: categoryId ? Number(categoryId) : undefined, status: status === "All Status" ? undefined : status }).then((data) => {
+      setItems(data.map((item: MenuItemApi) => ({ id: String(item.id), code: item.code, name: item.name, category: item.categoryName, description: item.description, price: item.price, preparationTime: item.preparationTimeMinutes, calories: item.calories ?? 0, ingredients: item.ingredients ?? "", status: item.status, dietary: item.dietaryType, image: item.imageUrl ?? "" })));
+      setLoading(false);
+    }).catch((requestError: unknown) => {
+      setError(requestError instanceof Error ? requestError.message : "Unable to load menu items.");
+      setLoading(false);
+    }); 
+  }, [search, categoryId, status]);
   const visibleItems = useMemo(
     () =>
       items.filter(
@@ -32,21 +44,36 @@ function MenuItemsListPage() {
     [items, search, dietary, status],
   );
 
+  if (loading) {
+    return (
+      <section className="items-page items-list-page">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
+        <div className="items-heading">
+          <div>
+            <h1>Items</h1>
+            <p>
+              Manage your restaurant food &amp; beverage items. Add, edit, delete,
+              and manage variations.
+            </p>
+          </div>
+          <Link className="primary-button" to="/menu/add">
+            <span>+</span> Add New Item
+          </Link>
+        </div>
+        <LoadingSpinner text="Loading menu items..." fullScreen />
+      </section>
+    );
+  }
+
   const handleDelete = (item: MenuItem) => {
     menuItemsApi.remove(Number(item.id)).then(() => { setItems((current) => current.filter((currentItem) => currentItem.id !== item.id)); setItemToDelete(null); void loadSummary(); }).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to delete menu item."));
   };
 
   return (
-    <section className="items-page">
+    <section className="items-page items-list-page">
+      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
       <div className="items-heading">
         <div>
-          <div className="breadcrumb">
-            <Link to="/dashboard">Home</Link>
-            <span>/</span>
-            <Link to="/menu">Menu</Link>
-            <span>/</span>
-            <strong>All Items</strong>
-          </div>
           <h1>Items</h1>
           <p>
             Manage your restaurant food &amp; beverage items. Add, edit, delete,
