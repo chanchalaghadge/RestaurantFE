@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { customersApi, type CustomerApi, type CustomerUpsert } from "../../../api/customers.api";
-import { validateEmail, validatePhone, commonRules } from "../../../utils/validation";
+import { validateEmail, validatePhone, validateRequired } from "../../../utils/validation";
 
 function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "create" | "edit" }) {
   const navigate = useNavigate();
@@ -24,16 +24,21 @@ function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "creat
     // Validate form fields
     const errors: Record<string, string> = {};
     
-    if (!form.fullName.trim()) {
-      errors.fullName = commonRules.required.message;
+    const nameResult = validateRequired(form.fullName, 'Full name');
+    if (!nameResult.isValid) {
+      errors.fullName = nameResult.error;
     }
     
-    if (!validatePhone(form.phone)) {
-      errors.phone = commonRules.phone.message;
+    const phoneResult = validatePhone(form.phone);
+    if (!phoneResult.isValid) {
+      errors.phone = phoneResult.error;
     }
     
-    if (form.email && !validateEmail(form.email)) {
-      errors.email = commonRules.email.message;
+    if (form.email) {
+      const emailResult = validateEmail(form.email);
+      if (!emailResult.isValid) {
+        errors.email = emailResult.error;
+      }
     }
     
     if (Object.keys(errors).length > 0) {

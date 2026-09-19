@@ -8,12 +8,14 @@ import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/ord
 import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import { exportToPdf } from "../../utils/pdfExport";
+import { useToast } from "../common/Toast";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
 type OrderType = OrderApi["orderType"];
 
 function OrdersPage() {
+  const { showToast } = useToast();
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
   const [deleting, setDeleting] = useState<OrderApi | null>(null);
@@ -47,18 +49,22 @@ function OrdersPage() {
     try {
       await ordersApi.remove(deleting.id);
       setDeleting(null);
+      showToast('Order deleted successfully', 'success');
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to delete order.");
+      showToast('Failed to delete order', 'error');
     }
   };
 
   const pay = async (order: OrderApi) => {
     try {
       await ordersApi.completePayment(order.id);
+      showToast('Payment completed successfully', 'success');
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to complete payment.");
+      showToast('Failed to complete payment', 'error');
     }
   };
 
@@ -73,6 +79,7 @@ function OrdersPage() {
       { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
     ];
     exportToCsv(sortedData, columns, `orders-export-${generateTimestamp()}.csv`);
+    showToast('CSV exported successfully', 'success');
   };
 
   const handlePdfExport = () => {
@@ -86,6 +93,7 @@ function OrdersPage() {
       { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
     ];
     exportToPdf(sortedData, columns, 'Orders Report');
+    showToast('PDF report generated', 'success');
   };
 
   if (loading) {

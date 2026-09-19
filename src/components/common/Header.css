@@ -13,6 +13,63 @@
 .profile b { color: #4f6483; font-size: 12px; margin-left: 14px; }
 .logout-button { border: 0; background: none; color: #597091; cursor: pointer; font-size: 11px; }
 
+.language-selector {
+  padding: 6px 10px;
+  border: 1px solid #e5eaf1;
+  border-radius: 6px;
+  background: #fff;
+  color: #455773;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.language-selector:hover {
+  border-color: #314d92;
+  background: #f8f9fa;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5eaf1;
+  border-radius: 8px;
+  background: #fff;
+  color: #455773;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 18px;
+}
+
+.theme-toggle:hover {
+  background: #f8f9fa;
+  transform: scale(1.05);
+}
+
+/* Dark mode support */
+[data-theme="dark"] .language-selector {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .language-selector:hover {
+  background: var(--border-color);
+}
+
+[data-theme="dark"] .theme-toggle {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: var(--border-color);
+}
+
 .header-left h2 { margin: 0; font-size: 20px; color: #333; }
 
 .header-right {

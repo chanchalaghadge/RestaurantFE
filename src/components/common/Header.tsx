@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import "./Header.css";
 
 function Header() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { language, setLanguage, availableLanguages, t } = useLanguage();
 
   const handleLogout = () => {
     localStorage.removeItem("restaurant-access-token");
@@ -19,11 +21,23 @@ function Header() {
       <div className="header-left">
         <label className="global-search">
           <span aria-hidden="true">⌕</span>
-          <input placeholder="Search categories, menu items..." />
+          <input placeholder={t.common.search + " categories, menu items..."} />
         </label>
       </div>
 
       <div className="header-right">
+        <select 
+          className="language-selector"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as any)}
+          aria-label="Select language"
+        >
+          {availableLanguages.map((lang) => (
+            <option key={lang} value={lang}>
+              {lang.toUpperCase()}
+            </option>
+          ))}
+        </select>
         <button 
           className="theme-toggle" 
           onClick={toggleTheme}
@@ -52,7 +66,7 @@ function Header() {
           onClick={handleLogout}
           aria-label="Logout from your account"
         >
-          Logout
+          {t.common.logout}
         </button>
       </div>
     </header>

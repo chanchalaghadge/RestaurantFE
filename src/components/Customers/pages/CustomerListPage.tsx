@@ -7,10 +7,12 @@ import Breadcrumb from "../../common/Breadcrumb";
 import { useTableSort } from "../../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { exportToPdf } from "../../../utils/pdfExport";
+import { useToast } from "../../common/Toast";
 import "../Customers.css";
 
 function CustomerListPage() {
   const navigate = useNavigate(); 
+  const { showToast } = useToast();
   const [customers, setCustomers] = useState<CustomerApi[]>([]); 
   const [search, setSearch] = useState(""); 
   const [status, setStatus] = useState("All Status"); 
@@ -51,6 +53,7 @@ function CustomerListPage() {
       { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
     ];
     exportToCsv(sortedData, columns, `customers-export-${generateTimestamp()}.csv`);
+    showToast('CSV exported successfully', 'success');
   };
 
   const handlePdfExport = () => {
@@ -64,6 +67,7 @@ function CustomerListPage() {
       { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
     ];
     exportToPdf(sortedData, columns, 'Customer Report');
+    showToast('PDF report generated', 'success');
   };
   
   if (loading) {
@@ -209,8 +213,12 @@ function CustomerListPage() {
           onConfirm={() => {
             customersApi.remove(deleting.id).then(() => {
               setDeleting(null);
+              showToast('Customer deleted successfully', 'success');
               void load();
-            }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to delete customer."));
+            }).catch((reason: unknown) => {
+              setError(reason instanceof Error ? reason.message : "Unable to delete customer.");
+              showToast('Failed to delete customer', 'error');
+            });
           }}
         />
       )}

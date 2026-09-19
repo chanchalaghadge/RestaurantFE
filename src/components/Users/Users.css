@@ -37,3 +37,76 @@
 .secondary-button { border: 1px solid #dbe5ef; border-radius: 6px; background: #fff; color: #506582; font-weight: 700; padding: 11px 16px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
 .secondary-button:hover { background: #f5f8fc; border-color: #c4d0e0; }
 .secondary-button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Form validation styles */
+.field-error {
+  display: block;
+  margin-top: 4px;
+  color: #c55563;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.user-form label input[aria-invalid="true"] {
+  border-color: #c55563;
+  background-color: #fff0f1;
+}
+
+.user-form label input[aria-invalid="true"]:focus {
+  border-color: #c55563;
+  box-shadow: 0 0 0 3px rgba(197, 85, 99, 0.12);
+}
+
+.user-form label small {
+  display: block;
+  margin-top: 4px;
+  color: #71809a;
+  font-size: 10px;
+}
+
+.user-form section {
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.user-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.user-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #425571;
+  font-size: 12px;
+}
+
+.user-form label input {
+  padding: 10px 12px;
+  border: 1px solid #dfe6f0;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.user-form label input:focus {
+  outline: none;
+  border-color: #4b88ee;
+  box-shadow: 0 0 0 3px rgba(75, 136, 238, 0.12);
+}
+
+.user-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.user-form-actions button {
+  padding: 11px 20px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

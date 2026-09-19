@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
-import { validateEmail, commonRules } from "../../../utils/validation";
+import { validateEmail } from "../../../utils/validation";
 import "./Login.css";
 
 function Login() {
@@ -41,12 +41,13 @@ function Login() {
     // Validate form fields
     const errors: Record<string, string> = {};
     
-    if (!validateEmail(formData.email)) {
-      errors.email = commonRules.email.message;
+    const emailResult = validateEmail(formData.email);
+    if (!emailResult.isValid) {
+      errors.email = emailResult.error;
     }
     
     if (!formData.password) {
-      errors.password = commonRules.required.message;
+      errors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }

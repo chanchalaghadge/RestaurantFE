@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import CategoryHeader from "../components/CategoryHeader";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
@@ -29,7 +29,10 @@ function CategoryListPage() {
 
   useEffect(() => { void load(); }, []);
   
-  const filtered = categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = useMemo(() => 
+    categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase())),
+    [categories, search]
+  );
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(filtered);
 
   const handleExport = () => {

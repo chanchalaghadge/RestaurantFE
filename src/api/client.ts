@@ -1,3 +1,5 @@
+import { cacheLocally, getCached } from "../utils/dataCache";
+
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net";
 
 // Add configuration validation
@@ -30,6 +32,32 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     return result.data;
   }
   return payload as T;
+}
+
+/**
+ * Cached API call - automatically caches GET requests
+ */
+export async function cachedApi<T>(path: string, init: RequestInit = {}, ttl: number = 5 * 60 * 1000): Promise<T> {
+  // Only cache GET requests
+  if (init.method && init.method.toUpperCase() !== 'GET') {
+    return api<T>(path, init);
+  }
+
+  const cacheKey = `${path}-${JSON.stringify(init)}`;
+  
+  // Try to get from localStorage cache first
+  const cached = getCached<T>(cacheKey);
+  if (cached !== null) {
+    return cached;
+  }
+
+  // Fetch data
+  const data = await api<T>(path, init);
+  
+  // Cache the result
+  cacheLocally(cacheKey, data, ttl);
+  
+  return data;
 }
 
 export const query = (values: Record<string, string | number | undefined | null>) => {
