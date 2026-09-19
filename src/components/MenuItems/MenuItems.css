@@ -24,3 +24,52 @@
 .items-list-page .items-table-wrap { flex: 1; min-height: 0; overflow: auto; }
 .items-list-page .items-table-wrap .items-table thead th { position: sticky; top: 0; z-index: 1; }
 .items-list-page .items-footer { flex: 0 0 auto; }
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .items-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .items-heading > div {
+    width: 100%;
+  }
+  
+  .items-heading .primary-button,
+  .items-heading .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .item-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .items-filters {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .items-filters label,
+  .items-filters button {
+    width: 100%;
+  }
+  
+  .items-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .items-footer {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .item-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

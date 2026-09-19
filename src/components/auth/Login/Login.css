@@ -90,6 +90,23 @@
   box-shadow: 0 0 0 3px rgba(22, 78, 99, 0.12);
 }
 
+.form-group input[aria-invalid="true"] {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.form-group input[aria-invalid="true"]:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.field-error {
+  margin: 4px 0 0;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .password-container {
   position: relative;
   display: flex;

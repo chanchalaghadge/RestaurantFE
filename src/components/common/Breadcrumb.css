@@ -1,0 +1,40 @@
+/**
+ * Breadcrumb Component Styles
+ * Navigation breadcrumbs for better UX
+ */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b98ad;
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumb-link {
+  color: #52678a;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+  color: #4c50e9;
+  text-decoration: underline;
+}
+
+.breadcrumb-current {
+  color: #6b7890;
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: #8b98ad;
+  font-size: 10px;
+}

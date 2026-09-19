@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
+import LoadingSpinner from "../../common/LoadingSpinner";
+import Breadcrumb from "../../common/Breadcrumb";
 import "../Dashboard.css";
 
 function DashboardPage() {
   const [data, setData] = useState<DashboardApi | null>(null);
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const load = () => dashboardApi.get()
     .then(setData)
-    .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load dashboard."));
+    .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load dashboard."))
+    .finally(() => setLoading(false));
 
   useEffect(() => { void load(); }, []);
 
@@ -39,6 +43,21 @@ function DashboardPage() {
     minute: "2-digit",
   }).format(now);
 
+  if (loading) {
+    return (
+      <section className="dashboard-page">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }]} />
+        <div className="dashboard-heading">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Live restaurant sales, orders, customers, and menu performance.</p>
+          </div>
+        </div>
+        <LoadingSpinner text="Loading dashboard..." fullScreen />
+      </section>
+    );
+  }
+
   const metrics = data ? [
     { icon: "₹", tone: "green", label: "Total Revenue", value: `₹${data.totalRevenue.toFixed(2)}`, sub: `₹${data.todayRevenue.toFixed(2)} today` },
     { icon: "▤", tone: "blue", label: "Total Orders", value: data.totalOrders, sub: `${data.todayOrders} today` },
@@ -49,6 +68,7 @@ function DashboardPage() {
 
   return (
     <section className="dashboard-page">
+      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }]} />
       <div className="dashboard-heading">
         <div>
           <h1>Dashboard</h1>

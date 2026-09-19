@@ -11,32 +11,58 @@ function Sidebar() {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" aria-label="Main navigation">
       <div className="sidebar-title">
-        <div className="brand-mark">♨</div><div><h2>Foodie</h2><small>Restaurant Admin</small></div>
+        <div className="brand-mark" aria-hidden="true">♨</div>
+        <div>
+          <h2>Foodie</h2>
+          <small>Restaurant Admin</small>
+        </div>
       </div>
 
       <div className="sidebar-scroll-area">
-        <nav className="sidebar-menu">
-          <NavLink to="/dashboard">⌂ <span>Dashboard</span></NavLink>
+        <nav className="sidebar-menu" aria-label="Main navigation">
+          <NavLink to="/dashboard" aria-label="Go to Dashboard">
+            ⌂ <span>Dashboard</span>
+          </NavLink>
           <div className={`menu-group ${menuOpen ? "open" : "closed"}`}>
-            <NavLink to="/categories" onClick={handleMenuToggle}>
-              ▣ <span>Menu</span><b className="menu-caret">⌃</b>
+            <NavLink 
+              to="/categories" 
+              onClick={handleMenuToggle}
+              aria-expanded={menuOpen}
+              aria-controls="menu-submenu"
+            >
+              ▣ <span>Menu</span>
+              <b className="menu-caret" aria-hidden="true">⌃</b>
             </NavLink>
             {menuOpen && (
-              <div className="submenu">
-                <NavLink to="/menu">All Items</NavLink>
-                <NavLink to="/categories">Categories</NavLink>
-                <NavLink to="/menu/add">Add Menu Item</NavLink>
+              <div className="submenu" id="menu-submenu">
+                <NavLink to="/menu" aria-label="View all menu items">All Items</NavLink>
+                <NavLink to="/categories" aria-label="View menu categories">Categories</NavLink>
+                <NavLink to="/menu/add" aria-label="Add new menu item">Add Menu Item</NavLink>
               </div>
             )}
           </div>
-          <NavLink to="/orders">▤ <span>Orders</span><i>3</i></NavLink>
-          <NavLink to="/tables">▦ <span>Tables</span></NavLink>
-          <NavLink to="/customers">♟ <span>Customers</span></NavLink>
-          <NavLink to="/users">♙ <span>Users</span></NavLink>
+          <NavLink to="/orders" aria-label="View orders">
+            ▤ <span>Orders</span>
+            <i aria-label="3 pending orders">3</i>
+          </NavLink>
+          <NavLink to="/tables" aria-label="View tables">
+            ▦ <span>Tables</span>
+          </NavLink>
+          <NavLink to="/customers" aria-label="View customers">
+            ♟ <span>Customers</span>
+          </NavLink>
+          <NavLink to="/users" aria-label="View users">
+            ♙ <span>Users</span>
+          </NavLink>
         </nav>
-        <div className="sidebar-promo"><div className="promo-image" /><strong>Good Food<br />Happy Customers</strong><p>Manage your menu categories to make it easy for customers to find their favorite dishes.</p><em /></div>
+        <div className="sidebar-promo" aria-hidden="true">
+          <div className="promo-image" />
+          <strong>Good Food<br />Happy Customers</strong>
+          <p>Manage your menu categories to make it easy for customers to find their favorite dishes.</p>
+          <em />
+        </div>
       </div>
     </aside>
   );

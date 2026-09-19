@@ -10,14 +10,40 @@ function Header() {
     navigate("/");
   };
 
+  const user = JSON.parse(localStorage.getItem("restaurant-user") || '{"name":"Admin"}');
+
   return (
-    <header className="header">
+    <header className="header" role="banner">
       <div className="header-left">
-        <label className="global-search">⌕ <input placeholder="Search categories, menu items..." /></label>
+        <label className="global-search">
+          <span aria-hidden="true">⌕</span>
+          <input placeholder="Search categories, menu items..." />
+        </label>
       </div>
 
       <div className="header-right">
-        <button className="notification" aria-label="Notifications">♧<i /></button><div className="profile"><span className="avatar">A</span><span><strong>Admin</strong><small>Restaurant Manager</small></span><b>⌄</b></div><button className="logout-button" onClick={handleLogout}>Logout</button>
+        <button 
+          className="notification" 
+          aria-label="Notifications"
+        >
+          <span aria-hidden="true">♧</span>
+          <i aria-hidden="true" />
+        </button>
+        <div className="profile">
+          <span className="avatar" aria-hidden="true">{user.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
+          <span>
+            <strong>{user.name || 'Admin'}</strong>
+            <small>Restaurant Manager</small>
+          </span>
+          <b aria-hidden="true">⌄</b>
+        </div>
+        <button 
+          className="logout-button" 
+          onClick={handleLogout}
+          aria-label="Logout from your account"
+        >
+          Logout
+        </button>
       </div>
     </header>
   );

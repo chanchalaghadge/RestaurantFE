@@ -1,4 +1,17 @@
-.header { height: 64px; padding: 0 22px; background: #fff; border-bottom: 1px solid #e5eaf1; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }.global-search { width: 380px; height: 31px; border-radius: 18px; background: #f3f6fb; color: #647c9e; display: flex; align-items: center; gap: 9px; padding: 0 13px; font-size: 18px; }.global-search input { border: 0; outline: 0; background: transparent; width: 100%; color: #455773; font-size: 10px; }.header-right { gap: 18px; }.notification { border: 0; background: none; color: #587194; font-size: 21px; position: relative; cursor: pointer; }.notification i { position: absolute; top: 4px; right: 1px; width: 5px; height: 5px; background: #f25266; border-radius: 50%; }.profile { display: flex; align-items: center; gap: 8px; }.avatar { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; background: #314d92; font-size: 12px; }.profile strong, .profile small { display: block; }.profile strong { color: #22324b; font-size: 11px; }.profile small { color: #7c8ba2; font-size: 8px; margin-top: 2px; }.profile b { color: #4f6483; font-size: 12px; margin-left: 14px; }.logout-button { border: 0; background: none; color: #597091; cursor: pointer; font-size: 11px; }
+.header { height: 64px; padding: 0 22px; background: #fff; border-bottom: 1px solid #e5eaf1; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
+.header-left { position: relative; }
+.global-search { width: 380px; height: 31px; border-radius: 18px; background: #f3f6fb; color: #647c9e; display: flex; align-items: center; gap: 9px; padding: 0 13px; font-size: 18px; }
+.global-search input { border: 0; outline: 0; background: transparent; width: 100%; color: #455773; font-size: 10px; }
+.header-right { gap: 18px; }
+.notification { border: 0; background: none; color: #587194; font-size: 21px; position: relative; cursor: pointer; }
+.notification i { position: absolute; top: 4px; right: 1px; width: 5px; height: 5px; background: #f25266; border-radius: 50%; }
+.profile { display: flex; align-items: center; gap: 8px; }
+.avatar { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #fff; background: #314d92; font-size: 12px; }
+.profile strong, .profile small { display: block; }
+.profile strong { color: #22324b; font-size: 11px; }
+.profile small { color: #7c8ba2; font-size: 8px; margin-top: 2px; }
+.profile b { color: #4f6483; font-size: 12px; margin-left: 14px; }
+.logout-button { border: 0; background: none; color: #597091; cursor: pointer; font-size: 11px; }
 
 .header-left h2 { margin: 0; font-size: 20px; color: #333; }
 
