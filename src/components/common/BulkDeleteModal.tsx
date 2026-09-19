@@ -1,26 +1,24 @@
-import "./ConfirmDeleteModal.css";
+import './ConfirmDeleteModal.css';
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-type ConfirmDeleteModalProps = {
-  itemName: string;
+interface BulkDeleteModalProps {
+  count: number;
   itemType: string;
   onCancel: () => void;
   onConfirm: () => void;
   isDeleting?: boolean;
-};
+}
 
-function ConfirmDeleteModal({ itemName, itemType, onCancel, onConfirm, isDeleting = false }: ConfirmDeleteModalProps) {
+export default function BulkDeleteModal({ count, itemType, onCancel, onConfirm, isDeleting = false }: BulkDeleteModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Focus the confirm button when modal opens
     if (confirmButtonRef.current) {
       confirmButtonRef.current.focus();
     }
 
-    // Trap focus within modal
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onCancel();
@@ -58,8 +56,8 @@ function ConfirmDeleteModal({ itemName, itemType, onCancel, onConfirm, isDeletin
         className="confirm-delete-modal"
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby="confirm-delete-title"
-        aria-describedby="confirm-delete-description"
+        aria-labelledby="bulk-delete-title"
+        aria-describedby="bulk-delete-description"
         ref={modalRef}
         onClick={(event) => event.stopPropagation()}
       >
@@ -73,12 +71,12 @@ function ConfirmDeleteModal({ itemName, itemType, onCancel, onConfirm, isDeletin
           x
         </button>
         <div className="confirm-delete-icon" aria-hidden="true">!</div>
-        <h2 id="confirm-delete-title">Delete {itemType}?</h2>
-        <p id="confirm-delete-description">
-          Are you sure you want to delete <strong>{itemName}</strong>?
+        <h2 id="bulk-delete-title">Delete {count} {itemType}{count > 1 ? 's' : ''}?</h2>
+        <p id="bulk-delete-description">
+          Are you sure you want to delete <strong>{count} {itemType}{count > 1 ? 's' : ''}</strong>?
         </p>
         <small>
-          This action cannot be undone. The {itemType.toLowerCase()} and its related data will be permanently removed.
+          This action cannot be undone. All selected {itemType.toLowerCase()}s and their related data will be permanently removed.
         </small>
         <div className="confirm-delete-actions">
           <button type="button" className="confirm-delete-cancel" onClick={onCancel} disabled={isDeleting}>
@@ -91,7 +89,7 @@ function ConfirmDeleteModal({ itemName, itemType, onCancel, onConfirm, isDeletin
             disabled={isDeleting}
             ref={confirmButtonRef}
           >
-            {isDeleting ? "Deleting..." : `Delete ${itemType}`}
+            {isDeleting ? "Deleting..." : `Delete ${count} ${itemType}${count > 1 ? 's' : ''}`}
           </button>
         </div>
       </section>
@@ -100,5 +98,3 @@ function ConfirmDeleteModal({ itemName, itemType, onCancel, onConfirm, isDeletin
 
   return createPortal(modalContent, document.body);
 }
-
-export default ConfirmDeleteModal;

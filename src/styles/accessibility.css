@@ -1,0 +1,57 @@
+/* Focus visible styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #4c50e9;
+  outline-offset: 2px;
+}
+
+/* Hide outline for mouse users, show for keyboard users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip link styles (also in SkipLink.css but ensuring global visibility) */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #4c50e9;
+  color: white;
+  padding: 8px 16px;
+  z-index: 10000;
+  text-decoration: none;
+  font-weight: 600;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Ensure sufficient color contrast */
+button:disabled,
+input:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Improve form label associations */
+label {
+  cursor: pointer;
+}
+
+/* Ensure buttons have accessible names */
+button:not([aria-label]):not([aria-labelledby]) {
+  position: relative;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

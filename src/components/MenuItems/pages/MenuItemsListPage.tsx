@@ -2,14 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
+import BulkDeleteModal from "../../common/BulkDeleteModal";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
+import ErrorAlert from "../../common/ErrorAlert";
 import "../MenuItems.css";
 import { menuItemsApi, type MenuItemApi, type MenuItemSummary } from "../../../api/menu-items.api";
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
+import { useToast } from "../../common/Toast";
 
 function MenuItemsListPage() {
+  const { showToast } = useToast();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
@@ -17,6 +21,9 @@ function MenuItemsListPage() {
   const [dietary, setDietary] = useState("All Dietary");
   const [status, setStatus] = useState("All Status");
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState<MenuItemSummary>({ totalItems: 0, activeItems: 0, categoryCount: 0, variationCount: 0 });
   const [loading, setLoading] = useState(true);
@@ -66,7 +73,53 @@ function MenuItemsListPage() {
   }
 
   const handleDelete = (item: MenuItem) => {
-    menuItemsApi.remove(Number(item.id)).then(() => { setItems((current) => current.filter((currentItem) => currentItem.id !== item.id)); setItemToDelete(null); void loadSummary(); }).catch((requestError: unknown) => setError(requestError instanceof Error ? requestError.message : "Unable to delete menu item."));
+    setIsDeleting(true);
+    menuItemsApi.remove(Number(item.id)).then(() => {
+      setItems((current) => current.filter((currentItem) => currentItem.id !== item.id));
+      setItemToDelete(null);
+      setIsDeleting(false);
+      showToast('Menu item deleted successfully', 'success');
+      void loadSummary();
+    }).catch((requestError: unknown) => {
+      setIsDeleting(false);
+      setError(requestError instanceof Error ? requestError.message : "Unable to delete menu item.");
+      showToast('Failed to delete menu item', 'error');
+    });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(visibleItems.map(item => item.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked) {
+      newSelected.add(id);
+    } else {
+      newSelected.delete(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      setBulkDeleting(true);
+      await Promise.all(Array.from(selectedIds).map(id => menuItemsApi.remove(Number(id))));
+      setItems((current) => current.filter(item => !selectedIds.has(item.id)));
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+      showToast(`${selectedIds.size} menu item(s) deleted successfully`, 'success');
+      void loadSummary();
+    } catch (requestError) {
+      setBulkDeleting(false);
+      setError(requestError instanceof Error ? requestError.message : "Unable to delete menu items.");
+      showToast('Failed to delete menu items', 'error');
+    }
   };
 
   return (
@@ -84,7 +137,7 @@ function MenuItemsListPage() {
           <span>+</span> Add New Item
         </Link>
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
       <div className="item-stats">
         <article>
           <span className="item-stat-icon green">♜</span>
@@ -179,13 +232,28 @@ function MenuItemsListPage() {
           >
             ↻ Clear
           </button>
+          {selectedIds.size > 0 && (
+            <button
+              className="clear-filters"
+              onClick={() => setBulkDeleting(true)}
+              disabled={bulkDeleting}
+              style={{ background: '#fee2e2', borderColor: '#fecaca', color: '#991b1b' }}
+            >
+              Delete {selectedIds.size} Selected
+            </button>
+          )}
         </div>
         <div className="items-table-wrap">
           <table className="items-table">
             <thead>
               <tr>
-                <th>
-                  <input type="checkbox" aria-label="Select all items" />
+                <th className="checkbox-column">
+                  <input
+                    type="checkbox"
+                    checked={visibleItems.length > 0 && selectedIds.size === visibleItems.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    aria-label="Select all items"
+                  />
                 </th>
                 <th>Image</th>
                 <th>Item Name</th>
@@ -201,8 +269,13 @@ function MenuItemsListPage() {
             <tbody>
               {visibleItems.length ? visibleItems.map((item) => (
                 <tr key={item.id}>
-                  <td>
-                    <input type="checkbox" aria-label={`Select ${item.name}`} />
+                  <td className="checkbox-column">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(item.id)}
+                      onChange={(e) => handleSelectOne(item.id, e.target.checked)}
+                      aria-label={`Select ${item.name}`}
+                    />
                   </td>
                   <td>
                     <img src={imageUrl(item.image)} onError={useDefaultImageOnError} alt={item.name} />
@@ -248,13 +321,14 @@ function MenuItemsListPage() {
                         type="button"
                         aria-label={`Delete ${item.name}`}
                         onClick={() => setItemToDelete(item)}
+                        disabled={isDeleting}
                       >
                         ♲
                       </button>
                     </div>
                   </td>
                 </tr>
-              )) : <tr><td colSpan={10}><div className="list-empty-state"><span>🍽</span><strong>No items yet</strong><p>Add your first menu item to begin building your menu.</p><Link className="primary-button" to="/menu/add">Add New Item</Link></div></td></tr>}
+              )) : <tr><td colSpan={11}><div className="list-empty-state"><span>🍽</span><strong>No items yet</strong><p>Add your first menu item to begin building your menu.</p><Link className="primary-button" to="/menu/add">Add New Item</Link></div></td></tr>}
             </tbody>
           </table>
         </div>
@@ -280,6 +354,16 @@ function MenuItemsListPage() {
           itemType="Menu Item"
           onCancel={() => setItemToDelete(null)}
           onConfirm={() => handleDelete(itemToDelete)}
+          isDeleting={isDeleting}
+        />
+      )}
+      {bulkDeleting && (
+        <BulkDeleteModal
+          count={selectedIds.size}
+          itemType="Menu Item"
+          onCancel={() => setBulkDeleting(false)}
+          onConfirm={handleBulkDelete}
+          isDeleting={bulkDeleting}
         />
       )}
     </section>

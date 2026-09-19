@@ -23,6 +23,54 @@
 .order-table th.sortable:hover { background: #eef2f6; }
 .order-table td { border-bottom: 1px solid #edf1f5; padding: 13px 10px; color: #53647a; font-size: 11px; }
 .order-table td strong { color: #274560; }
+
+/* Checkbox column styles for bulk operations */
+.checkbox-column {
+  width: 42px;
+  text-align: center;
+}
+
+.checkbox-column input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #4c50e9;
+}
+
+/* Advanced filter styles */
+.amount-range {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  color: #425571;
+  font-weight: 700;
+}
+
+.amount-range > span {
+  font-size: 10px;
+}
+
+.amount-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount-range-inputs input {
+  width: 80px;
+  border: 1px solid #dfe6f0;
+  border-radius: 5px;
+  padding: 8px;
+  color: #4c5f7b;
+  font-size: 11px;
+  outline-color: #4c50e9;
+}
+
+.amount-range-inputs span {
+  color: #77849a;
+  font-size: 11px;
+}
 .order-status { padding: 5px 9px; border-radius: 15px; font-size: 10px; font-weight: 700; }
 .order-status.pending { background: #ffe7e8; color: #d32f2f; }
 .order-status.preparing { background: #fff3e0; color: #f57c00; }

@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import { useOfflineQueue } from "../hooks/useOfflineQueue";
 
 // Lazy load components for code splitting
 const Login = lazy(() => import("../components/auth/Login/Login"));
@@ -39,6 +40,8 @@ function RouteLoadingFallback() {
 }
 
 function AppRoutes() {
+  useOfflineQueue();
+
   return (
     <BrowserRouter>
       <Suspense fallback={<RouteLoadingFallback />}>

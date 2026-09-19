@@ -4,6 +4,7 @@ import CategoryHeader from "../components/CategoryHeader";
 import CategoryForm from "../components/CategoryForm";
 import Breadcrumb from "../../common/Breadcrumb";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
+import ErrorAlert from "../../common/ErrorAlert";
 
 function CategoryEditPage() {
   const { id } = useParams();
@@ -18,7 +19,7 @@ function CategoryEditPage() {
     }
   }, [id]);
 
-  if (error) return <p>{error}</p>;
+  if (error) return <section className="categories-page category-detail-page"><ErrorAlert message={error} /></section>;
   if (!category) return <p>Loading category...</p>;
 
   return (

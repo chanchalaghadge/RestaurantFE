@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
+import BulkDeleteModal from "../common/BulkDeleteModal";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
 import OrderHistoryModal from "../common/OrderHistoryModal";
+import ErrorAlert from "../common/ErrorAlert";
+import DateRangePicker from "../common/DateRangePicker";
 import { menuItemsApi, type MenuItemApi } from "../../api/menu-items.api";
 import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/orders.api";
 import { useTableSort } from "../../hooks/useTableSort";
@@ -19,11 +23,16 @@ function OrdersPage() {
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
   const [deleting, setDeleting] = useState<OrderApi | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [showHistory, setShowHistory] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | OrderApi["status"]>("All");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"All" | OrderType>("All");
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
+  const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -39,7 +48,17 @@ function OrdersPage() {
 
   useEffect(() => { void load(); }, []);
 
-  const visibleOrders = useMemo(() => orders.filter((order) => (statusFilter === "All" || order.status === statusFilter) && (typeFilter === "All" || order.orderType === typeFilter) && `${order.id} ${order.customerName} ${order.tableNumber ?? ""}`.toLowerCase().includes(search.toLowerCase())), [orders, search, statusFilter, typeFilter]);
+  const visibleOrders = useMemo(() => orders.filter((order) => {
+    const matchesStatus = statusFilter === "All" || order.status === statusFilter;
+    const matchesType = typeFilter === "All" || order.orderType === typeFilter;
+    const matchesSearch = `${order.id} ${order.customerName} ${order.tableNumber ?? ""}`.toLowerCase().includes(search.toLowerCase());
+    const matchesDateRange = (!dateRange.startDate || !dateRange.endDate) ||
+      (new Date(order.createdAtUtc) >= new Date(dateRange.startDate) && new Date(order.createdAtUtc) <= new Date(dateRange.endDate));
+    const matchesAmountRange = (!amountRange.min || !amountRange.max) ||
+      (order.totalAmount >= Number(amountRange.min) && order.totalAmount <= Number(amountRange.max));
+
+    return matchesStatus && matchesType && matchesSearch && matchesDateRange && matchesAmountRange;
+  }), [orders, search, statusFilter, typeFilter, dateRange, amountRange]);
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(visibleOrders);
 
   const statuses: Array<"All" | OrderApi["status"]> = ["All", "Pending", "Preparing", "Ready", "Completed", "Cancelled"];
@@ -47,11 +66,14 @@ function OrdersPage() {
   const remove = async () => {
     if (!deleting) return;
     try {
+      setIsDeleting(true);
       await ordersApi.remove(deleting.id);
       setDeleting(null);
+      setIsDeleting(false);
       showToast('Order deleted successfully', 'success');
       await load();
     } catch (e) {
+      setIsDeleting(false);
       setError(e instanceof Error ? e.message : "Unable to delete order.");
       showToast('Failed to delete order', 'error');
     }
@@ -96,6 +118,40 @@ function OrdersPage() {
     showToast('PDF report generated', 'success');
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(sortedData.map(order => order.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectOne = (id: number, checked: boolean) => {
+    const newSelected = new Set(selectedIds);
+    if (checked) {
+      newSelected.add(id);
+    } else {
+      newSelected.delete(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      setBulkDeleting(true);
+      await Promise.all(Array.from(selectedIds).map(id => ordersApi.remove(id)));
+      setSelectedIds(new Set());
+      setBulkDeleting(false);
+      showToast(`${selectedIds.size} order(s) deleted successfully`, 'success');
+      await load();
+    } catch (e) {
+      setBulkDeleting(false);
+      setError(e instanceof Error ? e.message : "Unable to delete orders.");
+      showToast('Failed to delete orders', 'error');
+    }
+  };
+
   if (loading) {
     return (
       <section className="orders-page">
@@ -127,10 +183,20 @@ function OrdersPage() {
           <button className="secondary-button" onClick={handlePdfExport} disabled={sortedData.length === 0}>
             📄 PDF
           </button>
+          {selectedIds.size > 0 && (
+            <button
+              className="secondary-button"
+              onClick={() => setBulkDeleting(true)}
+              disabled={bulkDeleting}
+              style={{ background: '#fee2e2', borderColor: '#fecaca', color: '#991b1b' }}
+            >
+              Delete {selectedIds.size} Selected
+            </button>
+          )}
           <button className="primary-button" onClick={() => setEditing("new")}>＋ Create Order</button>
         </div>
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
       <div className="order-tabs">
         {statuses.map((status) => (
           <button key={status} className={statusFilter === status ? "active" : ""} onClick={() => setStatusFilter(status)}>
@@ -147,12 +213,47 @@ function OrdersPage() {
             <option value="Takeaway">Takeaway</option>
             <option value="Delivery">Delivery</option>
           </select>
-          <button type="button" onClick={() => { setSearch(""); setStatusFilter("All"); setTypeFilter("All"); }}>↻ Reset</button>
+          <DateRangePicker
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onStartDateChange={(date) => setDateRange(prev => ({ ...prev, startDate: date }))}
+            onEndDateChange={(date) => setDateRange(prev => ({ ...prev, endDate: date }))}
+            label="Date Range"
+          />
+          <label className="amount-range">
+            <span>Amount Range</span>
+            <div className="amount-range-inputs">
+              <input
+                type="number"
+                placeholder="Min"
+                value={amountRange.min}
+                onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
+                aria-label="Minimum amount"
+              />
+              <span>to</span>
+              <input
+                type="number"
+                placeholder="Max"
+                value={amountRange.max}
+                onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
+                aria-label="Maximum amount"
+              />
+            </div>
+          </label>
+          <button type="button" onClick={() => { setSearch(""); setStatusFilter("All"); setTypeFilter("All"); setDateRange({ startDate: '', endDate: '' }); setAmountRange({ min: '', max: '' }); }}>↻ Reset</button>
         </div>
         <div className="order-table-wrap">
           <table className="order-table">
             <thead>
               <tr>
+                <th className="checkbox-column">
+                  <input
+                    type="checkbox"
+                    checked={sortedData.length > 0 && selectedIds.size === sortedData.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    aria-label="Select all orders"
+                  />
+                </th>
                 <th className="sortable" onClick={() => handleSort('id')} aria-sort={sortConfig.key === 'id' ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
                   Order # {sortConfig.key === 'id' && getSortIcon()}
                 </th>
@@ -175,6 +276,14 @@ function OrdersPage() {
             <tbody>
               {sortedData.length ? sortedData.map((order) => (
                 <tr key={order.id}>
+                  <td className="checkbox-column">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(order.id)}
+                      onChange={(e) => handleSelectOne(order.id, e.target.checked)}
+                      aria-label={`Select order #${order.id}`}
+                    />
+                  </td>
                   <td><strong>#{order.id}</strong></td>
                   <td>{order.tableNumber ?? "—"}</td>
                   <td>{order.customerName}</td>
@@ -185,12 +294,12 @@ function OrdersPage() {
                     <button title="View history" onClick={() => setShowHistory(order.id)}>📜</button>
                     <button title="Edit order" onClick={() => setEditing(order)}>✎</button>
                     {order.status !== "Completed" && <button title="Complete payment" onClick={() => void pay(order)}>💳</button>}
-                    <button title="Delete order" onClick={() => setDeleting(order)}>♲</button>
+                    <button title="Delete order" onClick={() => setDeleting(order)} disabled={isDeleting}>♲</button>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={8}>
                     <div className="list-empty-state">
                       <span>📋</span>
                       <strong>No orders yet</strong>
@@ -205,7 +314,16 @@ function OrdersPage() {
         </div>
       </div>
       {editing && <OrderForm order={editing === "new" ? undefined : editing} onClose={() => setEditing(null)} onSaved={load} />}
-      {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} />}
+      {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} isDeleting={isDeleting} />}
+      {bulkDeleting && (
+        <BulkDeleteModal
+          count={selectedIds.size}
+          itemType="Order"
+          onCancel={() => setBulkDeleting(false)}
+          onConfirm={handleBulkDelete}
+          isDeleting={bulkDeleting}
+        />
+      )}
       {showHistory && <OrderHistoryModal orderId={showHistory} onClose={() => setShowHistory(null)} />}
     </section>
   );
@@ -245,7 +363,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
     }
   };
 
-  return (
+  const formContent = (
     <div className="modal-backdrop">
       <form className="order-editor" onSubmit={submit}>
         <div className="modal-title">
@@ -294,7 +412,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
             </div>
           </aside>
         </div>
-        {error && <p className="order-form-error" role="alert">{error}</p>}
+        {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
         <div className="modal-actions">
           <button type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" type="submit">{order ? "Update Order" : "Create Order"}</button>
@@ -302,6 +420,8 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
       </form>
     </div>
   );
+
+  return createPortal(formContent, document.body);
 }
 
 export default OrdersPage;
