@@ -9,9 +9,13 @@
 .dashboard-heading { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
 .dashboard-heading h1 { color: #16253d; font-size: 25px; margin-bottom: 4px; }
 .dashboard-heading p { color: #73829a; font-size: 12px; }
-.dashboard-date { display: flex; align-items: center; gap: 16px; color: #405474; font-size: 10px; }
-.dashboard-date span { color: #8491a5; font-size: 9px; margin-left: -12px; margin-top: 25px; }
-.dashboard-date strong + strong { border-left: 1px solid #dfe6f0; padding-left: 16px; }
+.dashboard-date { display: flex; align-items: center; gap: 20px; color: #16253d; font-size: 11px; }
+.dashboard-date-group, .dashboard-time-group { display: flex; align-items: center; gap: 11px; }
+.dashboard-date-group { padding-right: 20px; border-right: 1px solid #e5eaf1; }
+.dashboard-date svg { width: 20px; height: 20px; flex: 0 0 auto; fill: none; stroke: #547096; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.dashboard-date strong, .dashboard-date span { display: block; }
+.dashboard-date strong { color: #1e2c43; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.dashboard-date span { margin-top: 3px; color: #73829a; font-size: 9px; font-weight: 600; }
 
 .metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .dashboard-metric { min-height: 112px; position: relative; display: flex; gap: 12px; padding: 14px; overflow: hidden; border: 1px solid #e0e7f1; border-radius: 7px; background: #fff; box-shadow: 0 2px 7px #29416b0a; }
