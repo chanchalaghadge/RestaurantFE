@@ -434,6 +434,27 @@
   color: #fff;
 }
 
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  border: 1px solid #dbe3ef;
+  border-radius: 7px;
+  background: #fff;
+  color: #526783;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.secondary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .secondary-button {
   background: #edf2fb;
   color: #324765;
@@ -774,6 +795,77 @@
   margin-top: 18px;
 }
 
+/* Form validation styles */
+.field-error {
+  margin: 4px 0 0;
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.field-group input[aria-invalid="true"],
+.field-group textarea[aria-invalid="true"],
+.field-group select[aria-invalid="true"] {
+  border-color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.field-group input[aria-invalid="true"]:focus,
+.field-group textarea[aria-invalid="true"]:focus,
+.field-group select[aria-invalid="true"]:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .customer-page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .customer-page-header > div {
+    width: 100%;
+  }
+  
+  .customer-page-header .primary-button,
+  .customer-page-header .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .customer-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .customer-filters {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .customer-filters select,
+  .customer-filters button {
+    width: 100%;
+  }
+  
+  .customers-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .customers-footer {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .customer-row-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
 .customer-detail-box {
   background: #fff;
   border: 1px solid #e0e7f1;
@@ -827,18 +919,67 @@
 
 /* API customer table: override the legacy nine-column mock-table widths above. */
 .customers-table {
-  min-width: 940px;
+  min-width: 980px;
   table-layout: auto;
 }
 
-.customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 23%; }
-.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 14%; }
-.customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 20%; }
-.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 9%; }
+.customers-table th:nth-child(1), .customers-table td:nth-child(1) { width: 42px; } /* Checkbox column */
+.customers-table th:nth-child(2), .customers-table td:nth-child(2) { width: 23%; }
+.customers-table th:nth-child(3), .customers-table td:nth-child(3) { width: 14%; }
+.customers-table th:nth-child(4), .customers-table td:nth-child(4) { width: 20%; }
 .customers-table th:nth-child(5), .customers-table td:nth-child(5) { width: 9%; }
-.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 8%; }
-.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 11%; }
-.customers-table th:nth-child(8), .customers-table td:nth-child(8) { width: 6%; white-space: nowrap; }
+.customers-table th:nth-child(6), .customers-table td:nth-child(6) { width: 9%; }
+.customers-table th:nth-child(7), .customers-table td:nth-child(7) { width: 8%; }
+.customers-table th:nth-child(8), .customers-table td:nth-child(8) { width: 11%; }
+.customers-table th:nth-child(9), .customers-table td:nth-child(9) { width: 6%; white-space: nowrap; }
+
+/* Checkbox column styles */
+.checkbox-column {
+  width: 42px;
+  text-align: center;
+}
+
+.checkbox-column input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #2d5df6;
+}
+
+/* Advanced filter styles */
+.amount-range {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  color: #425571;
+  font-weight: 700;
+}
+
+.amount-range > span {
+  font-size: 10px;
+}
+
+.amount-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.amount-range-inputs input {
+  width: 80px;
+  border: 1px solid #dfe6f0;
+  border-radius: 5px;
+  padding: 8px;
+  color: #4c5f7b;
+  font-size: 11px;
+  outline-color: #2d5df6;
+}
+
+.amount-range-inputs span {
+  color: #77849a;
+  font-size: 11px;
+}
 
 .customers-table .customer-name,
 .customers-table .customer-name strong {
@@ -852,3 +993,45 @@
 .list-empty-state > span { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: #edf4ff; color: #2d6eea; font-size: 25px; animation: empty-state-float 2.2s ease-in-out infinite; }
 .list-empty-state strong { color: #243c5c; font-size: 14px; }.list-empty-state p { margin: 0 0 6px; font-size: 11px; }
 @keyframes empty-state-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+/* The customer page controls stay visible; only a long customer list scrolls. */
+.customer-list-page { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.customer-list-page .customer-page-header { flex: 0 0 auto; }
+.customer-list-page .customer-stats { flex: 0 0 auto; }
+.customer-list-page .customer-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.customer-list-page .customer-filters { flex: 0 0 auto; }
+.customer-list-page .customers-table-wrap { flex: 1; min-height: 0; overflow: auto; }
+.customer-list-page .customers-table-wrap thead th { position: sticky; top: 0; z-index: 1; }
+.customer-list-page .customers-footer { flex: 0 0 auto; }
+
+/* Table sorting styles */
+.customers-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 20px;
+}
+
+.customers-table th.sortable:hover {
+  background-color: #f8f9fa;
+}
+
+.customers-table th.sortable::after {
+  content: '↕';
+  position: absolute;
+  right: 8px;
+  opacity: 0.3;
+  font-size: 12px;
+}
+
+.customers-table th.sortable[aria-sort="ascending"]::after {
+  content: '↑';
+  opacity: 1;
+  color: #2d5df6;
+}
+
+.customers-table th.sortable[aria-sort="descending"]::after {
+  content: '↓';
+  opacity: 1;
+  color: #2d5df6;
+}

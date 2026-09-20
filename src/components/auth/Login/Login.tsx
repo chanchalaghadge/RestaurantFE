@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
+import { validateEmail } from "../../../utils/validation";
+import { sanitizeInput } from "../../../utils/security";
 import "./Login.css";
 
 function Login() {
@@ -15,21 +17,44 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setFormData((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: sanitizeInput(value),
     }));
+
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors((previous) => ({
+        ...previous,
+        [name]: ''
+      }));
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      alert("Please enter email and password.");
+    // Validate form fields
+    const errors: Record<string, string> = {};
+    
+    const emailResult = validateEmail(formData.email);
+    if (!emailResult.isValid) {
+      errors.email = emailResult.error;
+    }
+    
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -37,7 +62,7 @@ function Login() {
       setSubmitting(true);
       setError("");
       const result = await authApi.login(formData.email.trim(), formData.password);
-      localStorage.setItem("restaurant-access-token", result.token);
+      // Token is stored securely via authApi.login
       localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
       navigate("/dashboard");
     } catch (requestError) {
@@ -69,7 +94,14 @@ function Login() {
               onChange={handleChange}
               placeholder="Enter your email"
               autoComplete="email"
+              aria-invalid={fieldErrors.email ? 'true' : 'false'}
+              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
             />
+            {fieldErrors.email && (
+              <p id="email-error" className="field-error" role="alert">
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div className="form-group">
@@ -84,6 +116,8 @@ function Login() {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 autoComplete="current-password"
+                aria-invalid={fieldErrors.password ? 'true' : 'false'}
+                aria-describedby={fieldErrors.password ? 'password-error' : undefined}
               />
 
               <button
@@ -100,6 +134,11 @@ function Login() {
                 )}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p id="password-error" className="field-error" role="alert">
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
 
           <div className="login-options">

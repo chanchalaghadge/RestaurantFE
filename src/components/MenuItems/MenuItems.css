@@ -14,3 +14,75 @@
 @keyframes empty-state-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 .remove-option { border: 0; color: #e75c6d; background: transparent; cursor: pointer; font-size: 15px; }.remove-option:disabled { opacity: .35; cursor: not-allowed; }.preview-image-empty { display: grid; width: 83px; height: 80px; place-items: center; border-radius: 5px; color: #8190a6; background: #f2f5fa; font-size: 9px; }.menu-form-error { margin: 10px 0 0; color: #c63f51; font-size: 11px; }
 .image-panel { display: flex; flex-direction: column; gap: 9px; }.image-panel .menu-image-preview { margin-top: 2px; }@media (max-width: 1050px) { .image-panel { grid-column: 1 / -1; } }
+
+/* The items page controls stay visible; only a long items list scrolls. */
+.items-list-page { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.items-list-page .items-heading { flex: 0 0 auto; }
+.items-list-page .item-stats { flex: 0 0 auto; }
+.items-list-page .items-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.items-list-page .items-filters { flex: 0 0 auto; }
+.items-list-page .items-table-wrap { flex: 1; min-height: 0; overflow: auto; }
+.items-list-page .items-table-wrap .items-table thead th { position: sticky; top: 0; z-index: 1; }
+.items-list-page .items-footer { flex: 0 0 auto; }
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .items-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .items-heading > div {
+    width: 100%;
+  }
+  
+  .items-heading .primary-button,
+  .items-heading .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .item-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .items-filters {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .items-filters label,
+  .items-filters button {
+    width: 100%;
+  }
+  
+  .items-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .items-footer {
+
+/* Checkbox column styles for bulk operations */
+.checkbox-column {
+  width: 42px;
+  text-align: center;
+}
+
+.checkbox-column input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #4c50e9;
+}
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .item-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

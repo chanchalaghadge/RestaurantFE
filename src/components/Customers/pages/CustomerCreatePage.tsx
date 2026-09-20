@@ -1,19 +1,14 @@
 import { Link } from "react-router-dom";
 import CustomerForm from "../components/CustomerForm";
+import Breadcrumb from "../../common/Breadcrumb";
 import "../Customers.css";
 
 function CustomerCreatePage() {
   return (
     <section className="customers-page">
+      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers', path: '/customers' }, { label: 'Create Customer' }]} />
       <div className="customer-page-header">
         <div>
-          <div className="customer-breadcrumb">
-            <Link to="/dashboard">Home</Link>
-            <span>/</span>
-            <Link to="/customers">Customers</Link>
-            <span>/</span>
-            <strong>Create Customer</strong>
-          </div>
           <h1>Create Customer</h1>
           <p>Add a new customer to your restaurant system.</p>
         </div>

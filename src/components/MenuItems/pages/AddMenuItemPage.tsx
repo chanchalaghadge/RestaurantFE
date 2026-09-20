@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import Breadcrumb from "../../common/Breadcrumb";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import { menuItemsApi, type MenuItemUpsert, type MenuOptionGroup } from "../../../api/menu-items.api";
 import { uploadMenuItemImage } from "../../../api/uploads.api";
@@ -70,7 +71,8 @@ function AddMenuItemPage() {
   const previewOption = allOptions[selectedPreviewOption];
 
   return <section className="menu-item-page">
-    <div className="menu-item-heading"><div className="breadcrumb"><Link to="/dashboard">Home</Link><span>/</span><Link to="/menu">Menu</Link><span>/</span><strong>{id ? "Edit Menu Item" : "Add Menu Item"}</strong></div><h1>{id ? "Edit Menu Item" : "Add New Menu Item"}</h1><p>Create a menu item and configure its options.</p></div>
+    <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: id ? 'Edit Menu Item' : 'Add Menu Item' }]} />
+    <div className="menu-item-heading"><h1>{id ? "Edit Menu Item" : "Add New Menu Item"}</h1><p>Create a menu item and configure its options.</p></div>
     <form className="menu-item-form" onSubmit={submit}>
       <div className="menu-item-top-grid">
         <section className="menu-panel basic-panel"><h2>Basic Information</h2>

@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import Breadcrumb from "../../common/Breadcrumb";
 import { customers } from "../data/customer.data";
 import "../Customers.css";
 
@@ -15,16 +16,10 @@ function CustomerViewPage() {
   const customer = customers.find((item) => item.id === id) ?? customers[0];
 
   return (
-    <section className="customer-detail-page">
+    <section className="customers-page customer-detail-page">
+      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers', path: '/customers' }, { label: customer.name }]} />
       <div className="customer-heading-row">
         <div>
-          <div className="customer-breadcrumb">
-            <Link to="/dashboard">Home</Link>
-            <span>/</span>
-            <Link to="/customers">Customers</Link>
-            <span>/</span>
-            <strong>{customer.name}</strong>
-          </div>
           <h1>Customer Details</h1>
           <p>View complete information about the customer.</p>
         </div>
