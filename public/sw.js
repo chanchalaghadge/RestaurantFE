@@ -1,115 +1,71 @@
-const CACHE_NAME = 'restaurant-fe-v2';
-const OFFLINE_QUEUE_CACHE = 'restaurant-fe-queue-v1';
+const CACHE_NAME = 'restaurant-be-v1';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/assets/',
+  '/icon-192x192.png',
+  '/icon-512x512.png'
 ];
 
-// IndexedDB for offline queue
-const DB_NAME = 'RestaurantOfflineDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'requestQueue';
-
-// Open IndexedDB
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-  });
-}
-
-// Add request to queue
-async function addToQueue(request) {
-  const db = await openDB();
-  const transaction = db.transaction([STORE_NAME], 'readwrite');
-  const store = transaction.objectStore(STORE_NAME);
-
-  const queueItem = {
-    url: request.url,
-    method: request.method,
-    headers: Object.fromEntries(request.headers.entries()),
-    body: await request.text(),
-    timestamp: Date.now()
-  };
-
-  store.add(queueItem);
-  return new Promise((resolve, reject) => {
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
-  });
-}
-
-// Process queue when online
-async function processQueue() {
-  try {
-    const db = await openDB();
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const requests = await new Promise((resolve, reject) => {
-      const getAll = store.getAll();
-      getAll.onsuccess = () => resolve(getAll.result);
-      getAll.onerror = () => reject(getAll.error);
-    });
-
-    for (const item of requests) {
-      try {
-        const response = await fetch(item.url, {
-          method: item.method,
-          headers: item.headers,
-          body: item.method !== 'GET' ? item.body : undefined
-        });
-
-        if (response.ok) {
-          await new Promise((resolve, reject) => {
-            const deleteRequest = store.delete(item.id);
-            deleteRequest.onsuccess = () => resolve();
-            deleteRequest.onerror = () => reject(deleteRequest.error);
-          });
-        }
-      } catch (error) {
-        console.error('Failed to process queued request:', error);
-      }
-    }
-  } catch (error) {
-    console.error('Failed to process queue:', error);
-  }
-}
-
-// Install event - cache static assets
+// Install event - cache assets
 self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Install');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
+        console.log('[Service Worker] Caching app shell');
         return cache.addAll(urlsToCache);
+      })
+      .catch((error) => {
+        console.error('[Service Worker] Failed to cache:', error);
       })
   );
   self.skipWaiting();
 });
 
-// Fetch event - serve from cache, fallback to network with queue
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activate');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests for caching
-  if (event.request.method !== 'GET') {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Skip API requests - they should always go to network
+  if (event.request.url.includes('/api/')) {
     event.respondWith(
-      fetch(event.request).catch(async () => {
-        // Queue failed non-GET requests
-        await addToQueue(event.request);
-        return new Response(JSON.stringify({ offline: true, queued: true }), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      })
+      fetch(event.request)
+        .catch((error) => {
+          console.error('[Service Worker] API request failed:', error);
+          // Return a custom offline response for API requests
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              message: 'You are offline. Please check your internet connection.' 
+            }),
+            {
+              status: 503,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+        })
     );
     return;
   }
@@ -119,6 +75,7 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         // Cache hit - return response
         if (response) {
+          console.log('[Service Worker] Serving from cache:', event.request.url);
           return response;
         }
 
@@ -136,55 +93,69 @@ self.addEventListener('fetch', (event) => {
 
           caches.open(CACHE_NAME)
             .then((cache) => {
+              console.log('[Service Worker] Caching new resource:', event.request.url);
               cache.put(event.request, responseToCache);
             });
 
           return response;
-        }).catch(() => {
-          // Return offline fallback for HTML requests
-          if (event.request.mode === 'navigate') {
+        }).catch((error) => {
+          console.error('[Service Worker] Fetch failed:', error);
+          
+          // For HTML requests, return offline page
+          if (event.request.headers.get('accept')?.includes('text/html')) {
             return caches.match('/index.html');
           }
-          // Return offline page for other requests
-          return new Response('Offline - Data not available', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: { 'Content-Type': 'text/plain' }
-          });
+          
+          // For other requests, just fail
+          throw error;
         });
       })
   );
 });
 
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  const cacheWhitelist = [CACHE_NAME, OFFLINE_QUEUE_CACHE];
+// Handle background sync (for offline actions)
+self.addEventListener('sync', (event) => {
+  console.log('[Service Worker] Background sync:', event.tag);
+  // Handle different sync events here
+  if (event.tag === 'sync-orders') {
+    event.waitUntil(syncOrders());
+  }
+});
+
+// Handle push notifications
+self.addEventListener('push', (event) => {
+  console.log('[Service Worker] Push received');
+  
+  const options = {
+    body: event.data ? event.data.text() : 'New notification',
+    icon: '/icon-192x192.png',
+    badge: '/icon-192x192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      dateOfArrival: Date.now(),
+      primaryKey: 1
+    }
+  };
+
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    self.registration.showNotification('RestaurantBE', options)
   );
-  // Process queued requests when coming online
-  processQueue();
 });
 
-// Handle messages from clients
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  if (event.data && event.data.type === 'PROCESS_QUEUE') {
-    processQueue();
-  }
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('[Service Worker] Notification click received');
+  
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.openWindow('/')
+  );
 });
 
-// Listen for online event
-self.addEventListener('online', () => {
-  processQueue();
-});
+// Helper function to sync orders when back online
+async function syncOrders() {
+  console.log('[Service Worker] Syncing orders...');
+  // Implement order sync logic here
+  // This would typically involve reading from IndexedDB and sending to API
+}

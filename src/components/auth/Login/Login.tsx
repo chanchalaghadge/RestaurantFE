@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
 import { validateEmail } from "../../../utils/validation";
+import { sanitizeInput } from "../../../utils/security";
 import "./Login.css";
 
 function Login() {
@@ -23,7 +24,7 @@ function Login() {
 
     setFormData((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: sanitizeInput(value),
     }));
 
     // Clear field error when user starts typing
@@ -61,7 +62,7 @@ function Login() {
       setSubmitting(true);
       setError("");
       const result = await authApi.login(formData.email.trim(), formData.password);
-      localStorage.setItem("restaurant-access-token", result.token);
+      // Token is stored securely via authApi.login
       localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
       navigate("/dashboard");
     } catch (requestError) {

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { authApi } from "../../api/auth.api";
 import "./Header.css";
 
 function Header() {
@@ -9,7 +10,7 @@ function Header() {
   const { language, setLanguage, availableLanguages, t } = useLanguage();
 
   const handleLogout = () => {
-    localStorage.removeItem("restaurant-access-token");
+    authApi.logout();
     localStorage.removeItem("restaurant-user");
     navigate("/");
   };

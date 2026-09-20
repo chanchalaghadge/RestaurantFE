@@ -6,6 +6,7 @@ import Breadcrumb from "../../common/Breadcrumb";
 import { LineChart } from "../../common/AnalyticsChart";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
+import { webSocketService } from "../../../utils/websocket";
 import "../Dashboard.css";
 
 function DashboardPage() {
@@ -33,6 +34,36 @@ function DashboardPage() {
       }
     }
   });
+
+  // WebSocket integration for real-time updates
+  useEffect(() => {
+    // Connect to WebSocket
+    webSocketService.connect();
+
+    // Subscribe to dashboard updates
+    const unsubscribe = webSocketService.on('dashboard:updated', (dashboardData) => {
+      console.log('Dashboard updated via WebSocket:', dashboardData);
+      setData(dashboardData as DashboardApi);
+      showToast('Dashboard updated in real-time', 'success');
+    });
+
+    // Subscribe to order updates that affect dashboard
+    const unsubscribeOrders = webSocketService.on('order:created', () => {
+      console.log('New order created, refreshing dashboard');
+      load();
+    });
+
+    const unsubscribeOrderStatus = webSocketService.on('order:status_changed', () => {
+      console.log('Order status changed, refreshing dashboard');
+      load();
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeOrders();
+      unsubscribeOrderStatus();
+    };
+  }, []);
 
   useEffect(() => { void load(); }, []);
 
