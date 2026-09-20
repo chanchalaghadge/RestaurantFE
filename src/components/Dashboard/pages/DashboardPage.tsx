@@ -6,11 +6,13 @@ import Breadcrumb from "../../common/Breadcrumb";
 import { LineChart } from "../../common/AnalyticsChart";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
+import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
 import "../Dashboard.css";
 
 function DashboardPage() {
   const { showToast } = useToast();
+  const { handleError, createErrorContext } = useErrorHandler();
   const [data, setData] = useState<DashboardApi | null>(null);
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
@@ -19,8 +21,9 @@ function DashboardPage() {
   const load = () => dashboardApi.get()
     .then(setData)
     .catch((reason: unknown) => {
+      const errorContext = createErrorContext('DashboardPage', 'loadDashboard');
+      handleError(reason instanceof Error ? reason : new Error('Unable to load dashboard.'), errorContext);
       setError(reason instanceof Error ? reason.message : "Unable to load dashboard.");
-      showToast('Failed to load dashboard data', 'error');
     })
     .finally(() => setLoading(false));
 
@@ -38,13 +41,16 @@ function DashboardPage() {
   // WebSocket integration for real-time updates
   useEffect(() => {
     // Connect to WebSocket
-    webSocketService.connect();
+    webSocketService.connect().catch((error) => {
+      const errorContext = createErrorContext('DashboardPage', 'connectWebSocket');
+      handleError(error, errorContext);
+    });
 
     // Subscribe to dashboard updates
     const unsubscribe = webSocketService.on('dashboard:updated', (dashboardData) => {
       console.log('Dashboard updated via WebSocket:', dashboardData);
       setData(dashboardData as DashboardApi);
-      showToast('Dashboard updated in real-time', 'success');
+      showToast('Dashboard updated in real-time', 'success', 2000);
     });
 
     // Subscribe to order updates that affect dashboard
@@ -63,7 +69,7 @@ function DashboardPage() {
       unsubscribeOrders();
       unsubscribeOrderStatus();
     };
-  }, []);
+  }, [createErrorContext, handleError]);
 
   useEffect(() => { void load(); }, []);
 
@@ -72,8 +78,11 @@ function DashboardPage() {
       setSeeding(true);
       setError("");
       await dashboardApi.seed();
+      showToast('Sample data created successfully', 'success');
       await load();
     } catch (reason) {
+      const errorContext = createErrorContext('DashboardPage', 'seedData');
+      handleError(reason instanceof Error ? reason : new Error('Unable to create sample data.'), errorContext);
       setError(reason instanceof Error ? reason.message : "Unable to create sample data.");
     } finally {
       setSeeding(false);
@@ -136,10 +145,11 @@ function DashboardPage() {
           className="secondary-button refresh-button" 
           onClick={() => {
             refresh();
-            showToast('Dashboard refreshed', 'success');
+            showToast('Dashboard refreshed', 'success', 2000);
           }}
           disabled={isRefreshing}
           title="Refresh dashboard data"
+          aria-label="Refresh dashboard"
         >
           {isRefreshing ? '⏳' : '🔄'}
         </button>

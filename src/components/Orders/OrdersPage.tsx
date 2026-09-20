@@ -13,6 +13,7 @@ import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import { exportToPdf } from "../../utils/pdfExport";
 import { useToast } from "../common/Toast";
+import { useErrorHandler } from "../../utils/errorHandler";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
@@ -20,6 +21,7 @@ type OrderType = OrderApi["orderType"];
 
 function OrdersPage() {
   const { showToast } = useToast();
+  const { handleError, createErrorContext } = useErrorHandler();
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
   const [deleting, setDeleting] = useState<OrderApi | null>(null);
@@ -40,6 +42,8 @@ function OrdersPage() {
       setLoading(true);
       setOrders(await ordersApi.list());
     } catch (e) {
+      const errorContext = createErrorContext('OrdersPage', 'loadOrders');
+      handleError(e instanceof Error ? e : new Error('Unable to load orders.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to load orders.");
     } finally {
       setLoading(false);
@@ -70,23 +74,25 @@ function OrdersPage() {
       await ordersApi.remove(deleting.id);
       setDeleting(null);
       setIsDeleting(false);
-      showToast('Order deleted successfully', 'success');
+      showToast('Order deleted successfully', 'success', 2000);
       await load();
     } catch (e) {
       setIsDeleting(false);
+      const errorContext = createErrorContext('OrdersPage', 'deleteOrder', { orderId: deleting.id });
+      handleError(e instanceof Error ? e : new Error('Unable to delete order.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to delete order.");
-      showToast('Failed to delete order', 'error');
     }
   };
 
   const pay = async (order: OrderApi) => {
     try {
       await ordersApi.completePayment(order.id);
-      showToast('Payment completed successfully', 'success');
+      showToast('Payment completed successfully', 'success', 2000);
       await load();
     } catch (e) {
+      const errorContext = createErrorContext('OrdersPage', 'completePayment', { orderId: order.id });
+      handleError(e instanceof Error ? e : new Error('Unable to complete payment.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to complete payment.");
-      showToast('Failed to complete payment', 'error');
     }
   };
 

@@ -4,10 +4,22 @@ import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
 import { validateEmail } from "../../../utils/validation";
 import { sanitizeInput } from "../../../utils/security";
+import { useErrorHandler } from "../../../utils/errorHandler";
+import { useToast } from "../../common/Toast";
+import { useFieldValidation, commonRules } from "../../../utils/formValidation";
 import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { handleError, createErrorContext } = useErrorHandler();
+  const { 
+    errors, 
+    validateFieldOnChange, 
+    markFieldTouched, 
+    isFieldTouched, 
+    clearAllErrors 
+  } = useFieldValidation();
 
   const [formData, setFormData] = useState<LoginRequest>({
     email: "",
@@ -17,7 +29,6 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -27,34 +38,26 @@ function Login() {
       [name]: sanitizeInput(value),
     }));
 
-    // Clear field error when user starts typing
-    if (fieldErrors[name]) {
-      setFieldErrors((previous) => ({
-        ...previous,
-        [name]: ''
-      }));
-    }
+    // Real-time validation
+    const rules = name === 'email' ? commonRules.emailRequired : commonRules.password;
+    validateFieldOnChange(name, value, rules, name === 'email' ? 'Email' : 'Password');
+    
+    // Mark field as touched
+    markFieldTouched(name);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // Validate form fields
-    const errors: Record<string, string> = {};
-    
-    const emailResult = validateEmail(formData.email);
-    if (!emailResult.isValid) {
-      errors.email = emailResult.error;
-    }
-    
-    if (!formData.password) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
+    // Mark all fields as touched for validation
+    markFieldTouched('email');
+    markFieldTouched('password');
 
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
+    // Validate all fields
+    const emailValid = validateFieldOnChange('email', formData.email, commonRules.emailRequired, 'Email');
+    const passwordValid = validateFieldOnChange('password', formData.password, commonRules.password, 'Password');
+
+    if (!emailValid || !passwordValid) {
       return;
     }
 
@@ -64,8 +67,14 @@ function Login() {
       const result = await authApi.login(formData.email.trim(), formData.password);
       // Token is stored securely via authApi.login
       localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
+      showToast('Login successful', 'success', 2000);
+      clearAllErrors();
       navigate("/dashboard");
     } catch (requestError) {
+      const errorContext = createErrorContext('Login', 'submitLoginForm', {
+        email: formData.email
+      });
+      handleError(requestError instanceof Error ? requestError : new Error('Unable to sign in.'), errorContext);
       setError(requestError instanceof Error ? requestError.message : "Unable to sign in.");
     } finally {
       setSubmitting(false);
@@ -94,12 +103,12 @@ function Login() {
               onChange={handleChange}
               placeholder="Enter your email"
               autoComplete="email"
-              aria-invalid={fieldErrors.email ? 'true' : 'false'}
-              aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? 'email-error' : undefined}
             />
-            {fieldErrors.email && (
+            {errors.email && isFieldTouched('email') && (
               <p id="email-error" className="field-error" role="alert">
-                {fieldErrors.email}
+                {errors.email}
               </p>
             )}
           </div>
@@ -116,8 +125,8 @@ function Login() {
                 onChange={handleChange}
                 placeholder="Enter your password"
                 autoComplete="current-password"
-                aria-invalid={fieldErrors.password ? 'true' : 'false'}
-                aria-describedby={fieldErrors.password ? 'password-error' : undefined}
+                aria-invalid={errors.password ? 'true' : 'false'}
+                aria-describedby={errors.password ? 'password-error' : undefined}
               />
 
               <button
@@ -134,9 +143,9 @@ function Login() {
                 )}
               </button>
             </div>
-            {fieldErrors.password && (
+            {errors.password && isFieldTouched('password') && (
               <p id="password-error" className="field-error" role="alert">
-                {fieldErrors.password}
+                {errors.password}
               </p>
             )}
           </div>
