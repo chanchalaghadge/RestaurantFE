@@ -4,7 +4,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./components/common/Toast";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { OfflineIndicator } from "./components/common/OfflineIndicator";
-import { SkipLink } from "./components/common/SkipLink";
+// import SkipLink from "./components/common/SkipLink"; // Temporarily disabled
 import "./styles/dark-mode.css";
 import "./styles/responsive.css";
 
@@ -14,7 +14,7 @@ function App() {
       <ThemeProvider>
         <ToastProvider>
           <ErrorBoundary>
-            <SkipLink />
+            {/* <SkipLink /> */} {/* Temporarily disabled */}
             <OfflineIndicator />
             <AppRoutes />
           </ErrorBoundary>

@@ -180,7 +180,7 @@ async function staleWhileRevalidateStrategy(request) {
   const cachedResponse = await caches.match(request);
   
   // Fetch in background and update cache
-  const fetchPromise = fetch(request).then((networkResponse) => {
+  const fetchPromise = fetch(request).then(async (networkResponse) => {
     if (networkResponse.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());

@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import CategoryHeader from "../components/CategoryHeader";
 import Breadcrumb from "../../common/Breadcrumb";
 import { categories } from "../data/category.data";
+import "../Categories.css";
 
 function CategoryViewPage() {
   const { id } = useParams();
