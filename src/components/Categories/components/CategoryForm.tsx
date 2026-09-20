@@ -1,13 +1,124 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import { uploadCategoryImage } from "../../../api/uploads.api";
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
+import { useToast } from "../../common/Toast";
+import { useUnsavedChanges } from "../../../hooks/useUnsavedChanges";
+import ErrorAlert from "../../common/ErrorAlert";
 
 function CategoryForm({ category, mode }: { category?: CategoryApi; mode: "create" | "edit" }) {
-  const navigate = useNavigate(); const fileInputRef = useRef<HTMLInputElement>(null); const [name, setName] = useState(category?.name ?? ""); const [description, setDescription] = useState(category?.description ?? ""); const [storedImageUrl, setStoredImageUrl] = useState(category?.imageUrl ?? ""); const [error, setError] = useState(""); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false);
-  const submit = async (event: React.FormEvent) => { event.preventDefault(); try { setSaving(true); setError(""); const body = { name: name.trim(), description: description.trim() || undefined, imageUrl: storedImageUrl || undefined }; category ? await categoriesApi.update(category.id, body) : await categoriesApi.create(body); navigate("/categories"); } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to save category."); } finally { setSaving(false); } };
-  const selectImage = async (file?: File) => { if (!file) return; if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) { setError("Choose a PNG, JPG, or WebP image up to 5 MB."); return; } try { setUploading(true); setError(""); setStoredImageUrl(await uploadCategoryImage(file)); } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to upload image."); } finally { setUploading(false); } };
-  return <form className="category-form" onSubmit={submit}><div className="category-form-columns"><div className="category-information"><h3>Category Information</h3><label>Category Name <b>*</b><input required value={name} onChange={(event) => setName(event.target.value)} /></label><label>Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} /></label></div><div className="category-image-column"><h3>Category Image</h3><button type="button" className="upload-box" onClick={() => fileInputRef.current?.click()} disabled={uploading}><strong>{uploading ? "Uploading image..." : "Click to upload an image"}</strong><small>PNG, JPG, WebP · Max. 5 MB</small></button><input ref={fileInputRef} className="hidden-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => void selectImage(event.target.files?.[0])} /><div className="image-preview"><img src={imageUrl(storedImageUrl)} onError={useDefaultImageOnError} alt="Category preview" />{storedImageUrl && <button type="button" onClick={() => setStoredImageUrl("")}>Remove</button>}</div></div></div>{error && <p role="alert">{error}</p>}<div className="form-actions"><button type="button" onClick={() => navigate(-1)}>Cancel</button><button className="primary-button" disabled={saving || uploading} type="submit">{saving ? "Saving..." : mode === "create" ? "Save Category" : "Save Changes"}</button></div></form>;
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState(category?.name ?? "");
+  const [description, setDescription] = useState(category?.description ?? "");
+  const [storedImageUrl, setStoredImageUrl] = useState(category?.imageUrl ?? "");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useUnsavedChanges(hasUnsavedChanges);
+
+  useEffect(() => {
+    const initialName = category?.name ?? "";
+    const initialDescription = category?.description ?? "";
+    const initialImageUrl = category?.imageUrl ?? "";
+    const changed =
+      name !== initialName ||
+      description !== initialDescription ||
+      storedImageUrl !== initialImageUrl;
+    setHasUnsavedChanges(changed);
+  }, [name, description, storedImageUrl, category]);
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    try {
+      setSaving(true);
+      setError("");
+      const body = {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        imageUrl: storedImageUrl || undefined
+      };
+      category
+        ? await categoriesApi.update(category.id, body)
+        : await categoriesApi.create(body);
+      setHasUnsavedChanges(false);
+      showToast(mode === "create" ? "Category created successfully" : "Category updated successfully", "success");
+      navigate("/categories");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to save category.");
+      showToast("Failed to save category", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const selectImage = async (file?: File) => {
+    if (!file) return;
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      setError("Choose a PNG, JPG, or WebP image up to 5 MB.");
+      return;
+    }
+    try {
+      setUploading(true);
+      setError("");
+      setStoredImageUrl(await uploadCategoryImage(file));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to upload image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <form className="category-form" onSubmit={submit}>
+      <div className="category-form-columns">
+        <div className="category-information">
+          <h3>Category Information</h3>
+          <label>
+            Category Name <b>*</b>
+            <input required value={name} onChange={(event) => setName(event.target.value)} />
+          </label>
+          <label>
+            Description
+            <textarea value={description} onChange={(event) => setDescription(event.target.value)} />
+          </label>
+        </div>
+        <div className="category-image-column">
+          <h3>Category Image</h3>
+          <button
+            type="button"
+            className="upload-box"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            <strong>{uploading ? "Uploading image..." : "Click to upload an image"}</strong>
+            <small>PNG, JPG, WebP · Max. 5 MB</small>
+          </button>
+          <input
+            ref={fileInputRef}
+            className="hidden-file-input"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(event) => void selectImage(event.target.files?.[0])}
+          />
+          <div className="image-preview">
+            <img src={imageUrl(storedImageUrl)} onError={useDefaultImageOnError} alt="Category preview" />
+            {storedImageUrl && <button type="button" onClick={() => setStoredImageUrl("")}>Remove</button>}
+          </div>
+        </div>
+      </div>
+      {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
+      <div className="form-actions">
+        <button type="button" onClick={() => navigate(-1)}>Cancel</button>
+        <button className="primary-button" disabled={saving || uploading} type="submit">
+          {saving ? "Saving..." : mode === "create" ? "Save Category" : "Save Changes"}
+        </button>
+      </div>
+    </form>
+  );
 }
 export default CategoryForm;

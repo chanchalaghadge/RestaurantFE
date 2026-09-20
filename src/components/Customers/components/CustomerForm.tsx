@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { customersApi, type CustomerApi, type CustomerUpsert } from "../../../api/customers.api";
-import { validateEmail, validatePhone, commonRules } from "../../../utils/validation";
+import { validateEmail, validatePhone, validateRequired } from "../../../utils/validation";
+import { useToast } from "../../common/Toast";
+import { useUnsavedChanges } from "../../../hooks/useUnsavedChanges";
+import ErrorAlert from "../../common/ErrorAlert";
 
 function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "create" | "edit" }) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [form, setForm] = useState<CustomerUpsert>({ fullName: customer?.fullName ?? "", phone: customer?.phone ?? "", email: customer?.email ?? "", status: customer?.status ?? "Active", tier: customer?.tier ?? "Regular", gender: customer?.gender ?? "Male", address: customer?.address ?? "", dateOfBirth: customer?.dateOfBirth?.slice(0, 10) ?? "", notes: customer?.notes ?? "" });
   const [error, setError] = useState(""); const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useUnsavedChanges(hasUnsavedChanges);
   const update = <K extends keyof CustomerUpsert>(key: K, value: CustomerUpsert[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
     // Clear field error when user starts typing
@@ -24,16 +31,21 @@ function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "creat
     // Validate form fields
     const errors: Record<string, string> = {};
     
-    if (!form.fullName.trim()) {
-      errors.fullName = commonRules.required.message;
+    const nameResult = validateRequired(form.fullName, 'Full name');
+    if (!nameResult.isValid) {
+      errors.fullName = nameResult.error;
     }
     
-    if (!validatePhone(form.phone)) {
-      errors.phone = commonRules.phone.message;
+    const phoneResult = validatePhone(form.phone);
+    if (!phoneResult.isValid) {
+      errors.phone = phoneResult.error;
     }
     
-    if (form.email && !validateEmail(form.email)) {
-      errors.email = commonRules.email.message;
+    if (form.email) {
+      const emailResult = validateEmail(form.email);
+      if (!emailResult.isValid) {
+        errors.email = emailResult.error;
+      }
     }
     
     if (Object.keys(errors).length > 0) {
@@ -41,7 +53,46 @@ function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "creat
       return;
     }
     
-    try { setSaving(true); setError(""); customer ? await customersApi.update(customer.id, form) : await customersApi.create(form); navigate("/customers"); } catch (requestError) { setError(requestError instanceof Error ? requestError.message : "Unable to save customer."); } finally { setSaving(false); } };
+    try {
+      setSaving(true);
+      setError("");
+      customer ? await customersApi.update(customer.id, form) : await customersApi.create(form);
+      setHasUnsavedChanges(false);
+      showToast(mode === "create" ? "Customer created successfully" : "Customer updated successfully", "success");
+      navigate("/customers");
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : "Unable to save customer.");
+      showToast("Failed to save customer", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    const initialForm = customer ? {
+      fullName: customer.fullName,
+      phone: customer.phone,
+      email: customer.email,
+      status: customer.status,
+      tier: customer.tier,
+      gender: customer.gender,
+      address: customer.address,
+      dateOfBirth: customer.dateOfBirth?.slice(0, 10) ?? "",
+      notes: customer.notes
+    } : {
+      fullName: "",
+      phone: "",
+      email: "",
+      status: "Active",
+      tier: "Regular",
+      gender: "Male",
+      address: "",
+      dateOfBirth: "",
+      notes: ""
+    };
+    const changed = JSON.stringify(form) !== JSON.stringify(initialForm);
+    setHasUnsavedChanges(changed);
+  }, [form, customer]);
   return (
     <form className="customer-form" onSubmit={submit}>
       <div className="customer-form-grid">
@@ -107,7 +158,7 @@ function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "creat
           <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} />
         </label>
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
       <div className="customer-form-actions">
         <button className="secondary-button" type="button" onClick={() => navigate(-1)}>Cancel</button>
         <button className="primary-button" disabled={saving} type="submit">

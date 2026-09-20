@@ -57,12 +57,6 @@ function Sidebar() {
             ♙ <span>Users</span>
           </NavLink>
         </nav>
-        <div className="sidebar-promo" aria-hidden="true">
-          <div className="promo-image" />
-          <strong>Good Food<br />Happy Customers</strong>
-          <p>Manage your menu categories to make it easy for customers to find their favorite dishes.</p>
-          <em />
-        </div>
       </div>
     </aside>
   );

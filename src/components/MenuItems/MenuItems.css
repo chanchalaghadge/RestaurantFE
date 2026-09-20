@@ -63,6 +63,19 @@
   }
   
   .items-footer {
+
+/* Checkbox column styles for bulk operations */
+.checkbox-column {
+  width: 42px;
+  text-align: center;
+}
+
+.checkbox-column input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #4c50e9;
+}
     flex-direction: column;
     gap: 8px;
     text-align: center;

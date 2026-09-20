@@ -1,196 +1,178 @@
 /**
- * Comprehensive form validation utilities
- * Provides reusable validation functions for all forms
+ * Form validation utilities
+ * Provides real-time validation with error messages
  */
 
 export interface ValidationRule {
   validate: (value: string) => boolean;
-  message: string;
+  errorMessage: string;
 }
 
 export interface ValidationResult {
   isValid: boolean;
-  errors: Record<string, string>;
+  error: string;
+}
+
+export interface FormErrors {
+  [fieldName: string]: string;
 }
 
 /**
- * Email validation with comprehensive checks
+ * Email validation
  */
-export const validateEmail = (email: string): boolean => {
+export const validateEmail = (email: string): ValidationResult => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email.trim());
+  const isValid = emailRegex.test(email);
+  return {
+    isValid,
+    error: isValid ? '' : 'Please enter a valid email address'
+  };
 };
 
 /**
- * Phone number validation (Indian format)
+ * Phone number validation (10 digits)
  */
-export const validatePhone = (phone: string): boolean => {
+export const validatePhone = (phone: string): ValidationResult => {
   const phoneRegex = /^[6-9]\d{9}$/;
-  return phoneRegex.test(phone.replace(/\s/g, ''));
-};
-
-/**
- * Password strength validation
- */
-export const validatePassword = (password: string): { isValid: boolean; strength: 'weak' | 'medium' | 'strong'; message: string } => {
-  if (password.length < 8) {
-    return { isValid: false, strength: 'weak', message: 'Password must be at least 8 characters' };
-  }
-  
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumbers = /\d/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  
-  const strengthCount = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
-  
-  if (strengthCount < 2) {
-    return { isValid: false, strength: 'weak', message: 'Password must include uppercase, lowercase, numbers, and special characters' };
-  }
-  
-  if (strengthCount < 4) {
-    return { isValid: true, strength: 'medium', message: 'Password strength: medium' };
-  }
-  
-  return { isValid: true, strength: 'strong', message: 'Password strength: strong' };
+  const isValid = phoneRegex.test(phone);
+  return {
+    isValid,
+    error: isValid ? '' : 'Please enter a valid 10-digit phone number'
+  };
 };
 
 /**
  * Required field validation
  */
-export const validateRequired = (value: string): boolean => {
-  return value.trim().length > 0;
+export const validateRequired = (value: string, fieldName: string = 'This field'): ValidationResult => {
+  const isValid = value.trim().length > 0;
+  return {
+    isValid,
+    error: isValid ? '' : `${fieldName} is required`
+  };
 };
 
 /**
  * Minimum length validation
  */
-export const validateMinLength = (value: string, min: number): boolean => {
-  return value.trim().length >= min;
+export const validateMinLength = (value: string, min: number, fieldName: string = 'This field'): ValidationResult => {
+  const isValid = value.length >= min;
+  return {
+    isValid,
+    error: isValid ? '' : `${fieldName} must be at least ${min} characters`
+  };
 };
 
 /**
  * Maximum length validation
  */
-export const validateMaxLength = (value: string, max: number): boolean => {
-  return value.trim().length <= max;
+export const validateMaxLength = (value: string, max: number, fieldName: string = 'This field'): ValidationResult => {
+  const isValid = value.length <= max;
+  return {
+    isValid,
+    error: isValid ? '' : `${fieldName} must not exceed ${max} characters`
+  };
 };
 
 /**
- * Numeric validation
+ * Number validation
  */
-export const validateNumeric = (value: string): boolean => {
-  return /^\d*\.?\d*$/.test(value.trim());
+export const validateNumber = (value: string, fieldName: string = 'This field'): ValidationResult => {
+  const isValid = !isNaN(Number(value)) && value.trim() !== '';
+  return {
+    isValid,
+    error: isValid ? '' : `${fieldName} must be a valid number`
+  };
 };
 
 /**
  * Positive number validation
  */
-export const validatePositive = (value: string): boolean => {
-  const num = parseFloat(value);
-  return !isNaN(num) && num > 0;
-};
-
-/**
- * URL validation
- */
-export const validateUrl = (url: string): boolean => {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Date validation
- */
-export const validateDate = (date: string): boolean => {
-  const dateObj = new Date(date);
-  return !isNaN(dateObj.getTime());
-};
-
-/**
- * Future date validation
- */
-export const validateFutureDate = (date: string): boolean => {
-  const dateObj = new Date(date);
-  const now = new Date();
-  return dateObj > now;
-};
-
-/**
- * Past date validation
- */
-export const validatePastDate = (date: string): boolean => {
-  const dateObj = new Date(date);
-  const now = new Date();
-  return dateObj < now;
-};
-
-/**
- * Generic field validator
- */
-export const validateField = (value: string, rules: ValidationRule[]): string | null => {
-  for (const rule of rules) {
-    if (!rule.validate(value)) {
-      return rule.message;
-    }
-  }
-  return null;
-};
-
-/**
- * Form validator for complete forms
- */
-export const validateForm = (formData: Record<string, string>, validationRules: Record<string, ValidationRule[]>): ValidationResult => {
-  const errors: Record<string, string> = {};
-  
-  for (const [fieldName, rules] of Object.entries(validationRules)) {
-    const value = formData[fieldName] || '';
-    const error = validateField(value, rules);
-    if (error) {
-      errors[fieldName] = error;
-    }
-  }
-  
+export const validatePositiveNumber = (value: string, fieldName: string = 'This field'): ValidationResult => {
+  const num = Number(value);
+  const isValid = !isNaN(num) && num > 0;
   return {
-    isValid: Object.keys(errors).length === 0,
-    errors
+    isValid,
+    error: isValid ? '' : `${fieldName} must be a positive number`
   };
 };
 
 /**
- * Common validation rules
+ * Password validation (min 8 characters)
  */
-export const commonRules = {
-  required: {
-    validate: validateRequired,
-    message: 'This field is required'
-  },
-  email: {
-    validate: validateEmail,
-    message: 'Please enter a valid email address'
-  },
-  phone: {
-    validate: validatePhone,
-    message: 'Please enter a valid 10-digit phone number'
-  },
-  minLength: (min: number) => ({
-    validate: (value: string) => validateMinLength(value, min),
-    message: `Minimum ${min} characters required`
-  }),
-  maxLength: (max: number) => ({
-    validate: (value: string) => validateMaxLength(value, max),
-    message: `Maximum ${max} characters allowed`
-  }),
-  numeric: {
-    validate: validateNumeric,
-    message: 'Please enter a valid number'
-  },
-  positive: {
-    validate: validatePositive,
-    message: 'Please enter a positive number'
+export const validatePassword = (password: string): ValidationResult => {
+  const isValid = password.length >= 8;
+  return {
+    isValid,
+    error: isValid ? '' : 'Password must be at least 8 characters'
+  };
+};
+
+/**
+ * Password match validation
+ */
+export const validatePasswordMatch = (password: string, confirmPassword: string): ValidationResult => {
+  const isValid = password === confirmPassword;
+  return {
+    isValid,
+    error: isValid ? '' : 'Passwords do not match'
+  };
+};
+
+/**
+ * Custom validation with multiple rules
+ */
+export const validateField = (value: string, rules: ValidationRule[]): ValidationResult => {
+  for (const rule of rules) {
+    if (!rule.validate(value)) {
+      return {
+        isValid: false,
+        error: rule.errorMessage
+      };
+    }
   }
+  return {
+    isValid: true,
+    error: ''
+  };
+};
+
+/**
+ * Validate entire form
+ */
+export const validateForm = (formData: Record<string, string>, validationRules: Record<string, ValidationRule[]>): FormErrors => {
+  const errors: FormErrors = {};
+  
+  for (const [fieldName, rules] of Object.entries(validationRules)) {
+    const value = formData[fieldName] || '';
+    const result = validateField(value, rules);
+    if (!result.isValid) {
+      errors[fieldName] = result.error;
+    }
+  }
+  
+  return errors;
+};
+
+/**
+ * Check if form has any errors
+ */
+export const hasErrors = (errors: FormErrors): boolean => {
+  return Object.keys(errors).length > 0;
+};
+
+/**
+ * Clear specific field error
+ */
+export const clearFieldError = (errors: FormErrors, fieldName: string): FormErrors => {
+  const newErrors = { ...errors };
+  delete newErrors[fieldName];
+  return newErrors;
+};
+
+/**
+ * Clear all form errors
+ */
+export const clearAllErrors = (): FormErrors => {
+  return {};
 };

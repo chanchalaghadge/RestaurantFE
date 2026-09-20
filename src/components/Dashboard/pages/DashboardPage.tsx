@@ -4,9 +4,13 @@ import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
 import { LineChart } from "../../common/AnalyticsChart";
+import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
+import { useToast } from "../../common/Toast";
+import { webSocketService } from "../../../utils/websocket";
 import "../Dashboard.css";
 
 function DashboardPage() {
+  const { showToast } = useToast();
   const [data, setData] = useState<DashboardApi | null>(null);
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
@@ -14,8 +18,52 @@ function DashboardPage() {
 
   const load = () => dashboardApi.get()
     .then(setData)
-    .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load dashboard."))
+    .catch((reason: unknown) => {
+      setError(reason instanceof Error ? reason.message : "Unable to load dashboard.");
+      showToast('Failed to load dashboard data', 'error');
+    })
     .finally(() => setLoading(false));
+
+  // Auto-refresh every 30 seconds
+  const { refresh, isRefreshing } = useAutoRefresh({
+    interval: 30000,
+    enabled: true,
+    onRefresh: () => {
+      if (data) {
+        return dashboardApi.get().then(setData);
+      }
+    }
+  });
+
+  // WebSocket integration for real-time updates
+  useEffect(() => {
+    // Connect to WebSocket
+    webSocketService.connect();
+
+    // Subscribe to dashboard updates
+    const unsubscribe = webSocketService.on('dashboard:updated', (dashboardData) => {
+      console.log('Dashboard updated via WebSocket:', dashboardData);
+      setData(dashboardData as DashboardApi);
+      showToast('Dashboard updated in real-time', 'success');
+    });
+
+    // Subscribe to order updates that affect dashboard
+    const unsubscribeOrders = webSocketService.on('order:created', () => {
+      console.log('New order created, refreshing dashboard');
+      load();
+    });
+
+    const unsubscribeOrderStatus = webSocketService.on('order:status_changed', () => {
+      console.log('Order status changed, refreshing dashboard');
+      load();
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeOrders();
+      unsubscribeOrderStatus();
+    };
+  }, []);
 
   useEffect(() => { void load(); }, []);
 
@@ -84,6 +132,17 @@ function DashboardPage() {
             <strong>{timeText}</strong>
           </div>
         </div>
+        <button 
+          className="secondary-button refresh-button" 
+          onClick={() => {
+            refresh();
+            showToast('Dashboard refreshed', 'success');
+          }}
+          disabled={isRefreshing}
+          title="Refresh dashboard data"
+        >
+          {isRefreshing ? '⏳' : '🔄'}
+        </button>
       </div>
 
       {error && <p role="alert">{error}</p>}

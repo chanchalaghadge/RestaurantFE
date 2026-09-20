@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface OrderHistoryEntry {
   id: string;
@@ -56,14 +57,14 @@ export default function OrderHistoryModal({ orderId, onClose }: OrderHistoryModa
     setLoading(false);
   }, 500);
 
-  return (
+  const modalContent = (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content order-history-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Order #${orderId} History</h2>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        
+
         {loading ? (
           <div className="modal-loading">Loading history...</div>
         ) : history.length === 0 ? (
@@ -95,11 +96,13 @@ export default function OrderHistoryModal({ orderId, onClose }: OrderHistoryModa
             ))}
           </div>
         )}
-        
+
         <div className="modal-footer">
           <button className="secondary-button" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

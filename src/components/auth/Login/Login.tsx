@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
-import { validateEmail, commonRules } from "../../../utils/validation";
+import { validateEmail } from "../../../utils/validation";
+import { sanitizeInput } from "../../../utils/security";
 import "./Login.css";
 
 function Login() {
@@ -23,7 +24,7 @@ function Login() {
 
     setFormData((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: sanitizeInput(value),
     }));
 
     // Clear field error when user starts typing
@@ -41,12 +42,13 @@ function Login() {
     // Validate form fields
     const errors: Record<string, string> = {};
     
-    if (!validateEmail(formData.email)) {
-      errors.email = commonRules.email.message;
+    const emailResult = validateEmail(formData.email);
+    if (!emailResult.isValid) {
+      errors.email = emailResult.error;
     }
     
     if (!formData.password) {
-      errors.password = commonRules.required.message;
+      errors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
     }
@@ -60,7 +62,7 @@ function Login() {
       setSubmitting(true);
       setError("");
       const result = await authApi.login(formData.email.trim(), formData.password);
-      localStorage.setItem("restaurant-access-token", result.token);
+      // Token is stored securely via authApi.login
       localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
       navigate("/dashboard");
     } catch (requestError) {

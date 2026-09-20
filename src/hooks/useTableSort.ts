@@ -3,7 +3,7 @@
  * Provides sorting state and functions for table components
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 export type SortDirection = 'asc' | 'desc' | null;
 
@@ -14,7 +14,33 @@ export interface SortConfig {
 
 export function useTableSort<T>(initialData: T[]) {
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: null });
-  const [sortedData, setSortedData] = useState<T[]>(initialData);
+
+  // Use useMemo to compute sorted data instead of storing in state
+  const sortedData = useMemo(() => {
+    if (!sortConfig.key || !sortConfig.direction) {
+      return initialData;
+    }
+
+    const sorted = [...initialData].sort((a, b) => {
+      const aValue = a[sortConfig.key as keyof T];
+      const bValue = b[sortConfig.key as keyof T];
+      
+      if (aValue === bValue) return 0;
+      
+      let comparison = 0;
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        comparison = aValue.localeCompare(bValue);
+      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+        comparison = aValue - bValue;
+      } else {
+        comparison = String(aValue).localeCompare(String(bValue));
+      }
+      
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    });
+
+    return sorted;
+  }, [initialData, sortConfig.key, sortConfig.direction]);
 
   const handleSort = useCallback((key: keyof T) => {
     setSortConfig((prev) => {
@@ -23,38 +49,13 @@ export function useTableSort<T>(initialData: T[]) {
         key: String(key),
         direction: newDirection
       };
-      
-      if (newDirection) {
-        const sorted = [...initialData].sort((a, b) => {
-          const aValue = a[key];
-          const bValue = b[key];
-          
-          if (aValue === bValue) return 0;
-          
-          let comparison = 0;
-          if (typeof aValue === 'string' && typeof bValue === 'string') {
-            comparison = aValue.localeCompare(bValue);
-          } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-            comparison = aValue - bValue;
-          } else {
-            comparison = String(aValue).localeCompare(String(bValue));
-          }
-          
-          return newDirection === 'asc' ? comparison : -comparison;
-        });
-        setSortedData(sorted);
-      } else {
-        setSortedData(initialData);
-      }
-      
       return newConfig;
     });
-  }, [initialData]);
+  }, []);
 
   const resetSort = useCallback(() => {
     setSortConfig({ key: '', direction: null });
-    setSortedData(initialData);
-  }, [initialData]);
+  }, []);
 
   const getSortIcon = () => {
     switch (sortConfig.direction) {

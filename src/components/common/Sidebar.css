@@ -53,7 +53,7 @@
 }
 
 .submenu a { min-height: 29px; padding: 7px 10px; font-size: 10px; }
-.submenu a.active { background: transparent; color: #fff; box-shadow: none; }.sidebar-promo { margin: 108px 5px 0; border: 1px solid #294058; border-radius: 6px; overflow: hidden; color: #fff; background: #102238; }.promo-image { height: 57px; background: linear-gradient(#0003,#0007), url("https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=120&fit=crop") center/cover; }.sidebar-promo strong, .sidebar-promo p { display: block; padding: 0 10px; }.sidebar-promo strong { font-size: 12px; margin-top: 9px; }.sidebar-promo p { color: #c1cada; font-size: 9px; line-height: 1.35; margin: 6px 0 10px; }.sidebar-promo em { display: block; background: #f5a900; width: 26px; height: 2px; margin: 0 10px 14px; }
+.submenu a.active { background: transparent; color: #fff; box-shadow: none; }
 
 .sidebar-menu a:hover {
   background: #444;
