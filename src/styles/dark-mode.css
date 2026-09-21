@@ -548,6 +548,52 @@
   color: #ffffff !important;
 }
 
+/* Dedicated Create Order screen. */
+[data-theme="dark"] .create-order-details,
+[data-theme="dark"] .order-menu-panel,
+[data-theme="dark"] .order-summary-panel,
+[data-theme="dark"] .create-order-details input,
+[data-theme="dark"] .create-order-details select,
+[data-theme="dark"] .instructions-field textarea,
+[data-theme="dark"] .order-type-picker button,
+[data-theme="dark"] .cart-quantity button {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .order-type-picker button.selected,
+[data-theme="dark"] .menu-category-tabs button.active,
+[data-theme="dark"] .create-menu-card button {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .menu-category-tabs button,
+[data-theme="dark"] .create-menu-card,
+[data-theme="dark"] .menu-image-placeholder {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .create-order-page,
+[data-theme="dark"] .create-order-heading p,
+[data-theme="dark"] .order-panel-heading p,
+[data-theme="dark"] .create-order-details label,
+[data-theme="dark"] .instructions-field,
+[data-theme="dark"] .cart-empty,
+[data-theme="dark"] .order-totals > div {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .create-order-heading h1,
+[data-theme="dark"] .order-panel-heading h2,
+[data-theme="dark"] .order-cart-item strong,
+[data-theme="dark"] .cart-item-price,
+[data-theme="dark"] .order-totals .order-total-line { color: #ffffff !important; }
+
 /* Table availability and destructive actions need dark-mode contrast as well. */
 [data-theme="dark"] .restaurant-table em {
   background: rgba(34, 197, 94, .18) !important;

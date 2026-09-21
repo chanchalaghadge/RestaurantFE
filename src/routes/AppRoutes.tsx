@@ -30,6 +30,7 @@ const CustomerCreatePage = lazy(() => import("../components/Customers/pages/Cust
 const CustomerEditPage = lazy(() => import("../components/Customers/pages/CustomerEditPage"));
 const CustomerViewPage = lazy(() => import("../components/Customers/pages/CustomerViewPage"));
 const OrdersPage = lazy(() => import("../components/Orders/OrdersPage"));
+const CreateOrderPage = lazy(() => import("../components/Orders/CreateOrderPage"));
 const TablesPage = lazy(() => import("../components/Tables/TablesPage"));
 const UsersPage = lazy(() => import("../components/Users/UsersPage"));
 const UserFormPage = lazy(() => import("../components/Users/UserFormPage"));
@@ -78,6 +79,7 @@ function AppRoutes() {
             <Route path="/menu/:id/edit" element={<AddMenuItemPage />} />
             <Route path="/ingredients" element={<UnderDevelopment />} />
             <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders/new" element={<CreateOrderPage />} />
             <Route path="/tables" element={<TablesPage />} />
             <Route path="/reservations" element={<TablesPage />} />
             <Route path="/customers" element={<CustomerListPage />} />

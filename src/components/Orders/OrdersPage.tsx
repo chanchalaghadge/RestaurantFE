@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../common/BulkDeleteModal";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -22,6 +23,7 @@ type OrderType = OrderApi["orderType"];
 
 function OrdersPage() {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const { handleError, createErrorContext } = useErrorHandler();
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
@@ -168,7 +170,7 @@ function OrdersPage() {
             <h1>Orders</h1>
             <p>Manage and track every order in real time.</p>
           </div>
-          <button className="primary-button" onClick={() => setEditing("new")}>＋ Create Order</button>
+          <button className="primary-button" onClick={() => navigate("/orders/new")}>＋ Create Order</button>
         </div>
         <LoadingSpinner text="Loading orders..." fullScreen />
       </section>
@@ -200,7 +202,7 @@ function OrdersPage() {
               Delete {selectedIds.size} Selected
             </button>
           )}
-          <button className="primary-button" onClick={() => setEditing("new")}>＋ Create Order</button>
+          <button className="primary-button" onClick={() => navigate("/orders/new")}>＋ Create Order</button>
         </div>
       </div>
       {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
@@ -347,7 +349,7 @@ function OrdersPage() {
                       <span>📋</span>
                       <strong>No orders yet</strong>
                       <p>Create your first order to get started.</p>
-                      <button className="primary-button" onClick={() => setEditing("new")}>Create Order</button>
+                      <button className="primary-button" onClick={() => navigate("/orders/new")}>Create Order</button>
                     </div>
                   </td>
                 </tr>
@@ -356,7 +358,7 @@ function OrdersPage() {
           </table>
         </div>
       </div>
-      {editing && <OrderForm order={editing === "new" ? undefined : editing} onClose={() => setEditing(null)} onSaved={load} />}
+      {editing && editing !== "new" && <OrderForm order={editing} onClose={() => setEditing(null)} onSaved={load} />}
       {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} isDeleting={isDeleting} />}
       {bulkDeleting && (
         <BulkDeleteModal
