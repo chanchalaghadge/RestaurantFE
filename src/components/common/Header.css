@@ -100,6 +100,20 @@
   opacity: .72;
 }
 
+[data-theme="dark"] .profile-menu {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] #root .profile-menu button {
+  color: #ff8c9a !important;
+}
+
+[data-theme="dark"] #root .profile-menu button:hover,
+[data-theme="dark"] #root .profile-menu button:focus-visible {
+  background: rgba(242, 82, 102, .16);
+}
+
 .header-left h2 { margin: 0; font-size: 20px; color: #333; }
 
 .header-right {

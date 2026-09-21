@@ -366,3 +366,287 @@
 [data-theme="dark"] .donut-chart::after {
   background: var(--bg-secondary);
 }
+
+/* Shared application surfaces: prevents light cards, filters, and tables on non-dashboard pages. */
+[data-theme="dark"] .main-layout,
+[data-theme="dark"] .main-content,
+[data-theme="dark"] .items-page,
+[data-theme="dark"] .menu-item-page,
+[data-theme="dark"] .orders-page,
+[data-theme="dark"] .tables-page,
+[data-theme="dark"] .customers-page,
+[data-theme="dark"] .users-page,
+[data-theme="dark"] .user-form-page,
+[data-theme="dark"] .categories-page {
+  background: var(--bg-primary) !important;
+}
+
+[data-theme="dark"] .items-panel,
+[data-theme="dark"] .item-stats article,
+[data-theme="dark"] .menu-panel,
+[data-theme="dark"] .orders-card,
+[data-theme="dark"] .customer-panel,
+[data-theme="dark"] .customer-stats article,
+[data-theme="dark"] .users-panel,
+[data-theme="dark"] .user-form section,
+[data-theme="dark"] .restaurant-table,
+[data-theme="dark"] .table-detail,
+[data-theme="dark"] .category-panel,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .form-panel,
+[data-theme="dark"] .category-profile,
+[data-theme="dark"] .gallery-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .main-content th,
+[data-theme="dark"] .items-table th,
+[data-theme="dark"] .order-table th,
+[data-theme="dark"] .users-table th,
+[data-theme="dark"] .customers-table th {
+  background: var(--bg-tertiary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .main-content td,
+[data-theme="dark"] .items-table td,
+[data-theme="dark"] .order-table td,
+[data-theme="dark"] .users-table td,
+[data-theme="dark"] .customers-table td {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .items-table tbody tr:hover,
+[data-theme="dark"] .order-table tbody tr:hover,
+[data-theme="dark"] .users-table tbody tr:hover,
+[data-theme="dark"] .customers-table tbody tr:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .items-filters select,
+[data-theme="dark"] .items-search,
+[data-theme="dark"] .customer-search,
+[data-theme="dark"] .customer-filters select,
+[data-theme="dark"] .users-toolbar label,
+[data-theme="dark"] .search-compact,
+[data-theme="dark"] .select-compact,
+[data-theme="dark"] .date-range-compact,
+[data-theme="dark"] .amount-range-compact,
+[data-theme="dark"] .order-tools label,
+[data-theme="dark"] .form-grid input,
+[data-theme="dark"] .form-grid select,
+[data-theme="dark"] .form-grid textarea,
+[data-theme="dark"] .category-form input,
+[data-theme="dark"] .category-form select,
+[data-theme="dark"] .category-form textarea,
+[data-theme="dark"] .table-editor input,
+[data-theme="dark"] .table-editor select {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .items-footer,
+[data-theme="dark"] .table-footer,
+[data-theme="dark"] .users-toolbar,
+[data-theme="dark"] .form-panel-heading,
+[data-theme="dark"] .table-modal-title,
+[data-theme="dark"] .table-modal-actions,
+[data-theme="dark"] .option-group-header {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .clear-filters,
+[data-theme="dark"] .pagination-controls button:not(.current),
+[data-theme="dark"] .pagination-controls select,
+[data-theme="dark"] .secondary-button,
+[data-theme="dark"] .reset-btn-compact,
+[data-theme="dark"] .order-tools button,
+[data-theme="dark"] .menu-form-actions > button:first-child,
+[data-theme="dark"] .form-actions > button:first-child,
+[data-theme="dark"] .table-modal-actions button[type="button"] {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Preserve meaningful badge contrast rather than carrying light-mode pastel fills into dark mode. */
+[data-theme="dark"] .item-stats em,
+[data-theme="dark"] .stat-card em,
+[data-theme="dark"] .customer-stats em {
+  background: rgba(34, 197, 94, .18) !important;
+  color: #4ade9a !important;
+}
+
+[data-theme="dark"] .item-stats em.neutral {
+  background: var(--bg-tertiary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .category-pill {
+  background: rgba(139, 92, 246, .2) !important;
+  color: #c4a5ff !important;
+}
+
+[data-theme="dark"] .dietary-pill.veg,
+[data-theme="dark"] .item-status:not(.inactive),
+[data-theme="dark"] .status.active,
+[data-theme="dark"] .user-active {
+  background: rgba(34, 197, 94, .18) !important;
+  color: #4ade9a !important;
+}
+
+[data-theme="dark"] .dietary-pill.non-veg,
+[data-theme="dark"] .item-status.inactive,
+[data-theme="dark"] .status.inactive,
+[data-theme="dark"] .user-inactive {
+  background: rgba(239, 68, 68, .18) !important;
+  color: #ff8c8c !important;
+}
+
+[data-theme="dark"] .gst-pill,
+[data-theme="dark"] .availability-pill {
+  background: rgba(59, 130, 246, .18) !important;
+  color: #7db3ff !important;
+}
+
+[data-theme="dark"] .item-actions a,
+[data-theme="dark"] .user-actions button,
+[data-theme="dark"] .row-actions a,
+[data-theme="dark"] .row-actions button {
+  background: rgba(59, 130, 246, .18) !important;
+  color: #7db3ff !important;
+}
+
+[data-theme="dark"] .item-actions button,
+[data-theme="dark"] .user-actions .deactivate,
+[data-theme="dark"] .row-actions .delete {
+  background: rgba(239, 68, 68, .18) !important;
+  color: #ff8c8c !important;
+}
+
+/* Order status filters must not retain their light-mode button fills. */
+[data-theme="dark"] .order-tabs button,
+[data-theme="dark"] .tab-compact {
+  background: var(--bg-tertiary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .order-tabs button:hover,
+[data-theme="dark"] .tab-compact:hover {
+  background: var(--border-color) !important;
+}
+
+[data-theme="dark"] .order-tabs button.active,
+[data-theme="dark"] .tab-compact.active {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .count-badge {
+  background: rgba(255, 255, 255, .16) !important;
+  color: #ffffff !important;
+}
+
+/* Table availability and destructive actions need dark-mode contrast as well. */
+[data-theme="dark"] .restaurant-table em {
+  background: rgba(34, 197, 94, .18) !important;
+  color: #4ade9a !important;
+}
+
+[data-theme="dark"] .restaurant-table.occupied em {
+  background: rgba(239, 68, 68, .18) !important;
+  color: #ff8c8c !important;
+}
+
+[data-theme="dark"] .restaurant-table.reserved em {
+  background: rgba(245, 158, 11, .18) !important;
+  color: #facc5c !important;
+}
+
+[data-theme="dark"] .delete-table {
+  background: rgba(239, 68, 68, .22) !important;
+  color: #ff9ca8 !important;
+}
+
+[data-theme="dark"] .delete-table:hover {
+  background: rgba(239, 68, 68, .32) !important;
+}
+
+/* Customer table rows and controls must use dark surfaces, not their light defaults. */
+[data-theme="dark"] .customers-table tr {
+  background: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .customer-filters button {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .customer-tier.regular {
+  background: rgba(59, 130, 246, .18) !important;
+  color: #7db3ff !important;
+}
+
+[data-theme="dark"] .customer-tier.vip {
+  background: rgba(139, 92, 246, .2) !important;
+  color: #c4a5ff !important;
+}
+
+[data-theme="dark"] .customer-tier.new {
+  background: rgba(245, 158, 11, .18) !important;
+  color: #facc5c !important;
+}
+
+[data-theme="dark"] .view-link,
+[data-theme="dark"] .action-icon.edit {
+  background: rgba(59, 130, 246, .18) !important;
+  border-color: transparent !important;
+  color: #7db3ff !important;
+}
+
+[data-theme="dark"] .action-icon.delete {
+  background: rgba(239, 68, 68, .18) !important;
+  border-color: transparent !important;
+  color: #ff8c8c !important;
+}
+
+/* Menu item editor: remove the remaining light-mode upload, option, and preview surfaces. */
+[data-theme="dark"] .menu-upload,
+[data-theme="dark"] .option-group,
+[data-theme="dark"] .preview-content,
+[data-theme="dark"] .preview-image-empty {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .menu-upload:hover {
+  background: var(--border-color) !important;
+}
+
+[data-theme="dark"] .status-toggle button,
+[data-theme="dark"] .preview-tabs button,
+[data-theme="dark"] .add-option,
+[data-theme="dark"] .add-group,
+[data-theme="dark"] .menu-image-preview button {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .status-toggle button.selected,
+[data-theme="dark"] .preview-tabs button.selected {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .status-toggle button.inactive-selected {
+  background: rgba(239, 68, 68, .3) !important;
+  color: #ff9ca8 !important;
+}
+
+[data-theme="dark"] .menu-upload span {
+  background: rgba(59, 130, 246, .18) !important;
+  color: #7db3ff !important;
+}

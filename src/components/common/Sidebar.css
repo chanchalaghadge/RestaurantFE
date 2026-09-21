@@ -10,7 +10,7 @@
   padding: 0 13px;
 }
 
-.sidebar-title { height: 64px; flex: 0 0 64px; margin: 0 -13px 14px; padding: 0 19px; display: flex; align-items: center; gap: 10px; background: transparent; }.brand-mark { font-size: 29px; }.sidebar-title h2 { font-size: 17px; }.sidebar-title small { color: #b5c1d2; font-size: 9px; display: block; margin-top: 1px; }
+.sidebar-title { height: 64px; flex: 0 0 64px; margin: 0 -13px 4px; padding: 0 19px; display: flex; align-items: center; gap: 10px; background: transparent; }.brand-mark { font-size: 29px; }.sidebar-title h2 { font-size: 17px; }.sidebar-title small { color: #b5c1d2; font-size: 9px; display: block; margin-top: 1px; }
 
 .sidebar-title h2 { margin: 0; }
 
