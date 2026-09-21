@@ -76,7 +76,7 @@ function CustomerViewPage() {
             <small>Total Orders</small>
           </div>
           <div className="summary-card">
-            <span>₹ 1,850</span>
+            <span>₹1,850</span>
             <small>Lifetime Spend</small>
           </div>
           <div className="summary-card">

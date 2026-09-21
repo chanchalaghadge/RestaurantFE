@@ -13,6 +13,7 @@ import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import { exportToPdf } from "../../utils/pdfExport";
 import { useToast } from "../common/Toast";
 import { useErrorHandler } from "../../utils/errorHandler";
+import { formatCurrency } from "../../utils/currency";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
@@ -101,7 +102,7 @@ function OrdersPage() {
       { key: 'customerName', label: 'Customer' },
       { key: 'tableNumber', label: 'Table', formatter: (val: number | undefined) => val ? String(val) : 'N/A' },
       { key: 'orderType', label: 'Type', formatter: (val: string) => val === 'DineIn' ? 'Dine In' : val },
-      { key: 'totalAmount', label: 'Total', formatter: (val: number) => `₹${val.toFixed(2)}` },
+      { key: 'totalAmount', label: 'Total', formatter: formatCurrency },
       { key: 'status', label: 'Status' },
       { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
     ];
@@ -115,7 +116,7 @@ function OrdersPage() {
       { key: 'customerName', label: 'Customer' },
       { key: 'tableNumber', label: 'Table', formatter: (val: number | undefined) => val ? String(val) : 'N/A' },
       { key: 'orderType', label: 'Type', formatter: (val: string) => val === 'DineIn' ? 'Dine In' : val },
-      { key: 'totalAmount', label: 'Total', formatter: (val: number) => `₹${val.toFixed(2)}` },
+      { key: 'totalAmount', label: 'Total', formatter: formatCurrency },
       { key: 'status', label: 'Status' },
       { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
     ];
@@ -324,7 +325,7 @@ function OrdersPage() {
                   <td>{order.tableNumber ?? "—"}</td>
                   <td>{order.customerName}</td>
                   <td>{order.orderType === "DineIn" ? "Dine In" : order.orderType}</td>
-                  <td>₹{order.totalAmount.toFixed(2)}</td>
+                  <td>{formatCurrency(order.totalAmount)}</td>
                   <td><span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
                   <td className="order-actions">
                     <button title="View history" onClick={() => setShowHistory(order.id)}>📜</button>
@@ -429,7 +430,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
                 <article className="menu-product" key={item.id}>
                   <img src={item.imageUrl} alt="" />
                   <strong>{item.name}</strong>
-                  <span>₹{item.price}</span>
+                  <span>{formatCurrency(item.price)}</span>
                   <button type="button" className="add-item-button" onClick={() => add(item)}>＋ Add</button>
                 </article>
               ))}
@@ -441,19 +442,19 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
               <div className="current-item" key={`${item.itemName}-${index}`}>
                 <div>
                   <strong>{item.itemName}</strong>
-                  <small>₹{item.unitPrice} each</small>
+                  <small>{formatCurrency(item.unitPrice)} each</small>
                   <div className="quantity-control">
                     <button type="button" onClick={() => setItems((current) => current.map((x, position) => position === index ? { ...x, quantity: Math.max(1, x.quantity - 1) } : x))}>−</button>
                     <span>{item.quantity}</span>
                     <button type="button" onClick={() => setItems((current) => current.map((x, position) => position === index ? { ...x, quantity: x.quantity + 1 } : x))}>＋</button>
                   </div>
                 </div>
-                <b>₹{(item.unitPrice * item.quantity).toFixed(2)}</b>
+                <b>{formatCurrency(item.unitPrice * item.quantity)}</b>
                 <button type="button" className="remove-item" onClick={() => setItems((current) => current.filter((_, position) => position !== index))}>×</button>
               </div>
             ))}
             <div className="order-total">
-              <strong>Total: ₹{items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0).toFixed(2)}</strong>
+              <strong>Total: {formatCurrency(items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0))}</strong>
             </div>
           </aside>
         </div>

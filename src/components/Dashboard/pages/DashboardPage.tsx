@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
-import { LineChart } from "../../common/AnalyticsChart";
+import RevenueOrdersChart from "../components/RevenueOrdersChart";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
 import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
+import { formatCurrency } from "../../../utils/currency";
 import "../Dashboard.css";
 
 function DashboardPage() {
@@ -154,7 +155,7 @@ function DashboardPage() {
   }
 
   const metrics = data ? [
-    { icon: "₹", tone: "green", label: "Total Revenue", value: `₹${data.totalRevenue.toFixed(2)}`, sub: `₹${data.todayRevenue.toFixed(2)} today` },
+    { icon: "₹", tone: "green", label: "Total Revenue", value: formatCurrency(data.totalRevenue), sub: `${formatCurrency(data.todayRevenue)} today` },
     { icon: "▤", tone: "blue", label: "Total Orders", value: data.totalOrders, sub: `${data.todayOrders} today` },
     { icon: "♟", tone: "orange", label: "Customers", value: data.totalCustomers, sub: "From backend" },
     { icon: "▣", tone: "purple", label: "Active Menu Items", value: data.activeMenuItems, sub: "From backend" },
@@ -208,22 +209,15 @@ function DashboardPage() {
                 <p>Revenue for the last 7 days</p>
               </div>
             </div>
-            <div className="enhanced-chart-container">
-              <LineChart 
-                data={data.days.map(day => day.revenue)}
-                labels={data.days.map(day => day.label)}
-                color="#2d5df6"
-                height={200}
-              />
-            </div>
+            <RevenueOrdersChart days={data.days} />
             <div className="sales-stats">
               <div className="stat-item">
                 <span>Total Revenue</span>
-                <strong>₹{data.totalRevenue.toFixed(2)}</strong>
+                <strong>{formatCurrency(data.totalRevenue)}</strong>
               </div>
               <div className="stat-item">
                 <span>Average Daily</span>
-                <strong>₹{(data.totalRevenue / 7).toFixed(2)}</strong>
+                <strong>{formatCurrency(data.totalRevenue / 7)}</strong>
               </div>
               <div className="stat-item">
                 <span>Best Day</span>
@@ -270,7 +264,7 @@ function DashboardPage() {
                     <strong>{item.name}</strong>
                     <span>{item.quantity} sold</span>
                   </div>
-                  <b>₹{item.revenue.toFixed(0)}</b>
+                  <b>{formatCurrency(item.revenue)}</b>
                 </div>
               )) : <p>No item sales yet.</p>}
             </div>
@@ -289,7 +283,7 @@ function DashboardPage() {
               <div className="performance-card">
                 <span className="performance-icon">📊</span>
                 <div>
-                  <strong>₹{(data.totalRevenue / (data.totalOrders || 1)).toFixed(2)}</strong>
+                  <strong>{formatCurrency(data.totalRevenue / (data.totalOrders || 1))}</strong>
                   <small>Avg Order Value</small>
                 </div>
               </div>
@@ -345,7 +339,7 @@ function DashboardPage() {
                       <td>#{order.id}</td>
                       <td>{order.customerName}</td>
                       <td>{order.itemCount}</td>
-                      <td>₹{order.totalAmount.toFixed(2)}</td>
+                      <td>{formatCurrency(order.totalAmount)}</td>
                       <td><span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
                       <td>{new Date(order.createdAtUtc).toLocaleDateString()}</td>
                     </tr>

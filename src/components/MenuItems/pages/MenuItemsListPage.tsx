@@ -11,6 +11,7 @@ import { menuItemsApi, type MenuItemApi, type MenuItemSummary } from "../../../a
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import { useToast } from "../../common/Toast";
+import { formatCurrency } from "../../../utils/currency";
 
 function MenuItemsListPage() {
   const { showToast } = useToast();
@@ -298,7 +299,7 @@ function MenuItemsListPage() {
                       {item.category}
                     </span>
                   </td>
-                  <td>₹{item.price}</td>
+                  <td>{formatCurrency(item.price)}</td>
                   <td>
                     <span
                       className={`item-pill dietary-pill ${item.dietary === "Veg" ? "veg" : "non-veg"}`}

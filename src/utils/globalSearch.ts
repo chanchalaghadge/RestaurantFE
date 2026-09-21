@@ -2,6 +2,7 @@
  * Global search utilities
  * Provides cross-component search functionality
  */
+import { formatCurrency } from './currency';
 
 export interface SearchResult {
   id: string;
@@ -69,7 +70,7 @@ export function searchAcrossSources(
           id: String(item.id),
           type: 'menuItem',
           title: item.name,
-          subtitle: `${item.category} • ₹${item.price}`,
+          subtitle: `${item.category} • ${formatCurrency(item.price)}`,
           url: `/menu/${item.id}/edit`,
           icon: '🍽'
         });
@@ -86,7 +87,7 @@ export function searchAcrossSources(
           id: String(order.id),
           type: 'order',
           title: `Order #${order.id}`,
-          subtitle: `${order.customerName} • ₹${order.totalAmount.toFixed(2)}`,
+          subtitle: `${order.customerName} • ${formatCurrency(order.totalAmount)}`,
           url: `/orders`,
           icon: '▤'
         });
