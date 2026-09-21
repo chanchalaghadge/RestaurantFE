@@ -77,11 +77,11 @@ function AddMenuItemPage() {
     <form className="menu-item-form" onSubmit={submit}>
       <div className="menu-item-top-grid">
         <section className="menu-panel basic-panel"><h2>Basic Information</h2>
-          <label>Item Code <b>*</b><input required value={form.code} onChange={(event) => update("code", event.target.value)} /></label>
-          <label>Item Name <b>*</b><input required value={form.name} onChange={(event) => update("name", event.target.value)} /></label>
-          <label>Category <b>*</b><select required value={form.categoryId} onChange={(event) => update("categoryId", Number(event.target.value))}>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-          <label className="wide-field">Description <b>*</b><textarea required value={form.description} onChange={(event) => update("description", event.target.value)} /></label>
-          <label>Price <b>*</b><input required type="number" min="0" step="0.01" value={form.price} onChange={(event) => update("price", Number(event.target.value))} /></label>
+          <label><span className="field-label">Item Code <b>*</b></span><input required value={form.code} onChange={(event) => update("code", event.target.value)} /></label>
+          <label><span className="field-label">Item Name <b>*</b></span><input required value={form.name} onChange={(event) => update("name", event.target.value)} /></label>
+          <label><span className="field-label">Category <b>*</b></span><select required value={form.categoryId} onChange={(event) => update("categoryId", Number(event.target.value))}>{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+          <label className="wide-field"><span className="field-label">Description <b>*</b></span><textarea required value={form.description} onChange={(event) => update("description", event.target.value)} /></label>
+          <label><span className="field-label">Price <b>*</b></span><input required type="number" min="0" step="0.01" value={form.price} onChange={(event) => update("price", Number(event.target.value))} /></label>
           <div className="status-field"><span>Status <b>*</b></span><div className="status-toggle"><button type="button" className={form.status === "Active" ? "selected" : ""} onClick={() => update("status", "Active")}>Active</button><button type="button" className={form.status === "Inactive" ? "inactive-selected" : ""} onClick={() => update("status", "Inactive")}>Inactive</button></div></div>
           <label>Dietary Type<select value={form.dietaryType} onChange={(event) => update("dietaryType", event.target.value as MenuItemUpsert["dietaryType"])}><option>Veg</option><option>Non-Veg</option></select></label>
         </section>
