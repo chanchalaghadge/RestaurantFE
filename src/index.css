@@ -11,7 +11,7 @@ body,
   min-height: 100%;
 }
 
-body { font-family: "Segoe UI Variable", "Segoe UI", Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 1.45; background: #f6f8fc; color: #27364d; }
+body { font-family: "Lato", "Segoe UI Variable", "Segoe UI", Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 1.45; background: #f6f8fc; color: #27364d; }
 
 button,
 input,
@@ -23,6 +23,12 @@ h2,
 h3,
 strong,
 b { font-weight: 700; }
+
+/* Lato font weights */
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
 
 /* Keep data-heavy screens readable without changing their responsive layouts. */
 .main-content { font-size: 14px; }
