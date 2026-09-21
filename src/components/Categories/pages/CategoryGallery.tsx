@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import CategoryHeader from "../components/CategoryHeader";
 import { categories } from "../data/category.data";
+import "../Categories.css";
 
 function CategoryGallery() {
   return (

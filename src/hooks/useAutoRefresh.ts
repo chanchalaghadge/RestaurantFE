@@ -34,10 +34,7 @@ export function useAutoRefresh({ interval = 30000, enabled = true, onRefresh }: 
       return;
     }
 
-    // Initial refresh
-    refresh();
-
-    // Set up interval
+    // Set up interval (don't call refresh immediately - let the component handle initial load)
     intervalRef.current = window.setInterval(() => {
       refresh();
     }, interval);

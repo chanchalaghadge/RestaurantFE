@@ -58,47 +58,49 @@ export default function OrderHistoryModal({ orderId, onClose }: OrderHistoryModa
   }, 500);
 
   const modalContent = (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content order-history-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+    <div className="modal-backdrop animated-backdrop" onClick={onClose}>
+      <div className="modal-content order-history-modal animated-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header-compact">
           <h2>Order #${orderId} History</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <button className="modal-close-compact" onClick={onClose}>×</button>
         </div>
 
         {loading ? (
-          <div className="modal-loading">Loading history...</div>
+          <div className="modal-loading-compact">Loading history...</div>
         ) : history.length === 0 ? (
-          <div className="modal-empty">No history available</div>
+          <div className="modal-empty-compact">No history available</div>
         ) : (
-          <div className="history-list">
+          <div className="history-list-compact">
             {history.map((entry) => (
-              <div key={entry.id} className="history-item">
-                <div className="history-header">
-                  <span className="history-action">{entry.action}</span>
-                  <span className="history-time">
+              <div key={entry.id} className="history-item-compact">
+                <div className="history-header-compact">
+                  <span className="history-action-compact">{entry.action}</span>
+                  <span className="history-time-compact">
                     {new Date(entry.changedAt).toLocaleString()}
                   </span>
                 </div>
-                <div className="history-details">
-                  <div className="history-change">
-                    <span className="change-label">Previous:</span>
-                    <span className="change-value previous">{entry.previousValue || '—'}</span>
-                  </div>
-                  <div className="history-change">
-                    <span className="change-label">New:</span>
-                    <span className="change-value new">{entry.newValue}</span>
+                <div className="history-details-compact">
+                  {entry.previousValue && (
+                    <div className="history-change-compact">
+                      <span className="change-label-compact">Previous:</span>
+                      <span className="change-value-compact previous">{entry.previousValue}</span>
+                    </div>
+                  )}
+                  <div className="history-change-compact">
+                    <span className="change-label-compact">New:</span>
+                    <span className="change-value-compact new">{entry.newValue}</span>
                   </div>
                 </div>
-                <div className="history-footer">
-                  <span className="history-user">Changed by: {entry.changedBy}</span>
+                <div className="history-footer-compact">
+                  <span className="history-user-compact">Changed by: {entry.changedBy}</span>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <div className="modal-footer">
-          <button className="secondary-button" onClick={onClose}>Close</button>
+        <div className="modal-footer-compact">
+          <button className="secondary-button-compact" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>

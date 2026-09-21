@@ -6,13 +6,13 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
 import OrderHistoryModal from "../common/OrderHistoryModal";
 import ErrorAlert from "../common/ErrorAlert";
-import DateRangePicker from "../common/DateRangePicker";
 import { menuItemsApi, type MenuItemApi } from "../../api/menu-items.api";
 import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/orders.api";
 import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import { exportToPdf } from "../../utils/pdfExport";
 import { useToast } from "../common/Toast";
+import { useErrorHandler } from "../../utils/errorHandler";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
@@ -20,6 +20,7 @@ type OrderType = OrderApi["orderType"];
 
 function OrdersPage() {
   const { showToast } = useToast();
+  const { handleError, createErrorContext } = useErrorHandler();
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
   const [deleting, setDeleting] = useState<OrderApi | null>(null);
@@ -40,6 +41,8 @@ function OrdersPage() {
       setLoading(true);
       setOrders(await ordersApi.list());
     } catch (e) {
+      const errorContext = createErrorContext('OrdersPage', 'loadOrders');
+      handleError(e instanceof Error ? e : new Error('Unable to load orders.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to load orders.");
     } finally {
       setLoading(false);
@@ -70,23 +73,25 @@ function OrdersPage() {
       await ordersApi.remove(deleting.id);
       setDeleting(null);
       setIsDeleting(false);
-      showToast('Order deleted successfully', 'success');
+      showToast('Order deleted successfully', 'success', 2000);
       await load();
     } catch (e) {
       setIsDeleting(false);
+      const errorContext = createErrorContext('OrdersPage', 'deleteOrder', { orderId: deleting.id });
+      handleError(e instanceof Error ? e : new Error('Unable to delete order.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to delete order.");
-      showToast('Failed to delete order', 'error');
     }
   };
 
   const pay = async (order: OrderApi) => {
     try {
       await ordersApi.completePayment(order.id);
-      showToast('Payment completed successfully', 'success');
+      showToast('Payment completed successfully', 'success', 2000);
       await load();
     } catch (e) {
+      const errorContext = createErrorContext('OrdersPage', 'completePayment', { orderId: order.id });
+      handleError(e instanceof Error ? e : new Error('Unable to complete payment.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to complete payment.");
-      showToast('Failed to complete payment', 'error');
     }
   };
 
@@ -197,50 +202,81 @@ function OrdersPage() {
         </div>
       </div>
       {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
-      <div className="order-tabs">
+      <div className="order-tabs-compact">
         {statuses.map((status) => (
-          <button key={status} className={statusFilter === status ? "active" : ""} onClick={() => setStatusFilter(status)}>
-            {status} <span>({status === "All" ? orders.length : orders.filter((order) => order.status === status).length})</span>
+          <button key={status} className={`tab-compact ${statusFilter === status ? "active" : ""}`} onClick={() => setStatusFilter(status)}>
+            {status} <span className="count-badge">{status === "All" ? orders.length : orders.filter((order) => order.status === status).length}</span>
           </button>
         ))}
       </div>
       <div className="orders-card">
-        <div className="order-tools">
-          <label>⌕ <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by order #, customer, table..." /></label>
-          <select aria-label="Order type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as "All" | OrderType)}>
-            <option value="All">All Order Types</option>
-            <option value="DineIn">Dine In</option>
-            <option value="Takeaway">Takeaway</option>
-            <option value="Delivery">Delivery</option>
-          </select>
-          <DateRangePicker
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            onStartDateChange={(date) => setDateRange(prev => ({ ...prev, startDate: date }))}
-            onEndDateChange={(date) => setDateRange(prev => ({ ...prev, endDate: date }))}
-            label="Date Range"
-          />
-          <label className="amount-range">
-            <span>Amount Range</span>
-            <div className="amount-range-inputs">
+        <div className="order-tools-compact">
+          <div className="filter-row">
+            <div className="search-compact">
+              <span className="search-icon">🔍</span>
+              <input 
+                value={search} 
+                onChange={(event) => setSearch(event.target.value)} 
+                placeholder="Search orders..." 
+                className="search-input-compact"
+              />
+            </div>
+            <select 
+              className="select-compact" 
+              aria-label="Order type" 
+              value={typeFilter} 
+              onChange={(event) => setTypeFilter(event.target.value as "All" | OrderType)}
+            >
+              <option value="All">All Types</option>
+              <option value="DineIn">Dine In</option>
+              <option value="Takeaway">Takeaway</option>
+              <option value="Delivery">Delivery</option>
+            </select>
+            <div className="date-range-compact">
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                className="date-input-compact"
+                aria-label="Start date"
+              />
+              <span className="date-separator">→</span>
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                className="date-input-compact"
+                aria-label="End date"
+              />
+            </div>
+            <div className="amount-range-compact">
               <input
                 type="number"
-                placeholder="Min"
+                placeholder="₹ Min"
                 value={amountRange.min}
                 onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
+                className="amount-input-compact"
                 aria-label="Minimum amount"
               />
-              <span>to</span>
+              <span className="amount-separator">-</span>
               <input
                 type="number"
-                placeholder="Max"
+                placeholder="₹ Max"
                 value={amountRange.max}
                 onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
+                className="amount-input-compact"
                 aria-label="Maximum amount"
               />
             </div>
-          </label>
-          <button type="button" onClick={() => { setSearch(""); setStatusFilter("All"); setTypeFilter("All"); setDateRange({ startDate: '', endDate: '' }); setAmountRange({ min: '', max: '' }); }}>↻ Reset</button>
+            <button 
+              type="button" 
+              className="reset-btn-compact"
+              onClick={() => { setSearch(""); setStatusFilter("All"); setTypeFilter("All"); setDateRange({ startDate: '', endDate: '' }); setAmountRange({ min: '', max: '' }); }}
+              title="Reset filters"
+            >
+              ↻
+            </button>
+          </div>
         </div>
         <div className="order-table-wrap">
           <table className="order-table">

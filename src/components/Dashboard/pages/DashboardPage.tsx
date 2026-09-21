@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
@@ -6,31 +6,46 @@ import Breadcrumb from "../../common/Breadcrumb";
 import { LineChart } from "../../common/AnalyticsChart";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
+import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
 import "../Dashboard.css";
 
 function DashboardPage() {
   const { showToast } = useToast();
+  const { handleError, createErrorContext } = useErrorHandler();
   const [data, setData] = useState<DashboardApi | null>(null);
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isLoadingRef = useRef(false);
+  const refreshTimeoutRef = useRef<number | null>(null);
 
-  const load = () => dashboardApi.get()
-    .then(setData)
-    .catch((reason: unknown) => {
-      setError(reason instanceof Error ? reason.message : "Unable to load dashboard.");
-      showToast('Failed to load dashboard data', 'error');
-    })
-    .finally(() => setLoading(false));
+  const load = () => {
+    // Prevent concurrent API calls
+    if (isLoadingRef.current) return;
+    
+    isLoadingRef.current = true;
+    return dashboardApi.get()
+      .then(setData)
+      .catch((reason: unknown) => {
+        const errorContext = createErrorContext('DashboardPage', 'loadDashboard');
+        handleError(reason instanceof Error ? reason : new Error('Unable to load dashboard.'), errorContext);
+        setError(reason instanceof Error ? reason.message : "Unable to load dashboard.");
+      })
+      .finally(() => {
+        isLoadingRef.current = false;
+        setLoading(false);
+      });
+  };
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 60 seconds (increased from 30 to reduce API calls)
   const { refresh, isRefreshing } = useAutoRefresh({
-    interval: 30000,
+    interval: 60000,
     enabled: true,
     onRefresh: () => {
       if (data) {
-        return dashboardApi.get().then(setData);
+        console.log('Auto-refreshing dashboard');
+        return load();
       }
     }
   });
@@ -38,42 +53,73 @@ function DashboardPage() {
   // WebSocket integration for real-time updates
   useEffect(() => {
     // Connect to WebSocket
-    webSocketService.connect();
+    webSocketService.connect().catch((error) => {
+      const errorContext = createErrorContext('DashboardPage', 'connectWebSocket');
+      handleError(error, errorContext);
+    });
 
     // Subscribe to dashboard updates
     const unsubscribe = webSocketService.on('dashboard:updated', (dashboardData) => {
       console.log('Dashboard updated via WebSocket:', dashboardData);
       setData(dashboardData as DashboardApi);
-      showToast('Dashboard updated in real-time', 'success');
+      showToast('Dashboard updated in real-time', 'success', 2000);
     });
+
+    // Debounced refresh for order updates
+    const debouncedRefresh = () => {
+      if (refreshTimeoutRef.current !== null) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+      refreshTimeoutRef.current = window.setTimeout(() => {
+        console.log('Refreshing dashboard after order event');
+        load();
+      }, 2000); // Wait 2 seconds before refreshing
+    };
 
     // Subscribe to order updates that affect dashboard
     const unsubscribeOrders = webSocketService.on('order:created', () => {
-      console.log('New order created, refreshing dashboard');
-      load();
+      console.log('New order created, scheduling dashboard refresh');
+      debouncedRefresh();
     });
 
     const unsubscribeOrderStatus = webSocketService.on('order:status_changed', () => {
-      console.log('Order status changed, refreshing dashboard');
-      load();
+      console.log('Order status changed, scheduling dashboard refresh');
+      debouncedRefresh();
     });
 
     return () => {
       unsubscribe();
       unsubscribeOrders();
       unsubscribeOrderStatus();
+      if (refreshTimeoutRef.current !== null) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
     };
-  }, []);
+  }, [createErrorContext, handleError]);
 
   useEffect(() => { void load(); }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current !== null) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const seed = async () => {
     try {
       setSeeding(true);
       setError("");
       await dashboardApi.seed();
+      showToast('Sample data created successfully', 'success');
+      // Reset loading state before calling load
+      setLoading(true);
       await load();
     } catch (reason) {
+      const errorContext = createErrorContext('DashboardPage', 'seedData');
+      handleError(reason instanceof Error ? reason : new Error('Unable to create sample data.'), errorContext);
       setError(reason instanceof Error ? reason.message : "Unable to create sample data.");
     } finally {
       setSeeding(false);
@@ -136,10 +182,11 @@ function DashboardPage() {
           className="secondary-button refresh-button" 
           onClick={() => {
             refresh();
-            showToast('Dashboard refreshed', 'success');
+            showToast('Dashboard refreshed', 'success', 2000);
           }}
           disabled={isRefreshing}
           title="Refresh dashboard data"
+          aria-label="Refresh dashboard"
         >
           {isRefreshing ? '⏳' : '🔄'}
         </button>

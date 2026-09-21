@@ -1,6 +1,7 @@
 import CategoryHeader from "../components/CategoryHeader";
 import CategoryForm from "../components/CategoryForm";
 import Breadcrumb from "../../common/Breadcrumb";
+import "../Categories.css";
 
 function CategoryCreatePage() {
   return (

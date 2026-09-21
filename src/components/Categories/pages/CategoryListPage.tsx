@@ -11,6 +11,7 @@ import { useTableSort } from "../../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
+import "../Categories.css";
 
 function CategoryListPage() {
   const { showToast } = useToast();

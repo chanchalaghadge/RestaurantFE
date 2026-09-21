@@ -20,6 +20,8 @@ function MenuItemsListPage() {
   const [categories, setCategories] = useState<CategoryApi[]>([]);
   const [dietary, setDietary] = useState("All Dietary");
   const [status, setStatus] = useState("All Status");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -50,6 +52,11 @@ function MenuItemsListPage() {
       ),
     [items, search, dietary, status],
   );
+  const pageCount = Math.max(1, Math.ceil(visibleItems.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedItems = visibleItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  useEffect(() => { setPage(1); }, [search, categoryId, dietary, status, pageSize]);
 
   if (loading) {
     return (
@@ -89,7 +96,7 @@ function MenuItemsListPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(visibleItems.map(item => item.id)));
+      setSelectedIds(new Set(pagedItems.map(item => item.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -250,7 +257,7 @@ function MenuItemsListPage() {
                 <th className="checkbox-column">
                   <input
                     type="checkbox"
-                    checked={visibleItems.length > 0 && selectedIds.size === visibleItems.length}
+                    checked={pagedItems.length > 0 && pagedItems.every((item) => selectedIds.has(item.id))}
                     onChange={(e) => handleSelectAll(e.target.checked)}
                     aria-label="Select all items"
                   />
@@ -267,7 +274,7 @@ function MenuItemsListPage() {
               </tr>
             </thead>
             <tbody>
-              {visibleItems.length ? visibleItems.map((item) => (
+              {pagedItems.length ? pagedItems.map((item) => (
                 <tr key={item.id}>
                   <td className="checkbox-column">
                     <input
@@ -333,17 +340,17 @@ function MenuItemsListPage() {
           </table>
         </div>
         <div className="items-footer">
-          <span>Showing {visibleItems.length} of {summary.totalItems} items</span>
-          <div>
-            <button>‹</button>
-            <button className="current">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-            <button>5</button>
-            <button>›</button>
-            <select>
-              <option>10 / page</option>
+          <span>Showing {visibleItems.length ? (currentPage - 1) * pageSize + 1 : 0} to {Math.min(currentPage * pageSize, visibleItems.length)} of {visibleItems.length} items</span>
+          <div className="pagination-controls">
+            <button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} aria-label="Previous page">‹</button>
+            {Array.from({ length: Math.min(pageCount, 5) }, (_, index) => index + 1).map((pageNumber) => (
+              <button key={pageNumber} className={pageNumber === currentPage ? "current" : ""} onClick={() => setPage(pageNumber)}>{pageNumber}</button>
+            ))}
+            <button onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} aria-label="Next page">›</button>
+            <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} aria-label="Items per page">
+              <option value={10}>10 / page</option>
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
             </select>
           </div>
         </div>
