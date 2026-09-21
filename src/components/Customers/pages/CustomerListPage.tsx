@@ -10,7 +10,6 @@ import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { exportToPdf } from "../../../utils/pdfExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
-import DateRangePicker from "../../common/DateRangePicker";
 import { formatDate } from "../../../utils/date";
 import "../Customers.css";
 
@@ -25,8 +24,6 @@ function CustomerListPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
-  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-  const [ordersRange, setOrdersRange] = useState({ min: '', max: '' });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   
@@ -46,12 +43,7 @@ function CustomerListPage() {
     const matchesSearch = `${customer.fullName} ${customer.phone} ${customer.email}`.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = status === "All Status" || customer.status === status;
     const matchesTier = tier === "All Customers" || customer.tier === tier;
-    const matchesDateRange = (!dateRange.startDate || !dateRange.endDate) ||
-      (customer.lastOrderAtUtc && new Date(customer.lastOrderAtUtc) >= new Date(dateRange.startDate) && new Date(customer.lastOrderAtUtc) <= new Date(dateRange.endDate));
-    const matchesOrdersRange = (!ordersRange.min || !ordersRange.max) ||
-      (customer.totalOrders >= Number(ordersRange.min) && customer.totalOrders <= Number(ordersRange.max));
-
-    return matchesSearch && matchesStatus && matchesTier && matchesDateRange && matchesOrdersRange;
+    return matchesSearch && matchesStatus && matchesTier;
   });
   
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(filtered);
@@ -179,34 +171,7 @@ function CustomerListPage() {
             <option>VIP</option>
             <option>New</option>
           </select>
-          <DateRangePicker
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            onStartDateChange={(date) => setDateRange(prev => ({ ...prev, startDate: date }))}
-            onEndDateChange={(date) => setDateRange(prev => ({ ...prev, endDate: date }))}
-            label="Last Order Date"
-          />
-          <label className="amount-range">
-            <span>Total Orders</span>
-            <div className="amount-range-inputs">
-              <input
-                type="number"
-                placeholder="Min"
-                value={ordersRange.min}
-                onChange={(e) => setOrdersRange(prev => ({ ...prev, min: e.target.value }))}
-                aria-label="Minimum orders"
-              />
-              <span>to</span>
-              <input
-                type="number"
-                placeholder="Max"
-                value={ordersRange.max}
-                onChange={(e) => setOrdersRange(prev => ({ ...prev, max: e.target.value }))}
-                aria-label="Maximum orders"
-              />
-            </div>
-          </label>
-          <button type="button" onClick={() => { setSearch(""); setStatus("All Status"); setTier("All Customers"); setDateRange({ startDate: '', endDate: '' }); setOrdersRange({ min: '', max: '' }); }}>
+          <button type="button" onClick={() => { setSearch(""); setStatus("All Status"); setTier("All Customers"); }}>
             ↻ Reset
           </button>
           {selectedIds.size > 0 && (

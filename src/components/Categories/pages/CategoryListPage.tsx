@@ -6,7 +6,6 @@ import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import LoadingSpinner from "../../common/LoadingSpinner";
-import Breadcrumb from "../../common/Breadcrumb";
 import { useTableSort } from "../../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { useToast } from "../../common/Toast";
@@ -90,7 +89,6 @@ function CategoryListPage() {
   if (loading) {
     return (
       <section className="categories-page category-list-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Categories' }]} />
         <CategoryHeader title="Manage Categories" description="Organize your menu with categories." action={<Link className="primary-button" to="/categories/new"><span>+</span> Add New Category</Link>} />
         <LoadingSpinner text="Loading categories..." fullScreen />
       </section>
@@ -99,8 +97,7 @@ function CategoryListPage() {
 
   return (
     <section className="categories-page category-list-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Categories' }]} />
-      <CategoryHeader 
+      <CategoryHeader
         title="Manage Categories" 
         description="Organize your menu with categories." 
         action={
