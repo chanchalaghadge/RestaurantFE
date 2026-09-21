@@ -470,7 +470,7 @@
   margin: 0 auto;
 }
 
-.customer-heading-row {
+.customer-detail-topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -478,21 +478,27 @@
   margin-bottom: 18px;
 }
 
-.customer-heading-row h1 {
-  margin: 8px 0 4px;
-  color: #172640;
-  font-size: 25px;
+.customer-list-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
-.customer-heading-row p {
-  margin: 0;
-  color: #73829a;
-  font-size: 11px;
-}
+.customer-list-topbar .breadcrumb { margin-bottom: 0; }
+
+.customer-detail-topbar .breadcrumb { margin-bottom: 0; }
 
 .detail-actions {
   display: flex;
   gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.detail-actions .secondary-button,
+.detail-actions .primary-button {
+  white-space: nowrap;
 }
 
 .customer-detail-shell {
@@ -873,6 +879,18 @@
   padding: 20px;
 }
 
+.customer-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.customer-form-heading .secondary-button {
+  white-space: nowrap;
+}
+
 @media (max-width: 900px) {
   .customer-stats,
   .customer-profile-grid,
@@ -888,8 +906,14 @@
 }
 
 @media (max-width: 680px) {
+  .customer-form-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .customer-page-header,
-  .customer-heading-row,
+  .customer-list-topbar,
+  .customer-detail-topbar,
   .customers-footer,
   .detail-actions {
     flex-direction: column;
@@ -996,7 +1020,7 @@
 
 /* The customer page controls stay visible; only a long customer list scrolls. */
 .customer-list-page { height: 100%; min-height: 0; display: flex; flex-direction: column; }
-.customer-list-page .customer-page-header { flex: 0 0 auto; }
+.customer-list-page .customer-list-topbar { flex: 0 0 auto; }
 .customer-list-page .customer-stats { flex: 0 0 auto; }
 .customer-list-page .customer-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .customer-list-page .customer-filters { flex: 0 0 auto; }

@@ -117,6 +117,69 @@
   outline: none;
 }
 
+/* Shared by single and bulk delete dialogs. */
+[data-theme="dark"] .confirm-delete-backdrop {
+  background: rgba(4, 7, 16, 0.72);
+}
+
+[data-theme="dark"] .confirm-delete-modal {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .confirm-delete-close {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .confirm-delete-close:hover,
+[data-theme="dark"] .confirm-delete-close:focus-visible {
+  background: var(--bg-tertiary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .confirm-delete-icon {
+  border-color: rgba(239, 68, 68, 0.16);
+  background: rgba(239, 68, 68, 0.24);
+  color: #ff9ca8;
+}
+
+[data-theme="dark"] .confirm-delete-modal h2,
+[data-theme="dark"] .confirm-delete-modal p strong {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .confirm-delete-modal p {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .confirm-delete-modal small {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .confirm-delete-cancel {
+  border-color: var(--border-color);
+  background: var(--bg-tertiary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .confirm-delete-cancel:hover,
+[data-theme="dark"] .confirm-delete-cancel:focus-visible {
+  background: var(--border-color);
+  outline: none;
+}
+
+[data-theme="dark"] .confirm-delete-submit {
+  border-color: #e0525b;
+  background: #e0525b;
+}
+
+[data-theme="dark"] .confirm-delete-submit:hover,
+[data-theme="dark"] .confirm-delete-submit:focus-visible {
+  border-color: #f06b74;
+  background: #f06b74;
+}
+
 @keyframes confirm-delete-enter {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }

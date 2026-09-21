@@ -594,6 +594,82 @@
 [data-theme="dark"] .cart-item-price,
 [data-theme="dark"] .order-totals .order-total-line { color: #ffffff !important; }
 
+/* Customer create/edit form: keep every panel and field readable in dark mode. */
+[data-theme="dark"] .customer-detail-box {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 2px 7px var(--shadow);
+}
+
+[data-theme="dark"] .customer-profile-text h2,
+[data-theme="dark"] .field-group span {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .field-group {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .field-group input,
+[data-theme="dark"] .field-group select,
+[data-theme="dark"] .field-group textarea {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .field-group input::placeholder,
+[data-theme="dark"] .field-group textarea::placeholder { color: var(--text-muted) !important; }
+
+/* Customer detail screen: match profile, metrics, tables, and preferences to the dark theme. */
+[data-theme="dark"] .customer-profile-summary-panel,
+[data-theme="dark"] .detail-panel,
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .customer-profile-grid div {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 2px 7px var(--shadow);
+}
+
+[data-theme="dark"] .customer-profile-grid div {
+  background: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .customer-profile-text h2,
+[data-theme="dark"] .customer-profile-grid strong,
+[data-theme="dark"] .summary-card span,
+[data-theme="dark"] .detail-panel-header h3,
+[data-theme="dark"] .customer-orders-table td,
+[data-theme="dark"] .preference-list p {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .customer-profile-text p,
+[data-theme="dark"] .customer-meta-list,
+[data-theme="dark"] .customer-profile-grid small,
+[data-theme="dark"] .summary-card small,
+[data-theme="dark"] .preference-list label {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .customer-orders-table th {
+  background: var(--bg-tertiary) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .customer-orders-table th,
+[data-theme="dark"] .customer-orders-table td,
+[data-theme="dark"] .preference-list div,
+[data-theme="dark"] .detail-panel-header {
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .detail-panel-header button {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: #ffffff !important;
+}
+
 /* Table availability and destructive actions need dark-mode contrast as well. */
 [data-theme="dark"] .restaurant-table em {
   background: rgba(34, 197, 94, .18) !important;

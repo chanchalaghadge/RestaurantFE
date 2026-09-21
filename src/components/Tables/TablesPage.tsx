@@ -65,13 +65,8 @@ function TablesPage() {
   if (loading) {
     return (
       <section className="tables-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
-        <div className="tables-heading">
-          <div>
-            <p className="eyebrow">Floor management</p>
-            <h1>Tables</h1>
-            <p>See table availability and current orders at a glance.</p>
-          </div>
+        <div className="tables-topbar">
+          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
           <button className="primary-button" onClick={() => setEditing({})}>＋ Add Table</button>
         </div>
         <LoadingSpinner text="Loading tables..." fullScreen />
@@ -81,13 +76,8 @@ function TablesPage() {
 
   return (
     <section className="tables-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
-      <div className="tables-heading">
-        <div>
-          <p className="eyebrow">Floor management</p>
-          <h1>Tables</h1>
-          <p>See table availability and current orders at a glance.</p>
-        </div>
+      <div className="tables-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={tables.length === 0}>
             📥 Export CSV

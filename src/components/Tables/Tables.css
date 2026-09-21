@@ -1,4 +1,6 @@
 .tables-page { padding: 18px; color: #17304d; }
+.tables-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.tables-topbar .breadcrumb { margin-bottom: 0; }
 .tables-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 22px; }
 .tables-heading h1 { font-size: 25px; margin: 2px 0 4px; }
 .tables-heading p:not(.eyebrow), .table-detail p { color: #718197; font-size: 12px; }
