@@ -125,7 +125,7 @@ export class ErrorHandler {
     if (error instanceof AppError) {
       this.handleAppError(error, showToast);
     } else if (error instanceof TypeError && error.message.includes('fetch')) {
-      this.handleNetworkError(error, showToast, context);
+      this.handleNetworkError(showToast, context);
     } else {
       this.handleGenericError(error, showToast, context);
     }
@@ -142,7 +142,7 @@ export class ErrorHandler {
     }
   }
 
-  private handleNetworkError(error: Error, showToast: ReturnType<typeof useToast>['showToast'], context?: ErrorContext): void {
+  private handleNetworkError(showToast: ReturnType<typeof useToast>['showToast'], context?: ErrorContext): void {
     const networkError = new NetworkError(
       'Network error. Please check your connection and try again.',
       context

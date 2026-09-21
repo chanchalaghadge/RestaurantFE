@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { LoginRequest } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
-import { validateEmail } from "../../../utils/validation";
 import { sanitizeInput } from "../../../utils/security";
 import { useErrorHandler } from "../../../utils/errorHandler";
 import { useToast } from "../../common/Toast";

@@ -18,7 +18,7 @@ class WebSocketService {
   private reconnectDelay = 3000; // 3 seconds
   private eventHandlers: Map<WebSocketEventType, Set<WebSocketEventHandler>> = new Map();
   private isConnecting = false;
-  private pingInterval: NodeJS.Timeout | null = null;
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
 
   async connect(): Promise<void> {
     if (this.isConnecting || (this.ws?.readyState === WebSocket.OPEN)) {

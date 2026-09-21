@@ -200,10 +200,18 @@ export function useFieldValidation() {
   ) => {
     const result = validateField(value, rules, label || fieldName);
     
-    setErrors(prev => ({
-      ...prev,
-      [fieldName]: result.isValid ? undefined : result.error
-    }));
+    setErrors(prev => {
+      if (result.isValid) {
+        const updatedErrors = { ...prev };
+        delete updatedErrors[fieldName];
+        return updatedErrors;
+      }
+
+      return {
+        ...prev,
+        [fieldName]: result.error || 'Invalid value'
+      };
+    });
 
     return result.isValid;
   };
