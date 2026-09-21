@@ -621,6 +621,32 @@
 [data-theme="dark"] .field-group input::placeholder,
 [data-theme="dark"] .field-group textarea::placeholder { color: var(--text-muted) !important; }
 
+[data-theme="dark"] .india-phone-input {
+  border-color: var(--border-color);
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .india-phone-input > span {
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .india-phone-input input {
+  background: var(--bg-tertiary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .user-form-actions button[type="button"] {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .user-form-actions button[type="button"]:hover {
+  background: var(--border-color);
+}
+
 /* Customer detail screen: match profile, metrics, tables, and preferences to the dark theme. */
 [data-theme="dark"] .customer-profile-summary-panel,
 [data-theme="dark"] .detail-panel,
