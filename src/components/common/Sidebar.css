@@ -26,7 +26,7 @@
   padding-bottom: 13px;
 }
 
-.sidebar-menu a { min-height: 37px; padding: 9px 9px; color: #e5ebf5; text-decoration: none; display: flex; align-items: center; gap: 11px; border-radius: 6px; font-size: 12px; }.sidebar-menu a > span { flex: 1; }.sidebar-menu a.active { color: #fff; background: linear-gradient(135deg, #195af4, #4545eb); box-shadow: 0 7px 15px #245cec55; }.sidebar-menu a:hover { background: #17304b; }.sidebar-menu a.active:hover { background: #3156ed; }.sidebar-menu b { font-size: 11px; }.sidebar-menu i { font-style: normal; display: grid; place-items: center; width: 17px; height: 17px; background: #fb4862; border-radius: 50%; color: white; font-size: 9px; }
+.sidebar-menu a, .sidebar-menu .menu-toggle { min-height: 37px; padding: 9px 9px; color: #e5ebf5; text-decoration: none; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 6px; background: transparent; font: inherit; font-size: 12px; text-align: left; cursor: pointer; }.sidebar-menu a > span, .sidebar-menu .menu-toggle > span { flex: 1; }.sidebar-menu a.active, .sidebar-menu .menu-toggle.active { color: #fff; background: linear-gradient(135deg, #195af4, #4545eb); box-shadow: 0 7px 15px #245cec55; }.sidebar-menu a:hover, .sidebar-menu .menu-toggle:hover { background: #17304b; }.sidebar-menu a.active:hover, .sidebar-menu .menu-toggle.active:hover { background: #3156ed; }.sidebar-menu b { font-size: 11px; }.sidebar-menu i { font-style: normal; display: grid; place-items: center; width: 17px; height: 17px; background: #fb4862; border-radius: 50%; color: white; font-size: 9px; }
 
 .menu-group {
   display: flex;
@@ -53,9 +53,9 @@
 }
 
 .submenu a { min-height: 29px; padding: 7px 10px; font-size: 11px; }
-.submenu a.active { background: transparent; color: #fff; box-shadow: none; }
+.submenu a.active { color: #fff; background: rgba(69, 69, 235, .32); box-shadow: inset 2px 0 #8daaff; }
 
-.sidebar-menu a:hover {
+.sidebar-menu a:hover, .sidebar-menu .menu-toggle:hover {
   background: #444;
 }
 

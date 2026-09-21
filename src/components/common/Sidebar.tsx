@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
 function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(true);
+  const location = useLocation();
+  const menuIsActive = location.pathname.startsWith("/menu");
 
-  const handleMenuToggle = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
+  const handleMenuToggle = () => {
     setMenuOpen((current) => !current);
   };
 
@@ -26,23 +27,26 @@ function Sidebar() {
             ⌂ <span>Dashboard</span>
           </NavLink>
           <div className={`menu-group ${menuOpen ? "open" : "closed"}`}>
-            <NavLink 
-              to="/categories" 
+            <button
+              type="button"
+              className={`menu-toggle${menuIsActive ? " active" : ""}`}
               onClick={handleMenuToggle}
               aria-expanded={menuOpen}
               aria-controls="menu-submenu"
             >
               ▣ <span>Menu</span>
               <b className="menu-caret" aria-hidden="true">⌃</b>
-            </NavLink>
+            </button>
             {menuOpen && (
               <div className="submenu" id="menu-submenu">
-                <NavLink to="/menu" aria-label="View all menu items">All Items</NavLink>
-                <NavLink to="/categories" aria-label="View menu categories">Categories</NavLink>
+                <NavLink to="/menu" end aria-label="View all menu items">All Items</NavLink>
                 <NavLink to="/menu/add" aria-label="Add new menu item">Add Menu Item</NavLink>
               </div>
             )}
           </div>
+          <NavLink to="/categories" aria-label="View menu categories">
+            ▦ <span>Categories</span>
+          </NavLink>
           <NavLink to="/orders" aria-label="View orders">
             ▤ <span>Orders</span>
             <i aria-label="3 pending orders">3</i>

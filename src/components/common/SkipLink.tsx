@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './SkipLink.css';
 
-function SkipLink() {
+export function SkipLink() {
   const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {

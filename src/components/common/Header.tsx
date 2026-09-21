@@ -54,21 +54,21 @@ function Header() {
           <span aria-hidden="true">♧</span>
           <i aria-hidden="true" />
         </button>
-        <div className="profile">
-          <span className="avatar" aria-hidden="true">{user.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
-          <span>
-            <strong>{user.name || 'Admin'}</strong>
-            <small>Restaurant Manager</small>
-          </span>
-          <b aria-hidden="true">⌄</b>
-        </div>
-        <button 
-          className="logout-button" 
-          onClick={handleLogout}
-          aria-label="Logout from your account"
-        >
-          {t.common.logout}
-        </button>
+        <details className="profile">
+          <summary aria-label="Open profile menu">
+            <span className="avatar" aria-hidden="true">{user.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
+            <span className="profile-details">
+              <strong>{user.name || 'Admin'}</strong>
+              <small>Restaurant Manager</small>
+            </span>
+            <b aria-hidden="true">⌄</b>
+          </summary>
+          <div className="profile-menu" role="menu">
+            <button type="button" role="menuitem" onClick={handleLogout}>
+              <span aria-hidden="true">⇥</span> {t.common.logout}
+            </button>
+          </div>
+        </details>
       </div>
     </header>
   );

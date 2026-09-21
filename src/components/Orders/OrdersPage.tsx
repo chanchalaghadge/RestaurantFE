@@ -328,7 +328,12 @@ function OrdersPage() {
                   <td><span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
                   <td className="order-actions">
                     <button title="View history" onClick={() => setShowHistory(order.id)}>📜</button>
-                    <button title="Edit order" onClick={() => setEditing(order)}>✎</button>
+                    <button
+                      title={order.status === "Completed" ? "Completed orders cannot be edited" : "Edit order"}
+                      onClick={() => setEditing(order)}
+                      disabled={order.status === "Completed"}
+                      aria-label={order.status === "Completed" ? `Order #${order.id} is completed and cannot be edited` : `Edit order #${order.id}`}
+                    >✎</button>
                     {order.status !== "Completed" && <button title="Complete payment" onClick={() => void pay(order)}>💳</button>}
                     <button title="Delete order" onClick={() => setDeleting(order)} disabled={isDeleting}>♲</button>
                   </td>
@@ -389,6 +394,10 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (order?.status === "Completed") {
+      setError("Completed orders cannot be edited.");
+      return;
+    }
     try {
       const body = { customerName, orderType, restaurantTableId: orderType === "DineIn" ? tableId : undefined, items };
       const saved = order ? await ordersApi.update(order.id, body) : await ordersApi.create(body);

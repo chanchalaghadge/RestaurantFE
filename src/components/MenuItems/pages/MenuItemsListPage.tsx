@@ -314,7 +314,7 @@ function MenuItemsListPage() {
                     <span className="availability-pill">Delivery</span>
                   </td>
                   <td>
-                    <span className="item-status">{item.status}</span>
+                    <span className={`item-status ${item.status === "Inactive" ? "inactive" : ""}`}>{item.status}</span>
                   </td>
                   <td>
                     <div className="item-actions">
