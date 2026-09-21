@@ -24,6 +24,8 @@
 
 /* Menu item listing */
 .items-list-page { max-width: 1440px; margin: 0 auto; color: #51637e; }
+.items-list-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
+.items-list-topbar .breadcrumb { margin-bottom: 0; }
 .items-list-page .breadcrumb { margin-bottom: 7px; }
 .items-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 17px; }
 .items-heading h1 { margin: 0 0 4px; color: #172640; font-size: 25px; line-height: 1.2; letter-spacing: -.3px; }
@@ -45,5 +47,5 @@
 .list-empty-state { padding: 45px 20px; text-align: center; }.list-empty-state > span { display: block; font-size: 28px; }.list-empty-state strong { display: block; margin: 10px 0 5px; color: #334762; font-size: 14px; }.list-empty-state p { margin: 0 0 16px; color: #8290a3; }.list-empty-state .primary-button { display: inline-flex; }
 .item-status.inactive { color: #dc4557; background: #ffe8eb; }
 @media (max-width: 1000px) { .items-filters { grid-template-columns: repeat(3, minmax(150px, 1fr)); }.items-search { grid-column: span 2; }.clear-filters { justify-self: start; } }
-@media (max-width: 680px) { .items-heading { align-items: flex-start; flex-direction: column; }.items-list-page .primary-button { width: 100%; }.item-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }.items-filters { grid-template-columns: 1fr 1fr; gap: 10px; }.items-search { grid-column: 1 / -1; }.items-footer { align-items: flex-start; flex-direction: column; }.pagination-controls { flex-wrap: wrap; } }
+@media (max-width: 680px) { .items-list-topbar { align-items: flex-start; flex-direction: column; }.items-list-page .primary-button { width: 100%; }.item-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }.items-filters { grid-template-columns: 1fr 1fr; gap: 10px; }.items-search { grid-column: 1 / -1; }.items-footer { align-items: flex-start; flex-direction: column; }.pagination-controls { flex-wrap: wrap; } }
 @media (max-width: 420px) { .item-stats, .items-filters { grid-template-columns: 1fr; }.items-search { grid-column: auto; } }

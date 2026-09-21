@@ -89,7 +89,7 @@ function CategoryListPage() {
   if (loading) {
     return (
       <section className="categories-page category-list-page">
-        <CategoryHeader title="Manage Categories" description="Organize your menu with categories." action={<Link className="primary-button" to="/categories/new"><span>+</span> Add New Category</Link>} />
+        <CategoryHeader compact title="Manage Categories" description="Organize your menu with categories." action={<Link className="primary-button" to="/categories/new"><span>+</span> Add New Category</Link>} />
         <LoadingSpinner text="Loading categories..." fullScreen />
       </section>
     );
@@ -98,6 +98,7 @@ function CategoryListPage() {
   return (
     <section className="categories-page category-list-page">
       <CategoryHeader
+        compact
         title="Manage Categories" 
         description="Organize your menu with categories." 
         action={

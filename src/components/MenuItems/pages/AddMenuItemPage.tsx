@@ -73,7 +73,6 @@ function AddMenuItemPage() {
 
   return <section className="menu-item-page">
     <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: id ? 'Edit Menu Item' : 'Add Menu Item' }]} />
-    <div className="menu-item-heading"><h1>{id ? "Edit Menu Item" : "Add New Menu Item"}</h1><p>Create a menu item and configure its options.</p></div>
     <form className="menu-item-form" onSubmit={submit}>
       <div className="menu-item-top-grid">
         <section className="menu-panel basic-panel"><h2>Basic Information</h2>

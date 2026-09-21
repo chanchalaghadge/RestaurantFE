@@ -62,15 +62,8 @@ function MenuItemsListPage() {
   if (loading) {
     return (
       <section className="items-page items-list-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
-        <div className="items-heading">
-          <div>
-            <h1>Items</h1>
-            <p>
-              Manage your restaurant food &amp; beverage items. Add, edit, delete,
-              and manage variations.
-            </p>
-          </div>
+        <div className="items-list-topbar">
+          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
           <Link className="primary-button" to="/menu/add">
             <span>+</span> Add New Item
           </Link>
@@ -132,15 +125,8 @@ function MenuItemsListPage() {
 
   return (
     <section className="items-page items-list-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
-      <div className="items-heading">
-        <div>
-          <h1>Items</h1>
-          <p>
-            Manage your restaurant food &amp; beverage items. Add, edit, delete,
-            and manage variations.
-          </p>
-        </div>
+      <div className="items-list-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
         <Link className="primary-button" to="/menu/add">
           <span>+</span> Add New Item
         </Link>
