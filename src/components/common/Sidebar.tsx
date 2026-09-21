@@ -13,7 +13,7 @@ function Sidebar() {
   return (
     <aside className="sidebar" aria-label="Main navigation">
       <div className="sidebar-title">
-        <div className="brand-mark" aria-hidden="true">♨</div>
+        <div className="brand-mark" aria-hidden="true">👨‍🍳</div>
         <div>
           <h2>Foodie</h2>
           <small>Restaurant Admin</small>
@@ -57,6 +57,12 @@ function Sidebar() {
             ♙ <span>Users</span>
           </NavLink>
         </nav>
+        <div className="sidebar-promo" aria-hidden="true">
+          <div className="promo-dish">🍲</div>
+          <strong>Good Food<br />Happy Customers</strong>
+          <span>Great food brings people together. Keep serving the best!</span>
+          <i />
+        </div>
       </div>
     </aside>
   );
