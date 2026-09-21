@@ -362,3 +362,7 @@
 [data-theme="dark"] .chart-axis-label,
 [data-theme="dark"] .chart-day-label { fill: #ffffff; }
 [data-theme="dark"] .orders-point { stroke: var(--bg-secondary); }
+
+[data-theme="dark"] .donut-chart::after {
+  background: var(--bg-secondary);
+}

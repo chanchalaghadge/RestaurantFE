@@ -9,6 +9,7 @@ import { useToast } from "../../common/Toast";
 import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
 import { formatCurrency } from "../../../utils/currency";
+import { formatDate } from "../../../utils/date";
 import "../Dashboard.css";
 
 function DashboardPage() {
@@ -127,18 +128,6 @@ function DashboardPage() {
     }
   };
 
-  const now = new Date();
-  const dateText = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(now);
-  const dayText = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(now);
-  const timeText = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(now);
-
   if (loading) {
     return (
       <section className="dashboard-page">
@@ -168,16 +157,6 @@ function DashboardPage() {
         <div>
           <h1>Dashboard</h1>
           <p>Live restaurant sales, orders, customers, and menu performance.</p>
-        </div>
-        <div className="dashboard-date" aria-label={`Current date and time: ${dateText}, ${timeText}`}>
-          <div className="dashboard-date-group">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></svg>
-            <div><strong>{dateText}</strong><span>{dayText}</span></div>
-          </div>
-          <div className="dashboard-time-group">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-            <strong>{timeText}</strong>
-          </div>
         </div>
         <button 
           className="secondary-button refresh-button" 
@@ -341,7 +320,7 @@ function DashboardPage() {
                       <td>{order.itemCount}</td>
                       <td>{formatCurrency(order.totalAmount)}</td>
                       <td><span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
-                      <td>{new Date(order.createdAtUtc).toLocaleDateString()}</td>
+                      <td>{formatDate(order.createdAtUtc)}</td>
                     </tr>
                   ))}
                 </tbody>

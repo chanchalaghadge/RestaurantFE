@@ -14,6 +14,7 @@ import { exportToPdf } from "../../utils/pdfExport";
 import { useToast } from "../common/Toast";
 import { useErrorHandler } from "../../utils/errorHandler";
 import { formatCurrency } from "../../utils/currency";
+import { formatDate } from "../../utils/date";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
@@ -104,7 +105,7 @@ function OrdersPage() {
       { key: 'orderType', label: 'Type', formatter: (val: string) => val === 'DineIn' ? 'Dine In' : val },
       { key: 'totalAmount', label: 'Total', formatter: formatCurrency },
       { key: 'status', label: 'Status' },
-      { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
+      { key: 'createdAtUtc', label: 'Created', formatter: formatDate }
     ];
     exportToCsv(sortedData, columns, `orders-export-${generateTimestamp()}.csv`);
     showToast('CSV exported successfully', 'success');
@@ -118,7 +119,7 @@ function OrdersPage() {
       { key: 'orderType', label: 'Type', formatter: (val: string) => val === 'DineIn' ? 'Dine In' : val },
       { key: 'totalAmount', label: 'Total', formatter: formatCurrency },
       { key: 'status', label: 'Status' },
-      { key: 'createdAtUtc', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
+      { key: 'createdAtUtc', label: 'Created', formatter: formatDate }
     ];
     exportToPdf(sortedData, columns, 'Orders Report');
     showToast('PDF report generated', 'success');

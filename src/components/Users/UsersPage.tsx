@@ -5,6 +5,7 @@ import Breadcrumb from "../common/Breadcrumb";
 import { usersApi, type UserApi } from "../../api/users.api";
 import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
+import { formatDate } from "../../utils/date";
 import "./Users.css";
 
 function UsersPage() {
@@ -48,7 +49,7 @@ function UsersPage() {
       { key: 'email', label: 'Email' },
       { key: 'phoneNumber', label: 'Phone', formatter: (val: string | undefined) => val || 'N/A' },
       { key: 'isActive', label: 'Status', formatter: (val: boolean) => val ? 'Active' : 'Inactive' },
-      { key: 'createdDate', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
+      { key: 'createdDate', label: 'Created', formatter: formatDate }
     ];
     exportToCsv(sortedData, columns, `users-export-${generateTimestamp()}.csv`);
   };
@@ -114,7 +115,7 @@ function UsersPage() {
                   <td>{user.email}</td>
                   <td>{user.phoneNumber || "—"}</td>
                   <td><i className={user.isActive ? "user-active" : "user-inactive"}>{user.isActive ? "Active" : "Inactive"}</i></td>
-                  <td>{new Date(user.createdDate).toLocaleDateString()}</td>
+                  <td>{formatDate(user.createdDate)}</td>
                   <td>
                     <div className="user-actions">
                       <button type="button" onClick={() => navigate(`/users/${user.id}/edit`)}>Edit</button>

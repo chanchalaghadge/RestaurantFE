@@ -11,6 +11,7 @@ import { exportToPdf } from "../../../utils/pdfExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
 import DateRangePicker from "../../common/DateRangePicker";
+import { formatDate } from "../../../utils/date";
 import "../Customers.css";
 
 function CustomerListPage() {
@@ -63,7 +64,7 @@ function CustomerListPage() {
       { key: 'status', label: 'Status' },
       { key: 'tier', label: 'Customer Tier' },
       { key: 'totalOrders', label: 'Total Orders' },
-      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
+      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? formatDate(val) : 'N/A' }
     ];
     exportToCsv(sortedData, columns, `customers-export-${generateTimestamp()}.csv`);
     showToast('CSV exported successfully', 'success');
@@ -77,7 +78,7 @@ function CustomerListPage() {
       { key: 'status', label: 'Status' },
       { key: 'tier', label: 'Customer Tier' },
       { key: 'totalOrders', label: 'Total Orders' },
-      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
+      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? formatDate(val) : 'N/A' }
     ];
     exportToPdf(sortedData, columns, 'Customer Report');
     showToast('PDF report generated', 'success');
@@ -279,7 +280,7 @@ function CustomerListPage() {
                   <td><span className={`customer-badge ${customer.status.toLowerCase()}`}>{customer.status}</span></td>
                   <td><span className={`customer-tier ${customer.tier.toLowerCase()}`}>{customer.tier}</span></td>
                   <td>{customer.totalOrders}</td>
-                  <td>{customer.lastOrderAtUtc ? new Date(customer.lastOrderAtUtc).toLocaleDateString() : "—"}</td>
+                  <td>{customer.lastOrderAtUtc ? formatDate(customer.lastOrderAtUtc) : "—"}</td>
                   <td className="customer-row-actions">
                     <Link className="view-link" to={`/customers/${customer.id}`}>View</Link>
                     <button className="action-icon edit" onClick={() => navigate(`/customers/${customer.id}/edit`)}>✎</button>

@@ -1,13 +1,21 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { authApi } from "../../api/auth.api";
+import { formatDate, formatTime } from "../../utils/date";
 import "./Header.css";
 
 function Header() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, availableLanguages, t } = useLanguage();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     authApi.logout();
@@ -24,6 +32,14 @@ function Header() {
           <span aria-hidden="true">⌕</span>
           <input placeholder={t.common.search + " categories, menu items..."} />
         </label>
+      </div>
+
+      <div className="header-center" aria-label={`Current date and time: ${formatDate(now)}, ${formatTime(now)}`}>
+        <span aria-hidden="true">▣</span>
+        <strong>{formatDate(now)}</strong>
+        <i aria-hidden="true" />
+        <span aria-hidden="true">◷</span>
+        <strong>{formatTime(now)}</strong>
       </div>
 
       <div className="header-right">

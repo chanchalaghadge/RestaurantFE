@@ -1,8 +1,9 @@
-.header { height: 52px; padding: 0 28px; background: #fff; border-bottom: 1px solid #e5eaf1; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
+.header { position: relative; height: 52px; padding: 0 28px; background: #fff; border-bottom: 1px solid #e5eaf1; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
 .header-left { position: relative; }
 .global-search { width: 520px; height: 31px; border-radius: 18px; background: #f3f6fb; color: #647c9e; display: flex; align-items: center; gap: 9px; padding: 0 13px; font-size: 18px; }
 .global-search input { border: 0; outline: 0; background: transparent; width: 100%; color: #455773; font-size: 10px; }
 .header-right { gap: 18px; }
+.header-center { position: absolute; left: 50%; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); color: #455f83; font-size: 11px; white-space: nowrap; }.header-center strong { color: #263c5d; font-size: 11px; }.header-center i { width: 1px; height: 21px; margin: 0 6px; background: #e0e7f0; }
 /* Keep the language selector optional, but always expose the theme control. */
 .header-right .language-selector { display: none; }
 .header-right .theme-toggle { display: inline-flex; }
@@ -83,6 +84,22 @@
   background: var(--border-color);
 }
 
+[data-theme="dark"] .global-search {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .global-search input {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .global-search input::placeholder {
+  color: #ffffff !important;
+  opacity: .72;
+}
+
 .header-left h2 { margin: 0; font-size: 20px; color: #333; }
 
 .header-right {
@@ -96,4 +113,4 @@
   font-weight: 500;
 }
 
-.header-right button:hover { opacity: .8; } @media (max-width: 700px) { .global-search { width: min(42vw, 250px); }.profile .profile-details, .profile b { display: none; }.profile-menu { right: -8px; } }
+.header-right button:hover { opacity: .8; } @media (max-width: 700px) { .global-search { width: min(42vw, 250px); }.header-center { display: none; }.profile .profile-details, .profile b { display: none; }.profile-menu { right: -8px; } }
