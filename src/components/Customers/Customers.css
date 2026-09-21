@@ -1027,6 +1027,7 @@
 .customer-list-page .customers-table-wrap { flex: 1; min-height: 0; overflow: auto; }
 .customer-list-page .customers-table-wrap thead th { position: sticky; top: 0; z-index: 1; }
 .customer-list-page .customers-footer { flex: 0 0 auto; }
+.customer-list-page .list-pagination { flex: 0 0 auto; }
 
 /* Table sorting styles */
 .customers-table th.sortable {

@@ -10,6 +10,7 @@ import { useTableSort } from "../../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
+import Pagination from "../../common/Pagination";
 import "../Categories.css";
 
 function CategoryListPage() {
@@ -22,6 +23,8 @@ function CategoryListPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     try {
@@ -41,6 +44,9 @@ function CategoryListPage() {
     [categories, search]
   );
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(filtered);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedCategories = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExport = () => {
     const columns = [
@@ -54,7 +60,7 @@ function CategoryListPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(sortedData.map(c => c.id)));
+      setSelectedIds(new Set(pagedCategories.map(c => c.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -161,7 +167,7 @@ function CategoryListPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((category) => (
+              {pagedCategories.length ? pagedCategories.map((category) => (
                 <tr key={category.id}>
                   <td className="checkbox-column">
                     <input
@@ -196,7 +202,7 @@ function CategoryListPage() {
             </tbody>
           </table>
         </div>
-        <div className="table-footer">Showing {sortedData.length} of {categories.length} categories</div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="categories" onChange={setPage} />
       </div>
       {deleting && (
         <ConfirmDeleteModal

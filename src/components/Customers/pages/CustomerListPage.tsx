@@ -10,6 +10,7 @@ import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { exportToPdf } from "../../../utils/pdfExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
+import Pagination from "../../common/Pagination";
 import { formatDate } from "../../../utils/date";
 import "../Customers.css";
 
@@ -26,6 +27,8 @@ function CustomerListPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   
   const load = async () => { 
     try { 
@@ -47,6 +50,9 @@ function CustomerListPage() {
   });
   
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(filtered);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedCustomers = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExport = () => {
     const columns = [
@@ -78,7 +84,7 @@ function CustomerListPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(sortedData.map(c => c.id)));
+      setSelectedIds(new Set(pagedCustomers.map(c => c.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -214,7 +220,7 @@ function CustomerListPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((customer) => (
+              {pagedCustomers.length ? pagedCustomers.map((customer) => (
                 <tr key={customer.id}>
                   <td className="checkbox-column">
                     <input
@@ -259,9 +265,7 @@ function CustomerListPage() {
             </tbody>
           </table>
         </div>
-        <div className="customers-footer">
-          <span>Showing {customers.length} customers</span>
-        </div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="customers" onChange={setPage} />
       </div>
       {deleting && (
         <ConfirmDeleteModal

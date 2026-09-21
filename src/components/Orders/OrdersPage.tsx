@@ -7,6 +7,7 @@ import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
 import OrderHistoryModal from "../common/OrderHistoryModal";
 import ErrorAlert from "../common/ErrorAlert";
+import Pagination from "../common/Pagination";
 import { menuItemsApi, type MenuItemApi } from "../../api/menu-items.api";
 import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/orders.api";
 import { useTableSort } from "../../hooks/useTableSort";
@@ -39,6 +40,8 @@ function OrdersPage() {
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     try {
@@ -67,6 +70,9 @@ function OrdersPage() {
     return matchesStatus && matchesType && matchesSearch && matchesDateRange && matchesAmountRange;
   }), [orders, search, statusFilter, typeFilter, dateRange, amountRange]);
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(visibleOrders);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedOrders = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const statuses: Array<"All" | OrderApi["status"]> = ["All", "Pending", "Preparing", "Ready", "Completed", "Cancelled"];
 
@@ -129,7 +135,7 @@ function OrdersPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(sortedData.map(order => order.id)));
+      setSelectedIds(new Set(pagedOrders.map(order => order.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -164,12 +170,8 @@ function OrdersPage() {
   if (loading) {
     return (
       <section className="orders-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} />
-        <div className="orders-heading">
-          <div>
-            <h1>Orders</h1>
-            <p>Manage and track every order in real time.</p>
-          </div>
+        <div className="orders-topbar">
+          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} />
           <button className="primary-button" onClick={() => navigate("/orders/new")}>＋ Create Order</button>
         </div>
         <LoadingSpinner text="Loading orders..." fullScreen />
@@ -179,12 +181,8 @@ function OrdersPage() {
 
   return (
     <section className="orders-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} />
-      <div className="orders-heading">
-        <div>
-          <h1>Orders</h1>
-          <p>Manage and track every order in real time.</p>
-        </div>
+      <div className="orders-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} />
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={sortedData.length === 0}>
             📥 CSV
@@ -314,7 +312,7 @@ function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((order) => (
+              {pagedOrders.length ? pagedOrders.map((order) => (
                 <tr key={order.id}>
                   <td className="checkbox-column">
                     <input
@@ -357,6 +355,7 @@ function OrdersPage() {
             </tbody>
           </table>
         </div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="orders" onChange={setPage} />
       </div>
       {editing && editing !== "new" && <OrderForm order={editing} onClose={() => setEditing(null)} onSaved={load} />}
       {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} isDeleting={isDeleting} />}

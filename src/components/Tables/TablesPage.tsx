@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
+import Pagination from "../common/Pagination";
 import { ordersApi, type RestaurantTableApi } from "../../api/orders.api";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import "./Tables.css";
@@ -16,6 +17,11 @@ function TablesPage() {
   const [deleting, setDeleting] = useState<RestaurantTableApi | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
+  const pageCount = Math.max(1, Math.ceil(tables.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedTables = tables.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const load = async () => {
     try {
@@ -88,7 +94,7 @@ function TablesPage() {
       {error && <p className="table-form-error" role="alert">{error}</p>}
       <div className="table-layout">
         <div className="table-grid">
-          {tables.map((table) => (
+          {pagedTables.map((table) => (
             <article
               className={`restaurant-table ${table.status.toLowerCase()} ${selected?.id === table.id ? "selected" : ""}`}
               key={table.id}
@@ -117,6 +123,7 @@ function TablesPage() {
           </aside>
         )}
       </div>
+      <Pagination count={tables.length} page={currentPage} pageSize={pageSize} label="tables" onChange={setPage} />
       {editing && <TableForm editor={editing} onClose={() => setEditing(null)} onSave={save} />}
       {deleting && <ConfirmDeleteModal itemName={deleting.tableNumber} itemType="Table" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} />}
     </section>

@@ -85,3 +85,10 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.category-list-page { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.category-list-page .page-heading, .category-list-page .category-panel > .panel-header { flex: 0 0 auto; }
+.category-list-page .category-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.category-list-page .table-wrap { flex: 1; min-height: 0; overflow: auto; }
+.category-list-page .list-pagination { flex: 0 0 auto; }
+@media (max-width: 768px) { .category-list-page { height: auto; overflow: visible; }.category-list-page .table-wrap { overflow-x: auto; } }

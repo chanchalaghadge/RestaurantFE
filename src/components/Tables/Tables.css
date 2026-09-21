@@ -1,4 +1,8 @@
 .tables-page { padding: 18px; color: #17304d; }
+.tables-page { height: 100%; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
+.tables-topbar, .tables-page .list-pagination { flex: 0 0 auto; }
+.table-layout { flex: 1; min-height: 0; overflow: auto; }
+@media (max-width: 768px) { .tables-page { height: auto; overflow: visible; }.table-layout { overflow: visible; } }
 .tables-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
 .tables-topbar .breadcrumb { margin-bottom: 0; }
 .tables-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 22px; }

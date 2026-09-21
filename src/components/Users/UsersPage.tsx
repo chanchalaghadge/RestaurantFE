@@ -6,6 +6,7 @@ import { usersApi, type UserApi } from "../../api/users.api";
 import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import { formatDate } from "../../utils/date";
+import Pagination from "../common/Pagination";
 import "./Users.css";
 
 function UsersPage() {
@@ -14,6 +15,8 @@ function UsersPage() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const load = async () => {
     try {
@@ -31,6 +34,9 @@ function UsersPage() {
 
   const filtered = users.filter((user) => `${user.firstName} ${user.lastName} ${user.email} ${user.phoneNumber ?? ""}`.toLowerCase().includes(search.toLowerCase()));
   const { sortedData } = useTableSort(filtered);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedUsers = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const deactivate = async (user: UserApi) => {
     if (!window.confirm(`Deactivate ${user.firstName} ${user.lastName}?`)) return;
@@ -104,7 +110,7 @@ function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((user) => (
+              {pagedUsers.length ? pagedUsers.map((user) => (
                 <tr key={user.id}>
                   <td>
                     <div className="user-name">
@@ -138,6 +144,7 @@ function UsersPage() {
             </tbody>
           </table>
         </div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="users" onChange={setPage} />
       </section>
     </section>
   );
