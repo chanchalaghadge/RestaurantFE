@@ -22,6 +22,8 @@
 .sidebar-scroll-area {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   padding-bottom: 13px;
 }
@@ -59,4 +61,4 @@
   background: #444;
 }
 
-.sidebar-promo { margin-top: auto; overflow: hidden; padding: 9px 10px 12px; border: 1px solid #183b62; border-radius: 8px; color: #f4f7fc; background: #092039; }.promo-dish { height: 82px; margin: -9px -10px 9px; display: grid; place-items: center; background: radial-gradient(circle, #e87126 0 22%, #7f371c 23% 36%, #0d2934 37%); font-size: 43px; }.sidebar-promo strong { display: block; font-size: 14px; line-height: 1.15; }.sidebar-promo span { display: block; margin-top: 8px; color: #c6d3e2; font-size: 10px; line-height: 1.4; }.sidebar-promo i { display: block; width: 28px; height: 3px; margin-top: 10px; border-radius: 2px; background: #ffb000; }
+.sidebar-promo { flex: 0 0 auto; margin-top: auto; overflow: hidden; padding: 9px 10px 12px; border: 1px solid #183b62; border-radius: 8px; color: #f4f7fc; background: #092039; }.promo-dish { height: 82px; margin: -9px -10px 9px; overflow: hidden; background: #0d2934; }.promo-dish img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; animation: promo-image-fade .28s ease-out; }.sidebar-promo strong { display: block; font-size: 14px; line-height: 1.15; }.sidebar-promo span { display: block; margin-top: 8px; color: #c6d3e2; font-size: 10px; line-height: 1.4; }.sidebar-promo i { display: block; width: 28px; height: 3px; margin-top: 10px; border-radius: 2px; background: #ffb000; }@keyframes promo-image-fade { from { opacity: .25; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }

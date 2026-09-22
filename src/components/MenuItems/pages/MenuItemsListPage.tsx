@@ -12,6 +12,7 @@ import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import { useToast } from "../../common/Toast";
 import { formatCurrency } from "../../../utils/currency";
+import { useTableSort } from "../../../hooks/useTableSort";
 
 function MenuItemsListPage() {
   const { showToast } = useToast();
@@ -53,9 +54,10 @@ function MenuItemsListPage() {
       ),
     [items, search, dietary, status],
   );
-  const pageCount = Math.max(1, Math.ceil(visibleItems.length / pageSize));
+  const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(visibleItems);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
   const currentPage = Math.min(page, pageCount);
-  const pagedItems = visibleItems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pagedItems = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   useEffect(() => { setPage(1); }, [search, categoryId, dietary, status, pageSize]);
 
@@ -250,13 +252,13 @@ function MenuItemsListPage() {
                   />
                 </th>
                 <th>Image</th>
-                <th>Item Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Dietary</th>
+                <th className="sortable" onClick={() => handleSort("name")} aria-sort={sortConfig.key === "name" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Item Name {sortConfig.key === "name" && getSortIcon()}</th>
+                <th className="sortable" onClick={() => handleSort("category")} aria-sort={sortConfig.key === "category" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Category {sortConfig.key === "category" && getSortIcon()}</th>
+                <th className="sortable" onClick={() => handleSort("price")} aria-sort={sortConfig.key === "price" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Price {sortConfig.key === "price" && getSortIcon()}</th>
+                <th className="sortable" onClick={() => handleSort("dietary")} aria-sort={sortConfig.key === "dietary" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Dietary {sortConfig.key === "dietary" && getSortIcon()}</th>
                 <th>GST</th>
                 <th>Available For</th>
-                <th>Status</th>
+                <th className="sortable" onClick={() => handleSort("status")} aria-sort={sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Status {sortConfig.key === "status" && getSortIcon()}</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -327,7 +329,7 @@ function MenuItemsListPage() {
           </table>
         </div>
         <div className="items-footer">
-          <span>Showing {visibleItems.length ? (currentPage - 1) * pageSize + 1 : 0} to {Math.min(currentPage * pageSize, visibleItems.length)} of {visibleItems.length} items</span>
+          <span>Showing {sortedData.length ? (currentPage - 1) * pageSize + 1 : 0} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} items</span>
           <div className="pagination-controls">
             <button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} aria-label="Previous page">‹</button>
             {Array.from({ length: Math.min(pageCount, 5) }, (_, index) => index + 1).map((pageNumber) => (

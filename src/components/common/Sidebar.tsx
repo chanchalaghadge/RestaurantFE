@@ -1,11 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { ordersApi } from "../../api/orders.api";
 import "./Sidebar.css";
+
+const promoImages = [
+  "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=480&q=80",
+  "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=480&q=80",
+  "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=480&q=80",
+];
 
 function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(true);
+  const [promoImageIndex, setPromoImageIndex] = useState(0);
+  const [incompleteOrderCount, setIncompleteOrderCount] = useState(0);
   const location = useLocation();
   const menuIsActive = location.pathname.startsWith("/menu");
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setPromoImageIndex((current) => (current + 1) % promoImages.length);
+    }, 2000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const loadIncompleteOrderCount = async () => {
+      try {
+        const orders = await ordersApi.list();
+        setIncompleteOrderCount(orders.filter((order) => order.status !== "Completed" && order.status !== "Cancelled").length);
+      } catch {
+        setIncompleteOrderCount(0);
+      }
+    };
+
+    void loadIncompleteOrderCount();
+    const interval = window.setInterval(() => void loadIncompleteOrderCount(), 30000);
+    return () => window.clearInterval(interval);
+  }, [location.pathname]);
 
   const handleMenuToggle = () => {
     setMenuOpen((current) => !current);
@@ -49,7 +81,7 @@ function Sidebar() {
           </NavLink>
           <NavLink to="/orders" aria-label="View orders">
             ▤ <span>Orders</span>
-            <i aria-label="3 pending orders">3</i>
+            {incompleteOrderCount > 0 && <i aria-label={`${incompleteOrderCount} incomplete orders`}>{incompleteOrderCount}</i>}
           </NavLink>
           <NavLink to="/tables" aria-label="View tables">
             ▦ <span>Tables</span>
@@ -62,7 +94,9 @@ function Sidebar() {
           </NavLink>
         </nav>
         <div className="sidebar-promo" aria-hidden="true">
-          <div className="promo-dish">🍲</div>
+          <div className="promo-dish">
+            <img key={promoImages[promoImageIndex]} src={promoImages[promoImageIndex]} alt="" />
+          </div>
           <strong>Good Food<br />Happy Customers</strong>
           <span>Great food brings people together. Keep serving the best!</span>
           <i />
