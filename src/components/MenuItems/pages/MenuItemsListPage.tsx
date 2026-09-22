@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
+import TrashIcon from "../../common/TrashIcon";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
 import ErrorAlert from "../../common/ErrorAlert";
@@ -319,7 +320,7 @@ function MenuItemsListPage() {
                         onClick={() => setItemToDelete(item)}
                         disabled={isDeleting}
                       >
-                        ♲
+                        <TrashIcon />
                       </button>
                     </div>
                   </td>

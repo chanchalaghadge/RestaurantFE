@@ -552,6 +552,8 @@
 [data-theme="dark"] .create-order-details,
 [data-theme="dark"] .order-menu-panel,
 [data-theme="dark"] .order-summary-panel,
+[data-theme="dark"] .order-type-note,
+[data-theme="dark"] .add-customer-button,
 [data-theme="dark"] .create-order-details input,
 [data-theme="dark"] .create-order-details select,
 [data-theme="dark"] .instructions-field textarea,
@@ -569,6 +571,8 @@
   border-color: var(--accent-primary) !important;
   color: #ffffff !important;
 }
+
+[data-theme="dark"] .add-customer-button { color: #7db3ff !important; }
 
 [data-theme="dark"] .menu-category-tabs button,
 [data-theme="dark"] .create-menu-card,
@@ -798,3 +802,35 @@
   background: rgba(59, 130, 246, .18) !important;
   color: #7db3ff !important;
 }
+
+/* Dedicated Edit Order screen. */
+[data-theme="dark"] .edit-order-page { background: var(--bg-primary) !important; color: var(--text-primary) !important; }
+[data-theme="dark"] .edit-items-area,
+[data-theme="dark"] .edit-summary,
+[data-theme="dark"] .edit-menu-grid button,
+[data-theme="dark"] .edit-add-customer,
+[data-theme="dark"] .edit-quantity button { background: var(--bg-secondary) !important; border-color: var(--border-color) !important; }
+[data-theme="dark"] .edit-order-controls input,
+[data-theme="dark"] .edit-order-controls select,
+[data-theme="dark"] .edit-instructions textarea,
+[data-theme="dark"] .edit-item-image { background: var(--bg-tertiary) !important; border-color: var(--border-color) !important; }
+[data-theme="dark"] .edit-item-list,
+[data-theme="dark"] .edit-item,
+[data-theme="dark"] .edit-instructions,
+[data-theme="dark"] .edit-summary-total { border-color: var(--border-color) !important; }
+[data-theme="dark"] .edit-order-controls label,
+[data-theme="dark"] .edit-instructions,
+[data-theme="dark"] .edit-item-name small,
+[data-theme="dark"] .edit-summary > div { color: var(--text-secondary) !important; }
+[data-theme="dark"] .edit-order-header h1,
+[data-theme="dark"] .edit-items-area h2,
+[data-theme="dark"] .edit-summary h2,
+[data-theme="dark"] .edit-item-name strong,
+[data-theme="dark"] .edit-item > strong,
+[data-theme="dark"] .edit-menu-grid button,
+[data-theme="dark"] .edit-summary-total { color: var(--text-primary) !important; }
+[data-theme="dark"] .edit-quantity { border-color: var(--border-color) !important; }
+[data-theme="dark"] .add-more-items { background: rgba(59, 130, 246, .18) !important; color: #7db3ff !important; }
+[data-theme="dark"] .edit-menu-grid strong,
+[data-theme="dark"] .edit-add-customer { color: #7db3ff !important; }
+[data-theme="dark"] .edit-remove { color: #ff8c8c !important; }

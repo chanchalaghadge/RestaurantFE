@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../common/BulkDeleteModal";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
-import OrderHistoryModal from "../common/OrderHistoryModal";
 import ErrorAlert from "../common/ErrorAlert";
 import Pagination from "../common/Pagination";
+import TrashIcon from "../common/TrashIcon";
+import EyeIcon from "../common/EyeIcon";
 import { menuItemsApi, type MenuItemApi } from "../../api/menu-items.api";
 import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/orders.api";
 import { useTableSort } from "../../hooks/useTableSort";
@@ -25,6 +26,7 @@ type OrderType = OrderApi["orderType"];
 function OrdersPage() {
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { handleError, createErrorContext } = useErrorHandler();
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
@@ -32,7 +34,6 @@ function OrdersPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
-  const [showHistory, setShowHistory] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | OrderApi["status"]>("All");
   const [search, setSearch] = useState("");
@@ -57,6 +58,14 @@ function OrdersPage() {
   };
 
   useEffect(() => { void load(); }, []);
+
+  useEffect(() => {
+    const editId = Number(searchParams.get("edit"));
+    if (!editId || editing || !orders.length) return;
+    const orderToEdit = orders.find((order) => order.id === editId);
+    if (orderToEdit) setEditing(orderToEdit);
+    if (searchParams.has("edit")) setSearchParams({}, { replace: true });
+  }, [editing, orders, searchParams, setSearchParams]);
 
   const visibleOrders = useMemo(() => orders.filter((order) => {
     const matchesStatus = statusFilter === "All" || order.status === statusFilter;
@@ -329,15 +338,15 @@ function OrdersPage() {
                   <td>{formatCurrency(order.totalAmount)}</td>
                   <td><span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
                   <td className="order-actions">
-                    <button title="View history" onClick={() => setShowHistory(order.id)}>📜</button>
+                    <button title="View order details" onClick={() => navigate(`/orders/${order.id}`)} aria-label={`View order #${order.id}`}><EyeIcon /></button>
                     <button
                       title={order.status === "Completed" ? "Completed orders cannot be edited" : "Edit order"}
-                      onClick={() => setEditing(order)}
+                      onClick={() => navigate(`/orders/${order.id}/edit`)}
                       disabled={order.status === "Completed"}
                       aria-label={order.status === "Completed" ? `Order #${order.id} is completed and cannot be edited` : `Edit order #${order.id}`}
                     >✎</button>
                     {order.status !== "Completed" && <button title="Complete payment" onClick={() => void pay(order)}>💳</button>}
-                    <button title="Delete order" onClick={() => setDeleting(order)} disabled={isDeleting}>♲</button>
+                    <button title="Delete order" aria-label={`Delete order #${order.id}`} onClick={() => setDeleting(order)} disabled={isDeleting}><TrashIcon /></button>
                   </td>
                 </tr>
               )) : (
@@ -368,7 +377,6 @@ function OrdersPage() {
           isDeleting={bulkDeleting}
         />
       )}
-      {showHistory && <OrderHistoryModal orderId={showHistory} onClose={() => setShowHistory(null)} />}
     </section>
   );
 }

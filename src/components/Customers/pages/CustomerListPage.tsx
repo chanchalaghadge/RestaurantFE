@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
+import TrashIcon from "../../common/TrashIcon";
+import EyeIcon from "../../common/EyeIcon";
 import { customersApi, type CustomerApi } from "../../../api/customers.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
@@ -245,9 +247,9 @@ function CustomerListPage() {
                   <td>{customer.totalOrders}</td>
                   <td>{customer.lastOrderAtUtc ? formatDate(customer.lastOrderAtUtc) : "—"}</td>
                   <td className="customer-row-actions">
-                    <Link className="view-link" to={`/customers/${customer.id}`}>View</Link>
+                    <Link className="view-link" to={`/customers/${customer.id}`} aria-label={`View ${customer.fullName}`} title={`View ${customer.fullName}`}><EyeIcon /></Link>
                     <button className="action-icon edit" onClick={() => navigate(`/customers/${customer.id}/edit`)}>✎</button>
-                    <button className="action-icon delete" onClick={() => setDeleting(customer)} disabled={isDeleting}>♲</button>
+                    <button className="action-icon delete" aria-label={`Delete ${customer.fullName}`} onClick={() => setDeleting(customer)} disabled={isDeleting}><TrashIcon /></button>
                   </td>
                 </tr>
               )) : (

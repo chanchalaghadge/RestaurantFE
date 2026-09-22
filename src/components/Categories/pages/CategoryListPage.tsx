@@ -4,6 +4,7 @@ import CategoryHeader from "../components/CategoryHeader";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
+import TrashIcon from "../../common/TrashIcon";
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import { useTableSort } from "../../../hooks/useTableSort";
@@ -183,7 +184,7 @@ function CategoryListPage() {
                   <td>
                     <div className="row-actions">
                       <Link to={`/categories/${category.id}/edit`}>↗</Link>
-                      <button className="delete" onClick={() => setDeleting(category)} disabled={isDeleting}>♲</button>
+                      <button className="delete" aria-label={`Delete ${category.name}`} onClick={() => setDeleting(category)} disabled={isDeleting}><TrashIcon /></button>
                     </div>
                   </td>
                 </tr>
