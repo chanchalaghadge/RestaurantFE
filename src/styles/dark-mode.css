@@ -764,6 +764,48 @@
   color: #ff8c8c !important;
 }
 
+/*
+ * Icon-only controls need their own dark hover state.  Several pages use
+ * transparent action buttons with a light-mode hover fill, which briefly
+ * produced a white square over the icon in the dark theme.  Keep the hover
+ * feedback on a dark surface and preserve the action's semantic colour.
+ */
+[data-theme="dark"] .order-actions button:hover:not(:disabled),
+[data-theme="dark"] .item-actions a:hover,
+[data-theme="dark"] .item-actions button:hover:not(:disabled),
+[data-theme="dark"] .user-actions button:hover:not(:disabled),
+[data-theme="dark"] .row-actions a:hover,
+[data-theme="dark"] .row-actions button:hover:not(:disabled),
+[data-theme="dark"] .customer-row-actions .view-link:hover,
+[data-theme="dark"] .customer-row-actions .action-icon:hover,
+[data-theme="dark"] .gallery-actions a:hover {
+  background: rgba(96, 165, 250, .30) !important;
+  color: #bfdbfe !important;
+  box-shadow: 0 0 0 1px rgba(147, 197, 253, .18);
+}
+
+[data-theme="dark"] .item-actions button:hover:not(:disabled),
+[data-theme="dark"] .user-actions .deactivate:hover:not(:disabled),
+[data-theme="dark"] .row-actions .delete:hover:not(:disabled),
+[data-theme="dark"] .customer-row-actions .action-icon.delete:hover {
+  background: rgba(248, 113, 113, .30) !important;
+  color: #fecaca !important;
+  box-shadow: 0 0 0 1px rgba(252, 165, 165, .18);
+}
+
+[data-theme="dark"] .order-actions button:focus-visible,
+[data-theme="dark"] .item-actions a:focus-visible,
+[data-theme="dark"] .item-actions button:focus-visible,
+[data-theme="dark"] .user-actions button:focus-visible,
+[data-theme="dark"] .row-actions a:focus-visible,
+[data-theme="dark"] .row-actions button:focus-visible,
+[data-theme="dark"] .customer-row-actions .view-link:focus-visible,
+[data-theme="dark"] .customer-row-actions .action-icon:focus-visible,
+[data-theme="dark"] .gallery-actions a:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
+
 /* Menu item editor: remove the remaining light-mode upload, option, and preview surfaces. */
 [data-theme="dark"] .menu-upload,
 [data-theme="dark"] .option-group,

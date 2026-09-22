@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
-import TrashIcon from "../common/TrashIcon";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
 import Pagination from "../common/Pagination";
@@ -120,7 +119,7 @@ function TablesPage() {
             <strong>{selected.seatCapacity} Seats <span>{selected.status}</span></strong>
             <p>{selected.status === "Occupied" ? "Currently occupied" : "No active order"}</p>
             <button className="primary-button" onClick={() => setEditing({ table: selected })}>Edit Table</button>
-            <button className="delete-table" onClick={() => setDeleting(selected)}><TrashIcon />Delete Table</button>
+            <button className="delete-table" onClick={() => setDeleting(selected)}>Delete Table</button>
           </aside>
         )}
       </div>
