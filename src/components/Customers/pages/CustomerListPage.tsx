@@ -28,7 +28,7 @@ function CustomerListPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
   
   const load = async () => { 
     try { 
@@ -265,7 +265,7 @@ function CustomerListPage() {
             </tbody>
           </table>
         </div>
-        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="customers" onChange={setPage} />
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="customers" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </div>
       {deleting && (
         <ConfirmDeleteModal

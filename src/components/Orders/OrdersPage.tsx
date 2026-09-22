@@ -41,7 +41,7 @@ function OrdersPage() {
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const load = async () => {
     try {
@@ -355,7 +355,7 @@ function OrdersPage() {
             </tbody>
           </table>
         </div>
-        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="orders" onChange={setPage} />
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="orders" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </div>
       {editing && editing !== "new" && <OrderForm order={editing} onClose={() => setEditing(null)} onSaved={load} />}
       {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} isDeleting={isDeleting} />}

@@ -18,7 +18,7 @@ function TablesPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const pageSize = 8;
+  const [pageSize, setPageSize] = useState(10);
   const pageCount = Math.max(1, Math.ceil(tables.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const pagedTables = tables.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -123,7 +123,7 @@ function TablesPage() {
           </aside>
         )}
       </div>
-      <Pagination count={tables.length} page={currentPage} pageSize={pageSize} label="tables" onChange={setPage} />
+      <Pagination count={tables.length} page={currentPage} pageSize={pageSize} label="tables" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       {editing && <TableForm editor={editing} onClose={() => setEditing(null)} onSave={save} />}
       {deleting && <ConfirmDeleteModal itemName={deleting.tableNumber} itemType="Table" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} />}
     </section>
