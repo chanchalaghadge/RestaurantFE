@@ -845,6 +845,60 @@
   color: #7db3ff !important;
 }
 
+/* Complete the dark treatment for nested option, price, and preview content. */
+[data-theme="dark"] .option-group-header::before {
+  background: #19355a !important;
+  color: #93c5fd !important;
+}
+
+[data-theme="dark"] .option-group-header strong,
+[data-theme="dark"] .option-group > small,
+[data-theme="dark"] .price-summary p,
+[data-theme="dark"] .price-summary p strong,
+[data-theme="dark"] .preview-content strong,
+[data-theme="dark"] .preview-content b {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .option-group-header > span,
+[data-theme="dark"] .price-summary em {
+  background: rgba(34, 197, 94, .18) !important;
+  color: #86efac !important;
+}
+
+[data-theme="dark"] .option-group-header button {
+  background: rgba(239, 68, 68, .18) !important;
+  color: #ff9ca8 !important;
+}
+
+[data-theme="dark"] .option-group-header button:hover,
+[data-theme="dark"] .remove-option:hover:not(:disabled) {
+  background: rgba(239, 68, 68, .30) !important;
+  color: #fecaca !important;
+}
+
+[data-theme="dark"] .option-row {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .remove-option {
+  color: #ff9ca8 !important;
+}
+
+[data-theme="dark"] .price-summary p {
+  border-bottom-color: var(--border-color) !important;
+  border-left-color: #6ee7b7 !important;
+}
+
+[data-theme="dark"] .preview-content p,
+[data-theme="dark"] .preview-content span,
+[data-theme="dark"] .preview-content small,
+[data-theme="dark"] .preview-image-empty {
+  color: var(--text-secondary) !important;
+}
+
 /* Dedicated Edit Order screen. */
 [data-theme="dark"] .edit-order-page { background: var(--bg-primary) !important; color: var(--text-primary) !important; }
 [data-theme="dark"] .edit-items-area,

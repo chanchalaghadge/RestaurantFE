@@ -307,6 +307,10 @@
   background: rgba(241, 161, 52, 0.12);
 }
 
+.customer-actions-cell {
+  white-space: nowrap;
+}
+
 .customer-row-actions {
   display: flex;
   align-items: center;
