@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
+import TrashIcon from "../../common/TrashIcon";
+import EyeIcon from "../../common/EyeIcon";
 import { customersApi, type CustomerApi } from "../../../api/customers.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
@@ -10,7 +12,8 @@ import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { exportToPdf } from "../../../utils/pdfExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
-import DateRangePicker from "../../common/DateRangePicker";
+import Pagination from "../../common/Pagination";
+import { formatDate } from "../../../utils/date";
 import "../Customers.css";
 
 function CustomerListPage() {
@@ -24,10 +27,10 @@ function CustomerListPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
-  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-  const [ordersRange, setOrdersRange] = useState({ min: '', max: '' });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   
   const load = async () => { 
     try { 
@@ -45,15 +48,13 @@ function CustomerListPage() {
     const matchesSearch = `${customer.fullName} ${customer.phone} ${customer.email}`.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = status === "All Status" || customer.status === status;
     const matchesTier = tier === "All Customers" || customer.tier === tier;
-    const matchesDateRange = (!dateRange.startDate || !dateRange.endDate) ||
-      (customer.lastOrderAtUtc && new Date(customer.lastOrderAtUtc) >= new Date(dateRange.startDate) && new Date(customer.lastOrderAtUtc) <= new Date(dateRange.endDate));
-    const matchesOrdersRange = (!ordersRange.min || !ordersRange.max) ||
-      (customer.totalOrders >= Number(ordersRange.min) && customer.totalOrders <= Number(ordersRange.max));
-
-    return matchesSearch && matchesStatus && matchesTier && matchesDateRange && matchesOrdersRange;
+    return matchesSearch && matchesStatus && matchesTier;
   });
   
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(filtered);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedCustomers = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExport = () => {
     const columns = [
@@ -63,7 +64,7 @@ function CustomerListPage() {
       { key: 'status', label: 'Status' },
       { key: 'tier', label: 'Customer Tier' },
       { key: 'totalOrders', label: 'Total Orders' },
-      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
+      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? formatDate(val) : 'N/A' }
     ];
     exportToCsv(sortedData, columns, `customers-export-${generateTimestamp()}.csv`);
     showToast('CSV exported successfully', 'success');
@@ -77,7 +78,7 @@ function CustomerListPage() {
       { key: 'status', label: 'Status' },
       { key: 'tier', label: 'Customer Tier' },
       { key: 'totalOrders', label: 'Total Orders' },
-      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? new Date(val).toLocaleDateString() : 'N/A' }
+      { key: 'lastOrderAtUtc', label: 'Last Order', formatter: (val: string) => val ? formatDate(val) : 'N/A' }
     ];
     exportToPdf(sortedData, columns, 'Customer Report');
     showToast('PDF report generated', 'success');
@@ -85,7 +86,7 @@ function CustomerListPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(sortedData.map(c => c.id)));
+      setSelectedIds(new Set(pagedCustomers.map(c => c.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -120,12 +121,8 @@ function CustomerListPage() {
   if (loading) {
     return (
       <section className="customers-page customer-list-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} />
-        <div className="customer-page-header">
-          <div>
-            <h1>Customers</h1>
-            <p>Manage your restaurant customers.</p>
-          </div>
+        <div className="customer-list-topbar">
+          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} />
           <Link className="primary-button" to="/customers/new">＋ Add New Customer</Link>
         </div>
         <LoadingSpinner text="Loading customers..." fullScreen />
@@ -135,12 +132,8 @@ function CustomerListPage() {
   
   return (
     <section className="customers-page customer-list-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} />
-      <div className="customer-page-header">
-        <div>
-          <h1>Customers</h1>
-          <p>Manage your restaurant customers.</p>
-        </div>
+      <div className="customer-list-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} />
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={sortedData.length === 0}>
             📥 CSV
@@ -178,34 +171,7 @@ function CustomerListPage() {
             <option>VIP</option>
             <option>New</option>
           </select>
-          <DateRangePicker
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            onStartDateChange={(date) => setDateRange(prev => ({ ...prev, startDate: date }))}
-            onEndDateChange={(date) => setDateRange(prev => ({ ...prev, endDate: date }))}
-            label="Last Order Date"
-          />
-          <label className="amount-range">
-            <span>Total Orders</span>
-            <div className="amount-range-inputs">
-              <input
-                type="number"
-                placeholder="Min"
-                value={ordersRange.min}
-                onChange={(e) => setOrdersRange(prev => ({ ...prev, min: e.target.value }))}
-                aria-label="Minimum orders"
-              />
-              <span>to</span>
-              <input
-                type="number"
-                placeholder="Max"
-                value={ordersRange.max}
-                onChange={(e) => setOrdersRange(prev => ({ ...prev, max: e.target.value }))}
-                aria-label="Maximum orders"
-              />
-            </div>
-          </label>
-          <button type="button" onClick={() => { setSearch(""); setStatus("All Status"); setTier("All Customers"); setDateRange({ startDate: '', endDate: '' }); setOrdersRange({ min: '', max: '' }); }}>
+          <button type="button" onClick={() => { setSearch(""); setStatus("All Status"); setTier("All Customers"); }}>
             ↻ Reset
           </button>
           {selectedIds.size > 0 && (
@@ -256,7 +222,7 @@ function CustomerListPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((customer) => (
+              {pagedCustomers.length ? pagedCustomers.map((customer) => (
                 <tr key={customer.id}>
                   <td className="checkbox-column">
                     <input
@@ -279,11 +245,11 @@ function CustomerListPage() {
                   <td><span className={`customer-badge ${customer.status.toLowerCase()}`}>{customer.status}</span></td>
                   <td><span className={`customer-tier ${customer.tier.toLowerCase()}`}>{customer.tier}</span></td>
                   <td>{customer.totalOrders}</td>
-                  <td>{customer.lastOrderAtUtc ? new Date(customer.lastOrderAtUtc).toLocaleDateString() : "—"}</td>
+                  <td>{customer.lastOrderAtUtc ? formatDate(customer.lastOrderAtUtc) : "—"}</td>
                   <td className="customer-row-actions">
-                    <Link className="view-link" to={`/customers/${customer.id}`}>View</Link>
+                    <Link className="view-link" to={`/customers/${customer.id}`} aria-label={`View ${customer.fullName}`} title={`View ${customer.fullName}`}><EyeIcon /></Link>
                     <button className="action-icon edit" onClick={() => navigate(`/customers/${customer.id}/edit`)}>✎</button>
-                    <button className="action-icon delete" onClick={() => setDeleting(customer)} disabled={isDeleting}>♲</button>
+                    <button className="action-icon delete" aria-label={`Delete ${customer.fullName}`} onClick={() => setDeleting(customer)} disabled={isDeleting}><TrashIcon /></button>
                   </td>
                 </tr>
               )) : (
@@ -301,9 +267,7 @@ function CustomerListPage() {
             </tbody>
           </table>
         </div>
-        <div className="customers-footer">
-          <span>Showing {customers.length} customers</span>
-        </div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="customers" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </div>
       {deleting && (
         <ConfirmDeleteModal

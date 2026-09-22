@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
+import TrashIcon from "../common/TrashIcon";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
+import Pagination from "../common/Pagination";
 import { ordersApi, type RestaurantTableApi } from "../../api/orders.api";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import "./Tables.css";
@@ -16,6 +18,11 @@ function TablesPage() {
   const [deleting, setDeleting] = useState<RestaurantTableApi | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const pageCount = Math.max(1, Math.ceil(tables.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedTables = tables.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const load = async () => {
     try {
@@ -65,13 +72,8 @@ function TablesPage() {
   if (loading) {
     return (
       <section className="tables-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
-        <div className="tables-heading">
-          <div>
-            <p className="eyebrow">Floor management</p>
-            <h1>Tables</h1>
-            <p>See table availability and current orders at a glance.</p>
-          </div>
+        <div className="tables-topbar">
+          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
           <button className="primary-button" onClick={() => setEditing({})}>＋ Add Table</button>
         </div>
         <LoadingSpinner text="Loading tables..." fullScreen />
@@ -81,13 +83,8 @@ function TablesPage() {
 
   return (
     <section className="tables-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
-      <div className="tables-heading">
-        <div>
-          <p className="eyebrow">Floor management</p>
-          <h1>Tables</h1>
-          <p>See table availability and current orders at a glance.</p>
-        </div>
+      <div className="tables-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={tables.length === 0}>
             📥 Export CSV
@@ -98,7 +95,7 @@ function TablesPage() {
       {error && <p className="table-form-error" role="alert">{error}</p>}
       <div className="table-layout">
         <div className="table-grid">
-          {tables.map((table) => (
+          {pagedTables.map((table) => (
             <article
               className={`restaurant-table ${table.status.toLowerCase()} ${selected?.id === table.id ? "selected" : ""}`}
               key={table.id}
@@ -123,10 +120,11 @@ function TablesPage() {
             <strong>{selected.seatCapacity} Seats <span>{selected.status}</span></strong>
             <p>{selected.status === "Occupied" ? "Currently occupied" : "No active order"}</p>
             <button className="primary-button" onClick={() => setEditing({ table: selected })}>Edit Table</button>
-            <button className="delete-table" onClick={() => setDeleting(selected)}>Delete Table</button>
+            <button className="delete-table" onClick={() => setDeleting(selected)}><TrashIcon />Delete Table</button>
           </aside>
         )}
       </div>
+      <Pagination count={tables.length} page={currentPage} pageSize={pageSize} label="tables" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       {editing && <TableForm editor={editing} onClose={() => setEditing(null)} onSave={save} />}
       {deleting && <ConfirmDeleteModal itemName={deleting.tableNumber} itemType="Table" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} />}
     </section>

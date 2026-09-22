@@ -4,13 +4,14 @@ import CategoryHeader from "../components/CategoryHeader";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
+import TrashIcon from "../../common/TrashIcon";
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import LoadingSpinner from "../../common/LoadingSpinner";
-import Breadcrumb from "../../common/Breadcrumb";
 import { useTableSort } from "../../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../../utils/csvExport";
 import { useToast } from "../../common/Toast";
 import ErrorAlert from "../../common/ErrorAlert";
+import Pagination from "../../common/Pagination";
 import "../Categories.css";
 
 function CategoryListPage() {
@@ -23,6 +24,8 @@ function CategoryListPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const load = async () => {
     try {
@@ -42,6 +45,9 @@ function CategoryListPage() {
     [categories, search]
   );
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(filtered);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedCategories = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleExport = () => {
     const columns = [
@@ -55,7 +61,7 @@ function CategoryListPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(sortedData.map(c => c.id)));
+      setSelectedIds(new Set(pagedCategories.map(c => c.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -90,8 +96,7 @@ function CategoryListPage() {
   if (loading) {
     return (
       <section className="categories-page category-list-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Categories' }]} />
-        <CategoryHeader title="Manage Categories" description="Organize your menu with categories." action={<Link className="primary-button" to="/categories/new"><span>+</span> Add New Category</Link>} />
+        <CategoryHeader compact title="Manage Categories" description="Organize your menu with categories." action={<Link className="primary-button" to="/categories/new"><span>+</span> Add New Category</Link>} />
         <LoadingSpinner text="Loading categories..." fullScreen />
       </section>
     );
@@ -99,8 +104,8 @@ function CategoryListPage() {
 
   return (
     <section className="categories-page category-list-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Categories' }]} />
-      <CategoryHeader 
+      <CategoryHeader
+        compact
         title="Manage Categories" 
         description="Organize your menu with categories." 
         action={
@@ -163,7 +168,7 @@ function CategoryListPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((category) => (
+              {pagedCategories.length ? pagedCategories.map((category) => (
                 <tr key={category.id}>
                   <td className="checkbox-column">
                     <input
@@ -179,7 +184,7 @@ function CategoryListPage() {
                   <td>
                     <div className="row-actions">
                       <Link to={`/categories/${category.id}/edit`}>↗</Link>
-                      <button className="delete" onClick={() => setDeleting(category)} disabled={isDeleting}>♲</button>
+                      <button className="delete" aria-label={`Delete ${category.name}`} onClick={() => setDeleting(category)} disabled={isDeleting}><TrashIcon /></button>
                     </div>
                   </td>
                 </tr>
@@ -198,7 +203,7 @@ function CategoryListPage() {
             </tbody>
           </table>
         </div>
-        <div className="table-footer">Showing {sortedData.length} of {categories.length} categories</div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="categories" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </div>
       {deleting && (
         <ConfirmDeleteModal

@@ -17,13 +17,8 @@ function CustomerViewPage() {
 
   return (
     <section className="customers-page customer-detail-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers', path: '/customers' }, { label: customer.name }]} />
-      <div className="customer-heading-row">
-        <div>
-          <h1>Customer Details</h1>
-          <p>View complete information about the customer.</p>
-        </div>
-
+      <div className="customer-detail-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers', path: '/customers' }, { label: customer.name }]} />
         <div className="detail-actions">
           <Link className="secondary-button" to="/customers">← Back to Customers</Link>
           <Link className="primary-button" to={`/customers/${customer.id}/edit`}>
@@ -76,7 +71,7 @@ function CustomerViewPage() {
             <small>Total Orders</small>
           </div>
           <div className="summary-card">
-            <span>₹ 1,850</span>
+            <span>₹1,850</span>
             <small>Lifetime Spend</small>
           </div>
           <div className="summary-card">

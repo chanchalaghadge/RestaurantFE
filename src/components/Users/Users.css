@@ -83,6 +83,9 @@
   font-size: 12px;
 }
 
+.user-field-label { display: inline-flex; align-items: center; gap: 4px; }
+.user-field-label b { color: #dc3545; font-size: 14px; line-height: 1; }
+
 .user-form label input {
   padding: 10px 12px;
   border: 1px solid #dfe6f0;
@@ -95,6 +98,12 @@
   border-color: #4b88ee;
   box-shadow: 0 0 0 3px rgba(75, 136, 238, 0.12);
 }
+
+.india-phone-input { display: flex; align-items: stretch; border: 1px solid #dfe6f0; border-radius: 6px; overflow: hidden; }
+.india-phone-input > span { display: inline-flex; align-items: center; gap: 5px; padding: 0 11px; border-right: 1px solid #dfe6f0; background: #f7f9fc; color: #425571; font-size: 12px; white-space: nowrap; }
+.india-phone-input input { min-width: 0; flex: 1; border: 0 !important; border-radius: 0 !important; }
+.india-phone-input:focus-within { border-color: #4b88ee; box-shadow: 0 0 0 3px rgba(75, 136, 238, 0.12); }
+.india-phone-input input:focus { box-shadow: none !important; }
 
 .user-form-actions {
   display: flex;
@@ -110,3 +119,10 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+.users-page { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.users-page .users-header { flex: 0 0 auto; }
+.users-page .users-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.users-page .users-toolbar, .users-page .list-pagination { flex: 0 0 auto; }
+.users-page .users-table-wrap { flex: 1; min-height: 0; overflow: auto; }
+@media (max-width: 768px) { .users-page { height: auto; overflow: visible; }.users-page .users-table-wrap { overflow-x: auto; } }

@@ -145,7 +145,7 @@ function UserFormPage() {
         <section>
           <h2>Account details</h2>
           <div className="user-form-grid">
-            <label>First Name <b>*</b>
+            <label><span className="user-field-label">First Name <b aria-hidden="true">*</b></span>
               <input 
                 required 
                 autoComplete="given-name" 
@@ -158,14 +158,14 @@ function UserFormPage() {
               />
               {errors.firstName && <small className="field-error">{errors.firstName}</small>}
             </label>
-            <label>Last Name
+            <label><span className="user-field-label">Last Name</span>
               <input 
                 autoComplete="family-name" 
                 value={form.lastName} 
                 onChange={(event) => update("lastName", event.target.value)} 
               />
             </label>
-            <label>Email <b>*</b>
+            <label><span className="user-field-label">Email <b aria-hidden="true">*</b></span>
               <input 
                 required 
                 type="email" 
@@ -179,22 +179,29 @@ function UserFormPage() {
               />
               {errors.email && <small className="field-error">{errors.email}</small>}
             </label>
-            <label>Phone Number
-              <input 
-                type="tel" 
-                autoComplete="tel" 
-                value={form.phoneNumber} 
-                onChange={(event) => {
-                  update("phoneNumber", event.target.value);
-                  validateFieldRealTime("phoneNumber", event.target.value);
-                }}
-                aria-invalid={!!errors.phoneNumber}
-              />
+            <label><span className="user-field-label">Phone Number</span>
+              <div className="india-phone-input">
+                <span aria-hidden="true">🇮🇳 <b>+91</b></span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  placeholder="98765 43210"
+                  maxLength={10}
+                  value={form.phoneNumber}
+                  onChange={(event) => {
+                    const phoneNumber = event.target.value.replace(/\D/g, "").slice(0, 10);
+                    update("phoneNumber", phoneNumber);
+                    validateFieldRealTime("phoneNumber", phoneNumber);
+                  }}
+                  aria-invalid={!!errors.phoneNumber}
+                />
+              </div>
               {errors.phoneNumber && <small className="field-error">{errors.phoneNumber}</small>}
             </label>
             {!editing && (
               <>
-                <label>Password <b>*</b>
+                <label><span className="user-field-label">Password <b aria-hidden="true">*</b></span>
                   <input 
                     required 
                     minLength={8} 
@@ -210,7 +217,7 @@ function UserFormPage() {
                   <small>At least 8 characters.</small>
                   {errors.password && <small className="field-error">{errors.password}</small>}
                 </label>
-                <label>Confirm Password <b>*</b>
+                <label><span className="user-field-label">Confirm Password <b aria-hidden="true">*</b></span>
                   <input 
                     required 
                     minLength={8} 

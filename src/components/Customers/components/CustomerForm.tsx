@@ -4,13 +4,12 @@ import { customersApi, type CustomerApi, type CustomerUpsert } from "../../../ap
 import { validateEmail, validatePhone, validateRequired } from "../../../utils/validation";
 import { useToast } from "../../common/Toast";
 import { useUnsavedChanges } from "../../../hooks/useUnsavedChanges";
-import ErrorAlert from "../../common/ErrorAlert";
 
 function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "create" | "edit" }) {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [form, setForm] = useState<CustomerUpsert>({ fullName: customer?.fullName ?? "", phone: customer?.phone ?? "", email: customer?.email ?? "", status: customer?.status ?? "Active", tier: customer?.tier ?? "Regular", gender: customer?.gender ?? "Male", address: customer?.address ?? "", dateOfBirth: customer?.dateOfBirth?.slice(0, 10) ?? "", notes: customer?.notes ?? "" });
-  const [error, setError] = useState(""); const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -55,14 +54,13 @@ function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "creat
     
     try {
       setSaving(true);
-      setError("");
       customer ? await customersApi.update(customer.id, form) : await customersApi.create(form);
       setHasUnsavedChanges(false);
       showToast(mode === "create" ? "Customer created successfully" : "Customer updated successfully", "success");
       navigate("/customers");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Unable to save customer.");
-      showToast("Failed to save customer", "error");
+      const message = requestError instanceof Error ? requestError.message : "Unable to save customer.";
+      showToast(message, "error", 3500);
     } finally {
       setSaving(false);
     }
@@ -158,7 +156,6 @@ function CustomerForm({ customer, mode }: { customer?: CustomerApi; mode: "creat
           <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} />
         </label>
       </div>
-      {error && <ErrorAlert message={error} onDismiss={() => setError("")} />}
       <div className="customer-form-actions">
         <button className="secondary-button" type="button" onClick={() => navigate(-1)}>Cancel</button>
         <button className="primary-button" disabled={saving} type="submit">
