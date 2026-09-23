@@ -1,4 +1,3 @@
-import * as signalR from '@microsoft/signalr';
 import { tokenStorage } from './security';
 
 export type WebSocketEventType = 
@@ -13,15 +12,16 @@ export type WebSocketEventType =
 export type WebSocketEventHandler<T = any> = (data: T) => void;
 
 class WebSocketService {
-  private connection: signalR.HubConnection | null = null;
+  private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 3000; // 3 seconds
   private eventHandlers: Map<WebSocketEventType, Set<WebSocketEventHandler>> = new Map();
   private isConnecting = false;
+  private pingInterval: ReturnType<typeof setInterval> | null = null;
 
   async connect(): Promise<void> {
-    if (this.isConnecting || (this.connection?.state === signalR.HubConnectionState.Connected)) {
+    if (this.isConnecting || (this.ws?.readyState === WebSocket.OPEN)) {
       return;
     }
 
@@ -32,89 +32,94 @@ class WebSocketService {
       const apiUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 
         'https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net';
 
-      this.connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${apiUrl}/restauranthub`, {
-          accessTokenFactory: () => token || '',
-          skipNegotiation: false,
-          transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents
-        })
-        .withAutomaticReconnect({
-          nextRetryDelayInMilliseconds: (retryContext) => {
-            // Exponential backoff: 3s, 6s, 12s, 24s, 30s
-            if (retryContext.previousRetryCount < 4) {
-              return 3000 * Math.pow(2, retryContext.previousRetryCount);
-            }
-            return 30000; // Max 30 seconds
-          }
-        })
-        .configureLogging(signalR.LogLevel.Information)
-        .build();
-
-      // Set up event handlers
-      this.setupEventHandlers();
-
-      // Start connection
-      await this.connection.start();
-      console.log('WebSocket connected successfully');
+      // Convert HTTPS to WSS for WebSocket
+      const wsUrl = apiUrl.replace(/^https?/, 'wss') + '/ws';
       
-      this.reconnectAttempts = 0;
-      this.isConnecting = false;
+      this.ws = new WebSocket(wsUrl);
 
-      // Subscribe to default groups
-      await this.subscribeToOrders();
-      await this.subscribeToDashboard();
+      this.ws.onopen = () => {
+        console.log('WebSocket connected successfully');
+        this.reconnectAttempts = 0;
+        this.isConnecting = false;
+
+        // Send authentication token
+        if (token) {
+          this.sendMessage({
+            type: 'auth',
+            token: token
+          });
+        }
+
+        // Subscribe to default channels
+        this.subscribeToOrders();
+        this.subscribeToDashboard();
+
+        // Start ping interval to keep connection alive
+        this.startPingInterval();
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          this.handleMessage(message);
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      this.ws.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason);
+        this.stopPingInterval();
+        
+        // Attempt reconnection
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+          this.reconnectAttempts++;
+          const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+          console.log(`Reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+          
+          setTimeout(() => {
+            this.connect();
+          }, delay);
+        } else {
+          console.error('Max reconnection attempts reached');
+          this.isConnecting = false;
+        }
+      };
 
     } catch (error) {
       console.error('WebSocket connection error:', error);
       this.isConnecting = false;
-      
-      // Attempt reconnection
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.reconnectAttempts++;
-        console.log(`Reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${this.reconnectDelay}ms`);
-        
-        setTimeout(() => {
-          this.connect();
-        }, this.reconnectDelay);
-      } else {
-        console.error('Max reconnection attempts reached');
-      }
     }
   }
 
-  private setupEventHandlers(): void {
-    if (!this.connection) return;
+  private handleMessage(message: any): void {
+    if (message.type) {
+      this.emit(message.type, message.data);
+    }
+  }
 
-    // Order events
-    this.connection.on('order:created', (data) => {
-      this.emit('order:created', data);
-    });
+  private sendMessage(message: any): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
+    }
+  }
 
-    this.connection.on('order:updated', (data) => {
-      this.emit('order:updated', data);
-    });
+  private startPingInterval(): void {
+    this.stopPingInterval();
+    this.pingInterval = setInterval(() => {
+      this.sendMessage({ type: 'ping' });
+    }, 30000); // Ping every 30 seconds
+  }
 
-    this.connection.on('order:deleted', (data) => {
-      this.emit('order:deleted', data);
-    });
-
-    this.connection.on('order:status_changed', (data) => {
-      this.emit('order:status_changed', data);
-    });
-
-    // Table events
-    this.connection.on('table:updated', (data) => {
-      this.emit('table:updated', data);
-    });
-
-    this.connection.on('table:status_changed', (data) => {
-      this.emit('table:status_changed', data);
-    });
-
-    // Dashboard events
-    this.connection.on('dashboard:updated', (data) => {
-      this.emit('dashboard:updated', data);
-    });
+  private stopPingInterval(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
   }
 
   on<T = any>(eventType: WebSocketEventType, handler: WebSocketEventHandler<T>): () => void {
@@ -144,92 +149,57 @@ class WebSocketService {
   }
 
   async subscribeToOrders(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('SubscribeToOrders');
-        console.log('Subscribed to orders');
-      } catch (error) {
-        console.error('Failed to subscribe to orders:', error);
-      }
-    }
+    this.sendMessage({
+      type: 'subscribe_orders'
+    });
   }
 
   async unsubscribeFromOrders(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('UnsubscribeFromOrders');
-        console.log('Unsubscribed from orders');
-      } catch (error) {
-        console.error('Failed to unsubscribe from orders:', error);
-      }
-    }
+    this.sendMessage({
+      type: 'unsubscribe_orders'
+    });
   }
 
   async subscribeToTables(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('SubscribeToTables');
-        console.log('Subscribed to tables');
-      } catch (error) {
-        console.error('Failed to subscribe to tables:', error);
-      }
-    }
+    // Currently not implemented in backend
+    console.log('Subscribe to tables not yet implemented');
   }
 
   async unsubscribeFromTables(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('UnsubscribeFromTables');
-        console.log('Unsubscribed from tables');
-      } catch (error) {
-        console.error('Failed to unsubscribe from tables:', error);
-      }
-    }
+    // Currently not implemented in backend
+    console.log('Unsubscribe from tables not yet implemented');
   }
 
   async subscribeToDashboard(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('SubscribeToDashboard');
-        console.log('Subscribed to dashboard');
-      } catch (error) {
-        console.error('Failed to subscribe to dashboard:', error);
-      }
-    }
+    this.sendMessage({
+      type: 'subscribe_dashboard'
+    });
   }
 
   async unsubscribeFromDashboard(): Promise<void> {
-    if (this.connection?.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('UnsubscribeFromDashboard');
-        console.log('Unsubscribed from dashboard');
-      } catch (error) {
-        console.error('Failed to unsubscribe from dashboard:', error);
-      }
-    }
+    this.sendMessage({
+      type: 'unsubscribe_dashboard'
+    });
   }
 
   async disconnect(): Promise<void> {
-    if (this.connection) {
-      try {
-        await this.connection.stop();
-        console.log('WebSocket disconnected');
-      } catch (error) {
-        console.error('Error disconnecting WebSocket:', error);
-      }
-      this.connection = null;
+    this.stopPingInterval();
+    
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
     
     // Clear all event handlers
     this.eventHandlers.clear();
   }
 
-  getConnectionState(): signalR.HubConnectionState {
-    return this.connection?.state ?? signalR.HubConnectionState.Disconnected;
+  getConnectionState(): number {
+    return this.ws?.readyState ?? WebSocket.CLOSED;
   }
 
   isConnected(): boolean {
-    return this.connection?.state === signalR.HubConnectionState.Connected;
+    return this.ws?.readyState === WebSocket.OPEN;
   }
 }
 

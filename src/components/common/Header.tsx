@@ -1,13 +1,21 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { authApi } from "../../api/auth.api";
+import { formatDate, formatTime } from "../../utils/date";
 import "./Header.css";
 
 function Header() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, availableLanguages, t } = useLanguage();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const handleLogout = () => {
     authApi.logout();
@@ -24,6 +32,14 @@ function Header() {
           <span aria-hidden="true">⌕</span>
           <input placeholder={t.common.search + " categories, menu items..."} />
         </label>
+      </div>
+
+      <div className="header-center" aria-label={`Current date and time: ${formatDate(now)}, ${formatTime(now)}`}>
+        <span aria-hidden="true">▣</span>
+        <strong>{formatDate(now)}</strong>
+        <i aria-hidden="true" />
+        <span aria-hidden="true">◷</span>
+        <strong>{formatTime(now)}</strong>
       </div>
 
       <div className="header-right">
@@ -54,21 +70,21 @@ function Header() {
           <span aria-hidden="true">♧</span>
           <i aria-hidden="true" />
         </button>
-        <div className="profile">
-          <span className="avatar" aria-hidden="true">{user.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
-          <span>
-            <strong>{user.name || 'Admin'}</strong>
-            <small>Restaurant Manager</small>
-          </span>
-          <b aria-hidden="true">⌄</b>
-        </div>
-        <button 
-          className="logout-button" 
-          onClick={handleLogout}
-          aria-label="Logout from your account"
-        >
-          {t.common.logout}
-        </button>
+        <details className="profile">
+          <summary aria-label="Open profile menu">
+            <span className="avatar" aria-hidden="true">{user.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
+            <span className="profile-details">
+              <strong>{user.name || 'Admin'}</strong>
+              <small>Restaurant Manager</small>
+            </span>
+            <b aria-hidden="true">⌄</b>
+          </summary>
+          <div className="profile-menu" role="menu">
+            <button type="button" role="menuitem" onClick={handleLogout}>
+              <span aria-hidden="true">⇥</span> {t.common.logout}
+            </button>
+          </div>
+        </details>
       </div>
     </header>
   );

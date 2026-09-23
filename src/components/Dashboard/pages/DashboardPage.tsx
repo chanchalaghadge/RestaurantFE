@@ -1,36 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
-import { LineChart } from "../../common/AnalyticsChart";
+import RevenueOrdersChart from "../components/RevenueOrdersChart";
 import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
+import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
+import { formatCurrency } from "../../../utils/currency";
+import { formatDate } from "../../../utils/date";
 import "../Dashboard.css";
 
 function DashboardPage() {
   const { showToast } = useToast();
+  const { handleError, createErrorContext } = useErrorHandler();
   const [data, setData] = useState<DashboardApi | null>(null);
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const isLoadingRef = useRef(false);
+  const refreshTimeoutRef = useRef<number | null>(null);
 
-  const load = () => dashboardApi.get()
-    .then(setData)
-    .catch((reason: unknown) => {
-      setError(reason instanceof Error ? reason.message : "Unable to load dashboard.");
-      showToast('Failed to load dashboard data', 'error');
-    })
-    .finally(() => setLoading(false));
+  const load = () => {
+    // Prevent concurrent API calls
+    if (isLoadingRef.current) return;
+    
+    isLoadingRef.current = true;
+    return dashboardApi.get()
+      .then(setData)
+      .catch((reason: unknown) => {
+        const errorContext = createErrorContext('DashboardPage', 'loadDashboard');
+        handleError(reason instanceof Error ? reason : new Error('Unable to load dashboard.'), errorContext);
+        setError(reason instanceof Error ? reason.message : "Unable to load dashboard.");
+      })
+      .finally(() => {
+        isLoadingRef.current = false;
+        setLoading(false);
+      });
+  };
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 60 seconds (increased from 30 to reduce API calls)
   const { refresh, isRefreshing } = useAutoRefresh({
-    interval: 30000,
+    interval: 60000,
     enabled: true,
     onRefresh: () => {
       if (data) {
-        return dashboardApi.get().then(setData);
+        console.log('Auto-refreshing dashboard');
+        return load();
       }
     }
   });
@@ -38,59 +55,78 @@ function DashboardPage() {
   // WebSocket integration for real-time updates
   useEffect(() => {
     // Connect to WebSocket
-    webSocketService.connect();
+    webSocketService.connect().catch((error) => {
+      const errorContext = createErrorContext('DashboardPage', 'connectWebSocket');
+      handleError(error, errorContext);
+    });
 
     // Subscribe to dashboard updates
     const unsubscribe = webSocketService.on('dashboard:updated', (dashboardData) => {
       console.log('Dashboard updated via WebSocket:', dashboardData);
       setData(dashboardData as DashboardApi);
-      showToast('Dashboard updated in real-time', 'success');
+      showToast('Dashboard updated in real-time', 'success', 2000);
     });
+
+    // Debounced refresh for order updates
+    const debouncedRefresh = () => {
+      if (refreshTimeoutRef.current !== null) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+      refreshTimeoutRef.current = window.setTimeout(() => {
+        console.log('Refreshing dashboard after order event');
+        load();
+      }, 2000); // Wait 2 seconds before refreshing
+    };
 
     // Subscribe to order updates that affect dashboard
     const unsubscribeOrders = webSocketService.on('order:created', () => {
-      console.log('New order created, refreshing dashboard');
-      load();
+      console.log('New order created, scheduling dashboard refresh');
+      debouncedRefresh();
     });
 
     const unsubscribeOrderStatus = webSocketService.on('order:status_changed', () => {
-      console.log('Order status changed, refreshing dashboard');
-      load();
+      console.log('Order status changed, scheduling dashboard refresh');
+      debouncedRefresh();
     });
 
     return () => {
       unsubscribe();
       unsubscribeOrders();
       unsubscribeOrderStatus();
+      if (refreshTimeoutRef.current !== null) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
     };
-  }, []);
+  }, [createErrorContext, handleError]);
 
   useEffect(() => { void load(); }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimeoutRef.current !== null) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const seed = async () => {
     try {
       setSeeding(true);
       setError("");
       await dashboardApi.seed();
+      showToast('Sample data created successfully', 'success');
+      // Reset loading state before calling load
+      setLoading(true);
       await load();
     } catch (reason) {
+      const errorContext = createErrorContext('DashboardPage', 'seedData');
+      handleError(reason instanceof Error ? reason : new Error('Unable to create sample data.'), errorContext);
       setError(reason instanceof Error ? reason.message : "Unable to create sample data.");
     } finally {
       setSeeding(false);
     }
   };
-
-  const now = new Date();
-  const dateText = new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(now);
-  const dayText = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(now);
-  const timeText = new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(now);
 
   if (loading) {
     return (
@@ -108,7 +144,7 @@ function DashboardPage() {
   }
 
   const metrics = data ? [
-    { icon: "₹", tone: "green", label: "Total Revenue", value: `₹${data.totalRevenue.toFixed(2)}`, sub: `₹${data.todayRevenue.toFixed(2)} today` },
+    { icon: "₹", tone: "green", label: "Total Revenue", value: formatCurrency(data.totalRevenue), sub: `${formatCurrency(data.todayRevenue)} today` },
     { icon: "▤", tone: "blue", label: "Total Orders", value: data.totalOrders, sub: `${data.todayOrders} today` },
     { icon: "♟", tone: "orange", label: "Customers", value: data.totalCustomers, sub: "From backend" },
     { icon: "▣", tone: "purple", label: "Active Menu Items", value: data.activeMenuItems, sub: "From backend" },
@@ -122,24 +158,15 @@ function DashboardPage() {
           <h1>Dashboard</h1>
           <p>Live restaurant sales, orders, customers, and menu performance.</p>
         </div>
-        <div className="dashboard-date" aria-label={`Current date and time: ${dateText}, ${timeText}`}>
-          <div className="dashboard-date-group">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></svg>
-            <div><strong>{dateText}</strong><span>{dayText}</span></div>
-          </div>
-          <div className="dashboard-time-group">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-            <strong>{timeText}</strong>
-          </div>
-        </div>
         <button 
           className="secondary-button refresh-button" 
           onClick={() => {
             refresh();
-            showToast('Dashboard refreshed', 'success');
+            showToast('Dashboard refreshed', 'success', 2000);
           }}
           disabled={isRefreshing}
           title="Refresh dashboard data"
+          aria-label="Refresh dashboard"
         >
           {isRefreshing ? '⏳' : '🔄'}
         </button>
@@ -161,22 +188,15 @@ function DashboardPage() {
                 <p>Revenue for the last 7 days</p>
               </div>
             </div>
-            <div className="enhanced-chart-container">
-              <LineChart 
-                data={data.days.map(day => day.revenue)}
-                labels={data.days.map(day => day.label)}
-                color="#2d5df6"
-                height={200}
-              />
-            </div>
+            <RevenueOrdersChart days={data.days} />
             <div className="sales-stats">
               <div className="stat-item">
                 <span>Total Revenue</span>
-                <strong>₹{data.totalRevenue.toFixed(2)}</strong>
+                <strong>{formatCurrency(data.totalRevenue)}</strong>
               </div>
               <div className="stat-item">
                 <span>Average Daily</span>
-                <strong>₹{(data.totalRevenue / 7).toFixed(2)}</strong>
+                <strong>{formatCurrency(data.totalRevenue / 7)}</strong>
               </div>
               <div className="stat-item">
                 <span>Best Day</span>
@@ -223,7 +243,7 @@ function DashboardPage() {
                     <strong>{item.name}</strong>
                     <span>{item.quantity} sold</span>
                   </div>
-                  <b>₹{item.revenue.toFixed(0)}</b>
+                  <b>{formatCurrency(item.revenue)}</b>
                 </div>
               )) : <p>No item sales yet.</p>}
             </div>
@@ -242,7 +262,7 @@ function DashboardPage() {
               <div className="performance-card">
                 <span className="performance-icon">📊</span>
                 <div>
-                  <strong>₹{(data.totalRevenue / (data.totalOrders || 1)).toFixed(2)}</strong>
+                  <strong>{formatCurrency(data.totalRevenue / (data.totalOrders || 1))}</strong>
                   <small>Avg Order Value</small>
                 </div>
               </div>
@@ -298,9 +318,9 @@ function DashboardPage() {
                       <td>#{order.id}</td>
                       <td>{order.customerName}</td>
                       <td>{order.itemCount}</td>
-                      <td>₹{order.totalAmount.toFixed(2)}</td>
+                      <td>{formatCurrency(order.totalAmount)}</td>
                       <td><span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
-                      <td>{new Date(order.createdAtUtc).toLocaleDateString()}</td>
+                      <td>{formatDate(order.createdAtUtc)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -5,6 +5,7 @@ import CategoryForm from "../components/CategoryForm";
 import Breadcrumb from "../../common/Breadcrumb";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import ErrorAlert from "../../common/ErrorAlert";
+import "../Categories.css";
 
 function CategoryEditPage() {
   const { id } = useParams();

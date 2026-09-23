@@ -5,6 +5,8 @@ import Breadcrumb from "../common/Breadcrumb";
 import { usersApi, type UserApi } from "../../api/users.api";
 import { useTableSort } from "../../hooks/useTableSort";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
+import { formatDate } from "../../utils/date";
+import Pagination from "../common/Pagination";
 import "./Users.css";
 
 function UsersPage() {
@@ -13,6 +15,8 @@ function UsersPage() {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const load = async () => {
     try {
@@ -30,6 +34,9 @@ function UsersPage() {
 
   const filtered = users.filter((user) => `${user.firstName} ${user.lastName} ${user.email} ${user.phoneNumber ?? ""}`.toLowerCase().includes(search.toLowerCase()));
   const { sortedData } = useTableSort(filtered);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedUsers = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const deactivate = async (user: UserApi) => {
     if (!window.confirm(`Deactivate ${user.firstName} ${user.lastName}?`)) return;
@@ -48,7 +55,7 @@ function UsersPage() {
       { key: 'email', label: 'Email' },
       { key: 'phoneNumber', label: 'Phone', formatter: (val: string | undefined) => val || 'N/A' },
       { key: 'isActive', label: 'Status', formatter: (val: boolean) => val ? 'Active' : 'Inactive' },
-      { key: 'createdDate', label: 'Created', formatter: (val: string) => new Date(val).toLocaleDateString() }
+      { key: 'createdDate', label: 'Created', formatter: formatDate }
     ];
     exportToCsv(sortedData, columns, `users-export-${generateTimestamp()}.csv`);
   };
@@ -103,7 +110,7 @@ function UsersPage() {
               </tr>
             </thead>
             <tbody>
-              {sortedData.length ? sortedData.map((user) => (
+              {pagedUsers.length ? pagedUsers.map((user) => (
                 <tr key={user.id}>
                   <td>
                     <div className="user-name">
@@ -114,7 +121,7 @@ function UsersPage() {
                   <td>{user.email}</td>
                   <td>{user.phoneNumber || "—"}</td>
                   <td><i className={user.isActive ? "user-active" : "user-inactive"}>{user.isActive ? "Active" : "Inactive"}</i></td>
-                  <td>{new Date(user.createdDate).toLocaleDateString()}</td>
+                  <td>{formatDate(user.createdDate)}</td>
                   <td>
                     <div className="user-actions">
                       <button type="button" onClick={() => navigate(`/users/${user.id}/edit`)}>Edit</button>
@@ -137,6 +144,7 @@ function UsersPage() {
             </tbody>
           </table>
         </div>
+        <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="users" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </section>
     </section>
   );

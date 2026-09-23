@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
+import TrashIcon from "../../common/TrashIcon";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
 import ErrorAlert from "../../common/ErrorAlert";
@@ -11,6 +12,8 @@ import { menuItemsApi, type MenuItemApi, type MenuItemSummary } from "../../../a
 import { imageUrl, useDefaultImageOnError } from "../../../utils/image";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import { useToast } from "../../common/Toast";
+import { formatCurrency } from "../../../utils/currency";
+import { useTableSort } from "../../../hooks/useTableSort";
 
 function MenuItemsListPage() {
   const { showToast } = useToast();
@@ -20,6 +23,8 @@ function MenuItemsListPage() {
   const [categories, setCategories] = useState<CategoryApi[]>([]);
   const [dietary, setDietary] = useState("All Dietary");
   const [status, setStatus] = useState("All Status");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [itemToDelete, setItemToDelete] = useState<MenuItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -50,19 +55,18 @@ function MenuItemsListPage() {
       ),
     [items, search, dietary, status],
   );
+  const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(visibleItems);
+  const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const pagedItems = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  useEffect(() => { setPage(1); }, [search, categoryId, dietary, status, pageSize]);
 
   if (loading) {
     return (
       <section className="items-page items-list-page">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
-        <div className="items-heading">
-          <div>
-            <h1>Items</h1>
-            <p>
-              Manage your restaurant food &amp; beverage items. Add, edit, delete,
-              and manage variations.
-            </p>
-          </div>
+        <div className="items-list-topbar">
+          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
           <Link className="primary-button" to="/menu/add">
             <span>+</span> Add New Item
           </Link>
@@ -89,7 +93,7 @@ function MenuItemsListPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(visibleItems.map(item => item.id)));
+      setSelectedIds(new Set(pagedItems.map(item => item.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -124,15 +128,8 @@ function MenuItemsListPage() {
 
   return (
     <section className="items-page items-list-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
-      <div className="items-heading">
-        <div>
-          <h1>Items</h1>
-          <p>
-            Manage your restaurant food &amp; beverage items. Add, edit, delete,
-            and manage variations.
-          </p>
-        </div>
+      <div className="items-list-topbar">
+        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
         <Link className="primary-button" to="/menu/add">
           <span>+</span> Add New Item
         </Link>
@@ -250,24 +247,24 @@ function MenuItemsListPage() {
                 <th className="checkbox-column">
                   <input
                     type="checkbox"
-                    checked={visibleItems.length > 0 && selectedIds.size === visibleItems.length}
+                    checked={pagedItems.length > 0 && pagedItems.every((item) => selectedIds.has(item.id))}
                     onChange={(e) => handleSelectAll(e.target.checked)}
                     aria-label="Select all items"
                   />
                 </th>
                 <th>Image</th>
-                <th>Item Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Dietary</th>
+                <th className="sortable" onClick={() => handleSort("name")} aria-sort={sortConfig.key === "name" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Item Name {sortConfig.key === "name" && getSortIcon()}</th>
+                <th className="sortable" onClick={() => handleSort("category")} aria-sort={sortConfig.key === "category" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Category {sortConfig.key === "category" && getSortIcon()}</th>
+                <th className="sortable" onClick={() => handleSort("price")} aria-sort={sortConfig.key === "price" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Price {sortConfig.key === "price" && getSortIcon()}</th>
+                <th className="sortable" onClick={() => handleSort("dietary")} aria-sort={sortConfig.key === "dietary" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Dietary {sortConfig.key === "dietary" && getSortIcon()}</th>
                 <th>GST</th>
                 <th>Available For</th>
-                <th>Status</th>
+                <th className="sortable" onClick={() => handleSort("status")} aria-sort={sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "ascending" : "descending") : "none"}>Status {sortConfig.key === "status" && getSortIcon()}</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {visibleItems.length ? visibleItems.map((item) => (
+              {pagedItems.length ? pagedItems.map((item) => (
                 <tr key={item.id}>
                   <td className="checkbox-column">
                     <input
@@ -291,7 +288,7 @@ function MenuItemsListPage() {
                       {item.category}
                     </span>
                   </td>
-                  <td>₹{item.price}</td>
+                  <td>{formatCurrency(item.price)}</td>
                   <td>
                     <span
                       className={`item-pill dietary-pill ${item.dietary === "Veg" ? "veg" : "non-veg"}`}
@@ -307,7 +304,7 @@ function MenuItemsListPage() {
                     <span className="availability-pill">Delivery</span>
                   </td>
                   <td>
-                    <span className="item-status">{item.status}</span>
+                    <span className={`item-status ${item.status === "Inactive" ? "inactive" : ""}`}>{item.status}</span>
                   </td>
                   <td>
                     <div className="item-actions">
@@ -323,7 +320,7 @@ function MenuItemsListPage() {
                         onClick={() => setItemToDelete(item)}
                         disabled={isDeleting}
                       >
-                        ♲
+                        <TrashIcon />
                       </button>
                     </div>
                   </td>
@@ -333,17 +330,17 @@ function MenuItemsListPage() {
           </table>
         </div>
         <div className="items-footer">
-          <span>Showing {visibleItems.length} of {summary.totalItems} items</span>
-          <div>
-            <button>‹</button>
-            <button className="current">1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-            <button>5</button>
-            <button>›</button>
-            <select>
-              <option>10 / page</option>
+          <span>Showing {sortedData.length ? (currentPage - 1) * pageSize + 1 : 0} to {Math.min(currentPage * pageSize, sortedData.length)} of {sortedData.length} items</span>
+          <div className="pagination-controls">
+            <button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={currentPage === 1} aria-label="Previous page">‹</button>
+            {Array.from({ length: Math.min(pageCount, 5) }, (_, index) => index + 1).map((pageNumber) => (
+              <button key={pageNumber} className={pageNumber === currentPage ? "current" : ""} onClick={() => setPage(pageNumber)}>{pageNumber}</button>
+            ))}
+            <button onClick={() => setPage((value) => Math.min(pageCount, value + 1))} disabled={currentPage === pageCount} aria-label="Next page">›</button>
+            <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))} aria-label="Items per page">
+              <option value={10}>10 / page</option>
+              <option value={25}>25 / page</option>
+              <option value={50}>50 / page</option>
             </select>
           </div>
         </div>

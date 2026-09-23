@@ -1,0 +1,189 @@
+/* Offline Indicator Styles */
+.offline-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.offline-indicator.offline {
+  background: #e35959;
+  color: white;
+}
+
+.offline-indicator.online {
+  background: #1bbf79;
+  color: white;
+}
+
+.offline-indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.offline-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.offline-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.offline-message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.offline-close {
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.offline-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.offline-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Connection Status Indicator */
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.connection-status.online {
+  color: #1bbf79;
+}
+
+.connection-status.offline {
+  color: #e35959;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-status.online .status-dot {
+  background: #1bbf79;
+}
+
+.connection-status.offline .status-dot {
+  background: #e35959;
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  font-weight: 500;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .connection-status {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .offline-indicator {
+    padding: 10px 12px;
+  }
+
+  .offline-message {
+    font-size: 13px;
+  }
+
+  .connection-status {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .status-text {
+    display: none;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .offline-indicator {
+    animation: none;
+  }
+
+  .status-dot {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .offline-indicator.offline {
+    background: #000;
+    border: 2px solid #fff;
+  }
+
+  .offline-indicator.online {
+    background: #000;
+    border: 2px solid #fff;
+  }
+
+  .connection-status {
+    border: 2px solid currentColor;
+  }
+}
