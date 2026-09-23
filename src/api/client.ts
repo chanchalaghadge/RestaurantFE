@@ -42,6 +42,12 @@ function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function notifyServiceUnavailable(error: ApiError) {
+  if (error.status === 0 || error.status >= 500) {
+    window.dispatchEvent(new Event("service-unavailable"));
+  }
+}
+
 export async function api<T>(path: string, init: RequestInit = {}, retryCount: number = 0): Promise<T> {
   const token = tokenStorage.getToken();
   
@@ -122,6 +128,7 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
     
     // Re-throw API errors
     if (error instanceof ApiError) {
+      notifyServiceUnavailable(error);
       throw error;
     }
     
