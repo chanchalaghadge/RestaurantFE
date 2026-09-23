@@ -246,10 +246,12 @@ function CustomerListPage() {
                   <td><span className={`customer-tier ${customer.tier.toLowerCase()}`}>{customer.tier}</span></td>
                   <td>{customer.totalOrders}</td>
                   <td>{customer.lastOrderAtUtc ? formatDate(customer.lastOrderAtUtc) : "—"}</td>
-                  <td className="customer-row-actions">
-                    <Link className="view-link" to={`/customers/${customer.id}`} aria-label={`View ${customer.fullName}`} title={`View ${customer.fullName}`}><EyeIcon /></Link>
-                    <button className="action-icon edit" onClick={() => navigate(`/customers/${customer.id}/edit`)}>✎</button>
-                    <button className="action-icon delete" aria-label={`Delete ${customer.fullName}`} onClick={() => setDeleting(customer)} disabled={isDeleting}><TrashIcon /></button>
+                  <td className="customer-actions-cell">
+                    <div className="customer-row-actions">
+                      <Link className="view-link" to={`/customers/${customer.id}`} aria-label={`View ${customer.fullName}`} title={`View ${customer.fullName}`}><EyeIcon /></Link>
+                      <button className="action-icon edit" onClick={() => navigate(`/customers/${customer.id}/edit`)}>✎</button>
+                      <button className="action-icon delete" aria-label={`Delete ${customer.fullName}`} onClick={() => setDeleting(customer)} disabled={isDeleting}><TrashIcon /></button>
+                    </div>
                   </td>
                 </tr>
               )) : (

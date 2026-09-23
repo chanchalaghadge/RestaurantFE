@@ -1,5 +1,5 @@
 import { api, query } from "./client";
-export type RestaurantTableApi = { id: number; tableNumber: string; seatCapacity: number; status: "Available" | "Occupied" | "Reserved" };
+export type RestaurantTableApi = { id: number; tableNumber: string; seatCapacity: number; area: string; status: "Available" | "Occupied" | "Reserved" };
 export type OrderItemApi = { id?: number; itemName: string; variant?: string; quantity: number; unitPrice: number; lineTotal?: number };
 export type OrderApi = { id: number; customerName: string; orderType: "DineIn" | "Takeaway" | "Delivery"; status: "Pending" | "Preparing" | "Ready" | "Completed" | "Cancelled"; restaurantTableId?: number; tableNumber?: string; subtotal: number; taxAmount: number; totalAmount: number; specialInstructions?: string; createdAtUtc: string; completedAtUtc?: string; items: OrderItemApi[] };
 export const ordersApi = {

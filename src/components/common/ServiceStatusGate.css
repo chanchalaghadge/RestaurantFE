@@ -1,0 +1,48 @@
+.service-unavailable {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+  color: #e8eaf0;
+  background: radial-gradient(circle at 20% 20%, #263f70 0, transparent 32%), radial-gradient(circle at 80% 85%, #263563 0, transparent 28%), #151827;
+}
+
+.service-unavailable-card {
+  position: relative;
+  width: min(100%, 540px);
+  padding: 48px;
+  overflow: hidden;
+  border: 1px solid rgba(173, 200, 255, .22);
+  border-radius: 20px;
+  text-align: center;
+  background: rgba(34, 39, 59, .86);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .34);
+  backdrop-filter: blur(12px);
+}
+
+.service-unavailable-card::before {
+  position: absolute;
+  top: -115px;
+  left: calc(50% - 115px);
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: rgba(75, 136, 238, .12);
+  content: "";
+  filter: blur(8px);
+}
+
+.service-status-orbit { position: relative; display: grid; width: 118px; height: 118px; margin: 0 auto 27px; place-items: center; }
+.service-status-orbit::before, .service-status-orbit::after { position: absolute; border: 1px solid rgba(120, 177, 255, .38); border-radius: 50%; content: ""; }
+.service-status-orbit::before { inset: 7px; animation: service-pulse 2.4s ease-out infinite; }
+.service-status-orbit::after { inset: 22px; border-color: rgba(120, 177, 255, .24); animation: service-pulse 2.4s .7s ease-out infinite; }
+.service-status-core { position: relative; z-index: 1; display: grid; width: 54px; height: 54px; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(135deg, #3e8dff, #5266e6); box-shadow: 0 8px 25px rgba(53, 126, 250, .48); font-size: 28px; font-weight: 800; animation: service-float 2.6s ease-in-out infinite; }
+.service-status-orbit i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #8fc2ff; box-shadow: 0 0 12px #8fc2ff; }
+.service-status-orbit i:nth-of-type(1) { top: 8px; left: 30px; }.service-status-orbit i:nth-of-type(2) { right: 8px; bottom: 31px; }.service-status-orbit i:nth-of-type(3) { bottom: 13px; left: 43px; }
+.service-status-label { position: relative; display: inline-flex; align-items: center; gap: 7px; margin: 0 0 13px; color: #9fc8ff; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }.service-status-label span { width: 8px; height: 8px; border-radius: 50%; background: #60a5fa; box-shadow: 0 0 0 5px rgba(96, 165, 250, .14); }
+.service-unavailable h1 { position: relative; margin: 0; color: #fff; font-size: clamp(25px, 5vw, 33px); line-height: 1.18; }.service-status-message { position: relative; max-width: 405px; margin: 16px auto 26px; color: #b5bdd0; font-size: 14px; line-height: 1.6; }
+.service-retry-button { position: relative; min-width: 154px; border: 0; border-radius: 8px; padding: 12px 18px; color: #fff; background: linear-gradient(135deg, #2775ed, #4f5ee0); box-shadow: 0 8px 20px rgba(44, 109, 230, .33); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform .2s, box-shadow .2s; }.service-retry-button span { display: inline-block; margin-right: 7px; font-size: 18px; vertical-align: -1px; }.service-retry-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 11px 24px rgba(44, 109, 230, .44); }.service-retry-button:disabled { opacity: .72; cursor: wait; }.service-status-hint { position: relative; margin: 18px 0 0; color: #7f8aa2; font-size: 12px; }
+@keyframes service-pulse { 0% { transform: scale(.78); opacity: .95; } 100% { transform: scale(1.18); opacity: 0; } } @keyframes service-float { 50% { transform: translateY(-5px); } }
+@media (max-width: 520px) { .service-unavailable { padding: 16px; }.service-unavailable-card { padding: 36px 24px; }.service-status-message { font-size: 13px; } }
+@media (prefers-reduced-motion: reduce) { .service-status-orbit::before, .service-status-orbit::after, .service-status-core { animation: none; } }

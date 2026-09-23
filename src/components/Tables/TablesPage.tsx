@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
-import TrashIcon from "../common/TrashIcon";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
 import Pagination from "../common/Pagination";
@@ -10,6 +9,7 @@ import "./Tables.css";
 
 type TableStatus = RestaurantTableApi["status"];
 type TableEditor = { table?: RestaurantTableApi };
+const tableAreas = ["Ground Floor", "Second Floor", "Garden", "Rooftop", "Private Dining"];
 
 function TablesPage() {
   const [tables, setTables] = useState<RestaurantTableApi[]>([]);
@@ -64,6 +64,7 @@ function TablesPage() {
     const columns = [
       { key: 'tableNumber', label: 'Table Number' },
       { key: 'seatCapacity', label: 'Seat Capacity' },
+      { key: 'area', label: 'Area' },
       { key: 'status', label: 'Status' }
     ];
     exportToCsv(tables, columns, `tables-export-${generateTimestamp()}.csv`);
@@ -104,6 +105,7 @@ function TablesPage() {
               <span className="table-icon">♜</span>
               <strong>{table.tableNumber}</strong>
               <small>{table.seatCapacity} Seats</small>
+              <small className="table-area">{table.area}</small>
               <em>{table.status}</em>
             </article>
           ))}
@@ -118,9 +120,10 @@ function TablesPage() {
             <hr />
             <p className="detail-label">TABLE DETAILS</p>
             <strong>{selected.seatCapacity} Seats <span>{selected.status}</span></strong>
+            <p className="table-area-detail">Area: <b>{selected.area}</b></p>
             <p>{selected.status === "Occupied" ? "Currently occupied" : "No active order"}</p>
             <button className="primary-button" onClick={() => setEditing({ table: selected })}>Edit Table</button>
-            <button className="delete-table" onClick={() => setDeleting(selected)}><TrashIcon />Delete Table</button>
+            <button className="delete-table" onClick={() => setDeleting(selected)}>Delete Table</button>
           </aside>
         )}
       </div>
@@ -134,13 +137,14 @@ function TablesPage() {
 function TableForm({ editor, onClose, onSave }: { editor: TableEditor; onClose: () => void; onSave: (body: Omit<RestaurantTableApi, "id">, id?: number) => Promise<void> }) {
   const [tableNumber, setTableNumber] = useState(editor.table?.tableNumber ?? "");
   const [seatCapacity, setSeatCapacity] = useState(String(editor.table?.seatCapacity ?? 2));
+  const [area, setArea] = useState(editor.table?.area ?? tableAreas[0]);
   const [status, setStatus] = useState<TableStatus>(editor.table?.status ?? "Available");
 
   return (
     <div className="table-modal-backdrop" role="presentation" onMouseDown={onClose}>
       <form className="table-editor" onMouseDown={(event) => event.stopPropagation()} onSubmit={(event) => {
         event.preventDefault();
-        void onSave({ tableNumber: tableNumber.trim(), seatCapacity: Number(seatCapacity), status }, editor.table?.id);
+        void onSave({ tableNumber: tableNumber.trim(), seatCapacity: Number(seatCapacity), area, status }, editor.table?.id);
       }}>
         <div className="table-modal-title">
           <div>
@@ -151,6 +155,7 @@ function TableForm({ editor, onClose, onSave }: { editor: TableEditor; onClose: 
         </div>
         <label>Table number<input required value={tableNumber} onChange={(event) => setTableNumber(event.target.value)} /></label>
         <label>Number of seats<input required type="number" min="1" value={seatCapacity} onChange={(event) => setSeatCapacity(event.target.value)} /></label>
+        <label>Area<select value={area} onChange={(event) => setArea(event.target.value)}>{tableAreas.map((value) => <option key={value}>{value}</option>)}</select></label>
         <label>Status<select value={status} onChange={(event) => setStatus(event.target.value as TableStatus)}>{(["Available", "Occupied", "Reserved"] as TableStatus[]).map((value) => <option key={value}>{value}</option>)}</select></label>
         <div className="table-modal-actions">
           <button type="button" onClick={onClose}>Cancel</button>
