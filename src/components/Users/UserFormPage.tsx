@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Breadcrumb from "../common/Breadcrumb";
 import { useToast } from "../common/Toast";
 import { usersApi, type UserCreate } from "../../api/users.api";
@@ -17,6 +17,8 @@ function UserFormPage() {
   const signingUp = location.pathname === "/signup";
   const [form, setForm] = useState<UserCreate>(newUser);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -43,7 +45,7 @@ function UserFormPage() {
         error = firstNameResult.error;
         break;
       case 'lastName':
-        // Optional field, no validation
+        if (signingUp) error = validateRequired(value, 'Last name').error;
         break;
       case 'email':
         const emailResult = validateEmail(value);
@@ -82,6 +84,15 @@ function UserFormPage() {
         { validate: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), errorMessage: 'Please enter a valid email address' }
       ]
     };
+
+    if (signingUp) {
+      validationRules.lastName = [
+        { validate: (v) => v.trim().length > 0, errorMessage: 'Last name is required' }
+      ];
+      validationRules.phoneNumber = [
+        { validate: (v) => /^[6-9]\d{9}$/.test(v), errorMessage: 'Enter a valid 10-digit phone number' }
+      ];
+    }
 
     if (!editing) {
       validationRules.password = [
@@ -137,18 +148,29 @@ function UserFormPage() {
     : [{ label: 'Home', path: '/dashboard' }, { label: 'Users', path: '/users' }, { label: title }];
 
   return (
-    <section className="user-form-page">
-      <Breadcrumb items={breadcrumbItems} />
-      <h1>{title}</h1>
-      <p>{signingUp ? "Create an account to access the restaurant portal." : "Create a secure account for a member of your restaurant team."}</p>
-      <form className="user-form" onSubmit={submit}>
+    <main className={signingUp ? "signup-shell" : "user-form-page"}>
+      {signingUp && <aside className="signup-story">
+        <Link className="signup-brand" to="/"><span aria-hidden="true">♨</span><span><strong>Food<span>Crave</span></strong><small>Good Food&nbsp; • &nbsp;Great Mood</small></span></Link>
+        <div className="signup-story-copy"><small>JOIN OUR FOOD COMMUNITY</small><h2>Good Food<br />Brings People<br /><span>Together</span></h2><p>Create your account and be part of a world of delicious food, exclusive offers and amazing experiences.</p>
+          <div className="signup-benefits"><article><span>♜</span><strong>Delicious<br />Food</strong></article><article><span>♧</span><strong>Fast<br />Delivery</strong></article><article><span>★</span><strong>Exclusive<br />Offers</strong></article></div>
+        </div>
+        <p className="signup-story-tagline">Fresh Ingredients&nbsp; · &nbsp;Better Taste&nbsp; ♡</p>
+      </aside>}
+      <section className={signingUp ? "signup-panel" : undefined}>
+      <div className={signingUp ? "signup-card" : undefined}>
+      {!signingUp && <Breadcrumb items={breadcrumbItems} />}
+      {signingUp && <p className="signup-kicker">Create Your Account</p>}
+      <h1>{signingUp ? "Sign Up" : title}</h1>
+      {!signingUp && <p>Create a secure account for a member of your restaurant team.</p>}
+      <form className={`user-form${signingUp ? " signup-form" : ""}`} onSubmit={submit}>
         <section>
           <h2>Account details</h2>
           <div className="user-form-grid">
             <label><span className="user-field-label">First Name <b aria-hidden="true">*</b></span>
               <input 
-                required 
-                autoComplete="given-name" 
+                  required
+                  autoComplete="given-name"
+                  placeholder={signingUp ? "Enter your first name" : undefined}
                 value={form.firstName} 
                 onChange={(event) => {
                   update("firstName", event.target.value);
@@ -158,9 +180,11 @@ function UserFormPage() {
               />
               {errors.firstName && <small className="field-error">{errors.firstName}</small>}
             </label>
-            <label><span className="user-field-label">Last Name</span>
+            <label><span className="user-field-label">Last Name {signingUp && <b aria-hidden="true">*</b>}</span>
               <input 
-                autoComplete="family-name" 
+                required={signingUp}
+                  autoComplete="family-name"
+                  placeholder={signingUp ? "Enter your last name" : undefined}
                 value={form.lastName} 
                 onChange={(event) => update("lastName", event.target.value)} 
               />
@@ -168,8 +192,9 @@ function UserFormPage() {
             <label><span className="user-field-label">Email <b aria-hidden="true">*</b></span>
               <input 
                 required 
-                type="email" 
-                autoComplete="email" 
+                  type="email"
+                  autoComplete="email"
+                  placeholder={signingUp ? "Enter your email address" : undefined}
                 value={form.email} 
                 onChange={(event) => {
                   update("email", event.target.value);
@@ -179,10 +204,11 @@ function UserFormPage() {
               />
               {errors.email && <small className="field-error">{errors.email}</small>}
             </label>
-            <label><span className="user-field-label">Phone Number</span>
+            <label><span className="user-field-label">Phone Number {signingUp && <b aria-hidden="true">*</b>}</span>
               <div className="india-phone-input">
-                <span aria-hidden="true">🇮🇳 <b>+91</b></span>
+                <span aria-hidden="true">☎ <b>+91</b>⌄</span>
                 <input
+                  required={signingUp}
                   type="tel"
                   inputMode="numeric"
                   autoComplete="tel-national"
@@ -205,8 +231,9 @@ function UserFormPage() {
                   <input 
                     required 
                     minLength={8} 
-                    type="password" 
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password" 
+                    placeholder={signingUp ? "At least 8 characters" : undefined}
                     value={form.password} 
                     onChange={(event) => {
                       update("password", event.target.value);
@@ -214,6 +241,7 @@ function UserFormPage() {
                     }}
                     aria-invalid={!!errors.password}
                   />
+                  {signingUp && <button type="button" className="signup-password-toggle" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.8 10.8 0 0 1 12 5c5.2 0 9.1 4.3 10 7a11.7 11.7 0 0 1-3.1 4.7M6.6 6.6C4.7 7.8 3.2 9.7 2 12c.9 2.7 4.8 7 10 7 1.1 0 2.1-.2 3-.5" /></svg> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="2.5" /></svg>}</button>}
                   <small>At least 8 characters.</small>
                   {errors.password && <small className="field-error">{errors.password}</small>}
                 </label>
@@ -221,8 +249,9 @@ function UserFormPage() {
                   <input 
                     required 
                     minLength={8} 
-                    type="password" 
+                    type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password" 
+                    placeholder={signingUp ? "Re-enter your password" : undefined}
                     value={confirmPassword} 
                     onChange={(event) => {
                       setConfirmPassword(event.target.value);
@@ -236,6 +265,7 @@ function UserFormPage() {
                     }}
                     aria-invalid={!!errors.confirmPassword}
                   />
+                  {signingUp && <button type="button" className="signup-password-toggle" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? "Hide password" : "Show password"}>{showConfirmPassword ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.8 10.8 0 0 1 12 5c5.2 0 9.1 4.3 10 7a11.7 11.7 0 0 1-3.1 4.7M6.6 6.6C4.7 7.8 3.2 9.7 2 12c.9 2.7 4.8 7 10 7 1.1 0 2.1-.2 3-.5" /></svg> : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="2.5" /></svg>}</button>}
                   {errors.confirmPassword && <small className="field-error">{errors.confirmPassword}</small>}
                 </label>
               </>
@@ -244,11 +274,21 @@ function UserFormPage() {
         </section>
         {error && <p className="users-error" role="alert">{error}</p>}
         <div className="user-form-actions">
-          <button type="button" onClick={() => navigate(-1)}>Cancel</button>
-          <button className="primary-button" disabled={saving} type="submit">{saving ? "Saving..." : editing ? "Save Changes" : signingUp ? "Create Account" : "Create User"}</button>
+          {!signingUp && <button type="button" onClick={() => navigate(-1)}>Cancel</button>}
+          <button className="primary-button" disabled={saving} type="submit">{saving ? "Saving..." : editing ? "Save Changes" : signingUp ? "Sign Up" : "Create User"}<span aria-hidden="true">→</span></button>
         </div>
       </form>
-    </section>
+      {signingUp && <>
+        <div className="signup-divider"><span>Or sign up with</span></div>
+        <div className="signup-social-actions">
+          <button type="button" onClick={() => showToast("Google sign up is not configured yet.", "info")}><b className="google-mark">G</b> Continue with Google</button>
+          <button type="button" onClick={() => showToast("Apple sign up is not configured yet.", "info")}><b className="apple-mark">●</b> Continue with Apple</button>
+        </div>
+      </>}
+      {signingUp && <p className="signup-login-prompt">Already have an account? <Link to="/login">Sign In</Link></p>}
+      </div>
+      </section>
+    </main>
   );
 }
 

@@ -66,7 +66,7 @@ function UsersPage() {
         <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Users' }]} />
         <header className="users-header">
           <div>
-            <h1>Users</h1>
+            <h1><span className="page-title-icon" aria-hidden="true">♙</span> Users</h1>
             <p>Create and manage access for restaurant staff.</p>
           </div>
           <button className="primary-button" onClick={() => navigate("/users/new")}>＋ Add New User</button>
@@ -81,7 +81,7 @@ function UsersPage() {
       <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Users' }]} />
       <header className="users-header">
         <div>
-          <h1>Users</h1>
+          <h1><span className="page-title-icon" aria-hidden="true">♙</span> Users</h1>
           <p>Create and manage access for restaurant staff.</p>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>

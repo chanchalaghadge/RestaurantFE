@@ -5,6 +5,7 @@ export type WebSocketEventType =
   | 'order:updated' 
   | 'order:deleted' 
   | 'order:status_changed'
+  | 'kitchen_ticket:updated'
   | 'table:updated' 
   | 'table:status_changed'
   | 'dashboard:updated';
