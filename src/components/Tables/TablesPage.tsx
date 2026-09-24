@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ConfirmDeleteModal from "../common/ConfirmDeleteModal";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Breadcrumb from "../common/Breadcrumb";
 import Pagination from "../common/Pagination";
-import { ordersApi, type RestaurantTableApi } from "../../api/orders.api";
+import { ordersApi, type OrderApi, type RestaurantTableApi } from "../../api/orders.api";
 import { exportToCsv, generateTimestamp } from "../../utils/csvExport";
 import "./Tables.css";
 
@@ -12,7 +13,9 @@ type TableEditor = { table?: RestaurantTableApi };
 const tableAreas = ["Ground Floor", "Second Floor", "Garden", "Rooftop", "Private Dining"];
 
 function TablesPage() {
+  const navigate = useNavigate();
   const [tables, setTables] = useState<RestaurantTableApi[]>([]);
+  const [orders, setOrders] = useState<OrderApi[]>([]);
   const [selected, setSelected] = useState<RestaurantTableApi | null>(null);
   const [editing, setEditing] = useState<TableEditor | null>(null);
   const [deleting, setDeleting] = useState<RestaurantTableApi | null>(null);
@@ -27,8 +30,9 @@ function TablesPage() {
   const load = async () => {
     try {
       setLoading(true);
-      const data = await ordersApi.listTables();
+      const [data, orderData] = await Promise.all([ordersApi.listTables(), ordersApi.list()]);
       setTables(data);
+      setOrders(orderData);
       setSelected((current) => data.find((table) => table.id === current?.id) ?? data[0] ?? null);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Unable to load tables.");
@@ -36,6 +40,11 @@ function TablesPage() {
       setLoading(false);
     }
   };
+
+  const getActiveOrder = (tableId: number) => orders.find(
+    (order) => order.restaurantTableId === tableId && order.status !== "Completed" && order.status !== "Cancelled",
+  );
+  const activeOrder = selected ? getActiveOrder(selected.id) : undefined;
 
   useEffect(() => { void load(); }, []);
 
@@ -100,13 +109,18 @@ function TablesPage() {
             <article
               className={`restaurant-table ${table.status.toLowerCase()} ${selected?.id === table.id ? "selected" : ""}`}
               key={table.id}
-              onClick={() => setSelected(table)}
+              onClick={() => {
+                const order = getActiveOrder(table.id);
+                if (order) navigate(`/orders/${order.id}`);
+                else setSelected(table);
+              }}
             >
               <span className="table-icon">♜</span>
               <strong>{table.tableNumber}</strong>
               <small>{table.seatCapacity} Seats</small>
               <small className="table-area">{table.area}</small>
               <em>{table.status}</em>
+              {getActiveOrder(table.id) && <small className="table-active-order">Order #{getActiveOrder(table.id)?.id}</small>}
             </article>
           ))}
         </div>
@@ -121,7 +135,9 @@ function TablesPage() {
             <p className="detail-label">TABLE DETAILS</p>
             <strong>{selected.seatCapacity} Seats <span>{selected.status}</span></strong>
             <p className="table-area-detail">Area: <b>{selected.area}</b></p>
-            <p>{selected.status === "Occupied" ? "Currently occupied" : "No active order"}</p>
+            {activeOrder
+              ? <p>Active order: <b>#{activeOrder.id} · {activeOrder.status}</b>. Select this table to open the order.</p>
+              : <p>{selected.status === "Occupied" ? "Occupied — no active order found" : selected.status === "Reserved" ? "This table is reserved" : "No active order"}</p>}
             <button className="primary-button" onClick={() => setEditing({ table: selected })}>Edit Table</button>
             <button className="delete-table" onClick={() => setDeleting(selected)}>Delete Table</button>
           </aside>

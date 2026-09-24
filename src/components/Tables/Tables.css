@@ -27,6 +27,7 @@
 .restaurant-table em { font-style: normal; padding: 4px 8px; border-radius: 15px; font-size: 9px; color: #159958; background: #dff7e9; }
 .restaurant-table.occupied em { color: #e34154; background: #ffe7e8; }
 .restaurant-table.reserved em { color: #bd7a00; background: #fff1cc; }
+.restaurant-table .table-active-order { color: #1467e8; font-weight: 700; }
 .table-detail { background: #fff; border: 1px solid #e0e8f0; border-radius: 8px; padding: 18px; }
 .table-detail h2 { margin: 3px 0 10px; font-size: 18px; }
 .table-detail hr { border: 0; border-top: 1px solid #e0e8f0; margin: 15px 0; }
@@ -36,6 +37,12 @@
 .table-detail .table-area-detail { margin: -4px 0 12px; }
 .table-detail .table-area-detail b { color: #17304d; }
 .table-detail .primary-button { width: 100%; margin-bottom: 10px; }
+.active-order-card { border: 1px solid #dbe5ef; border-radius: 7px; background: #f7faff; padding: 12px; margin: 12px 0; }
+.active-order-card .detail-label { margin-bottom: 10px; }
+.active-order-card strong { display: flex; justify-content: space-between; gap: 8px; }
+.active-order-card strong span { margin: 0; }
+.active-order-card p:not(.detail-label) { margin: 7px 0; }
+.active-order-card .secondary-button { width: 100%; margin-top: 8px; }
 .delete-table { width: 100%; border: 1px solid #ef5262; border-radius: 6px; background: #fff; color: #d32f2f; font-weight: 700; padding: 11px 16px; font-size: 12px; cursor: pointer; transition: background .2s, border-color .2s, color .2s; }
 .delete-table:hover { border-color: #d32f2f; background: #ffe7e8; }
 .table-form-error { color: #d32f2f; font-size: 12px; margin-bottom: 15px; }
