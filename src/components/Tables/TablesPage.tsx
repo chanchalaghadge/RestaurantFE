@@ -26,6 +26,14 @@ function TablesPage() {
   const pageCount = Math.max(1, Math.ceil(tables.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const pagedTables = tables.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const hasMultipleAreas = new Set(tables.map((table) => table.area?.trim() || "Unassigned area")).size > 1;
+  const tablesByArea = hasMultipleAreas
+    ? Array.from(pagedTables.reduce((groups, table) => {
+        const area = table.area?.trim() || "Unassigned area";
+        groups.set(area, [...(groups.get(area) ?? []), table]);
+        return groups;
+      }, new Map<string, RestaurantTableApi[]>()))
+    : [];
 
   const load = async () => {
     try {
@@ -79,11 +87,30 @@ function TablesPage() {
     exportToCsv(tables, columns, `tables-export-${generateTimestamp()}.csv`);
   };
 
+  const renderTableCard = (table: RestaurantTableApi) => (
+    <article
+      className={`restaurant-table ${table.status.toLowerCase()} ${selected?.id === table.id ? "selected" : ""}`}
+      key={table.id}
+      onClick={() => {
+        const order = getActiveOrder(table.id);
+        if (order) navigate(`/orders/${order.id}`);
+        else setSelected(table);
+      }}
+    >
+      <span className="table-icon">♜</span>
+      <strong>{table.tableNumber}</strong>
+      <small>{table.seatCapacity} Seats</small>
+      <small className="table-area">{table.area}</small>
+      <em>{table.status}</em>
+      {getActiveOrder(table.id) && <small className="table-active-order">Order #{getActiveOrder(table.id)?.id}</small>}
+    </article>
+  );
+
   if (loading) {
     return (
       <section className="tables-page">
         <div className="tables-topbar">
-          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
+          <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} /></div>
           <button className="primary-button" onClick={() => setEditing({})}>＋ Add Table</button>
         </div>
         <LoadingSpinner text="Loading tables..." fullScreen />
@@ -94,8 +121,8 @@ function TablesPage() {
   return (
     <section className="tables-page">
       <div className="tables-topbar">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} />
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Tables' }]} /></div>
+        <div className="tables-topbar-actions">
           <button className="secondary-button" onClick={handleExport} disabled={tables.length === 0}>
             📥 Export CSV
           </button>
@@ -104,26 +131,18 @@ function TablesPage() {
       </div>
       {error && <p className="table-form-error" role="alert">{error}</p>}
       <div className="table-layout">
-        <div className="table-grid">
-          {pagedTables.map((table) => (
-            <article
-              className={`restaurant-table ${table.status.toLowerCase()} ${selected?.id === table.id ? "selected" : ""}`}
-              key={table.id}
-              onClick={() => {
-                const order = getActiveOrder(table.id);
-                if (order) navigate(`/orders/${order.id}`);
-                else setSelected(table);
-              }}
-            >
-              <span className="table-icon">♜</span>
-              <strong>{table.tableNumber}</strong>
-              <small>{table.seatCapacity} Seats</small>
-              <small className="table-area">{table.area}</small>
-              <em>{table.status}</em>
-              {getActiveOrder(table.id) && <small className="table-active-order">Order #{getActiveOrder(table.id)?.id}</small>}
-            </article>
-          ))}
-        </div>
+        {hasMultipleAreas ? (
+          <div className="table-area-groups">
+            {tablesByArea.map(([area, areaTables]) => (
+              <section className="table-area-group" key={area} aria-label={`${area} tables`}>
+                <h2>{area}</h2>
+                <div className="table-grid">{areaTables.map((table) => renderTableCard(table))}</div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div className="table-grid">{pagedTables.map((table) => renderTableCard(table))}</div>
+        )}
         {selected && (
           <aside className="table-detail">
             <div>
@@ -153,14 +172,17 @@ function TablesPage() {
 function TableForm({ editor, onClose, onSave }: { editor: TableEditor; onClose: () => void; onSave: (body: Omit<RestaurantTableApi, "id">, id?: number) => Promise<void> }) {
   const [tableNumber, setTableNumber] = useState(editor.table?.tableNumber ?? "");
   const [seatCapacity, setSeatCapacity] = useState(String(editor.table?.seatCapacity ?? 2));
-  const [area, setArea] = useState(editor.table?.area ?? tableAreas[0]);
+  const [area, setArea] = useState(editor.table?.area?.trim() || tableAreas[0]);
   const [status, setStatus] = useState<TableStatus>(editor.table?.status ?? "Available");
+  const availableAreas = tableAreas.includes(area) ? tableAreas : [...tableAreas, area];
 
   return (
     <div className="table-modal-backdrop" role="presentation" onMouseDown={onClose}>
       <form className="table-editor" onMouseDown={(event) => event.stopPropagation()} onSubmit={(event) => {
         event.preventDefault();
-        void onSave({ tableNumber: tableNumber.trim(), seatCapacity: Number(seatCapacity), area, status }, editor.table?.id);
+        const normalizedArea = area.trim();
+        if (!normalizedArea) return;
+        void onSave({ tableNumber: tableNumber.trim(), seatCapacity: Number(seatCapacity), area: normalizedArea, status }, editor.table?.id);
       }}>
         <div className="table-modal-title">
           <div>
@@ -171,7 +193,7 @@ function TableForm({ editor, onClose, onSave }: { editor: TableEditor; onClose: 
         </div>
         <label>Table number<input required value={tableNumber} onChange={(event) => setTableNumber(event.target.value)} /></label>
         <label>Number of seats<input required type="number" min="1" value={seatCapacity} onChange={(event) => setSeatCapacity(event.target.value)} /></label>
-        <label>Area<select value={area} onChange={(event) => setArea(event.target.value)}>{tableAreas.map((value) => <option key={value}>{value}</option>)}</select></label>
+        <label>Area<select required value={area} onChange={(event) => setArea(event.target.value)}>{availableAreas.map((value) => <option key={value}>{value}</option>)}</select></label>
         <label>Status<select value={status} onChange={(event) => setStatus(event.target.value as TableStatus)}>{(["Available", "Occupied", "Reserved"] as TableStatus[]).map((value) => <option key={value}>{value}</option>)}</select></label>
         <div className="table-modal-actions">
           <button type="button" onClick={onClose}>Cancel</button>

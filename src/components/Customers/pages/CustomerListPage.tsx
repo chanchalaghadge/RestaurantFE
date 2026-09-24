@@ -122,7 +122,7 @@ function CustomerListPage() {
     return (
       <section className="customers-page customer-list-page">
         <div className="customer-list-topbar">
-          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} />
+        <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} /><h1><span className="page-title-icon" aria-hidden="true">♟</span>Customers</h1></div>
           <Link className="primary-button" to="/customers/new">＋ Add New Customer</Link>
         </div>
         <LoadingSpinner text="Loading customers..." fullScreen />
@@ -133,7 +133,7 @@ function CustomerListPage() {
   return (
     <section className="customers-page customer-list-page">
       <div className="customer-list-topbar">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} />
+          <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Customers' }]} /><h1><span className="page-title-icon" aria-hidden="true">♟</span>Customers</h1></div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="secondary-button" onClick={handleExport} disabled={sortedData.length === 0}>
             📥 CSV

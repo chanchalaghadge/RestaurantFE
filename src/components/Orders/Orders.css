@@ -5,9 +5,12 @@
 .orders-card .order-table-wrap { flex: 1; min-height: 0; overflow: auto; }
 .orders-card .list-pagination { flex: 0 0 auto; }
 .orders-topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
-.orders-topbar .breadcrumb { margin-bottom: 0; }
+.orders-topbar .breadcrumb { margin: 0; }
+.orders-topbar .section-title-block { flex: 1 1 auto; }
+.orders-topbar-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex: 0 0 auto; }
 .orders-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 @media (max-width: 768px) { .orders-page { height: auto; overflow: visible; }.orders-card .order-table-wrap { overflow-x: auto; } }
+@media (max-width: 620px) { .orders-topbar { align-items: flex-start; flex-wrap: wrap; }.orders-topbar-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; } }
 .orders-heading h1 { font-size: 25px; margin: 2px 0 4px; }
 .orders-heading p:not(.eyebrow) { color: #7d8ca1; font-size: 13px; }
 .eyebrow { color: #3574d6; text-transform: uppercase; letter-spacing: .08em; font-size: 10px; font-weight: 800; }

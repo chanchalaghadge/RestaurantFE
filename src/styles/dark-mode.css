@@ -925,6 +925,11 @@
   background: #171b29 !important;
 }
 
+[data-theme="dark"] .order-status.ready {
+  color: #4ade9a !important;
+  background-color: rgba(34, 197, 94, .18) !important;
+}
+
 [data-theme="dark"] #root .signup-card {
   border-color: #3d4255 !important;
   background: #242838 !important;
@@ -1073,3 +1078,37 @@
 [data-theme="dark"] .edit-menu-grid strong,
 [data-theme="dark"] .edit-add-customer { color: #7db3ff !important; }
 [data-theme="dark"] .edit-remove { color: #ff8c8c !important; }
+
+/* Keep Edit Order surfaces and controls legible with the dark theme enabled. */
+[data-theme="dark"] .edit-order-header-main,
+[data-theme="dark"] .edit-order-header-main .breadcrumb,
+[data-theme="dark"] .edit-order-header h1,
+[data-theme="dark"] .edit-order-controls,
+[data-theme="dark"] .edit-item-name,
+[data-theme="dark"] .edit-quantity span {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .edit-order-header-actions .secondary-button {
+  color: var(--text-primary) !important;
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .kot-addition-note {
+  color: #bfdbfe !important;
+  background: rgba(59, 130, 246, .16) !important;
+  border-left-color: #60a5fa !important;
+}
+
+[data-theme="dark"] .edit-order-controls input,
+[data-theme="dark"] .edit-order-controls select,
+[data-theme="dark"] .edit-instructions textarea,
+[data-theme="dark"] .edit-quantity button {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .edit-order-controls input::placeholder,
+[data-theme="dark"] .edit-instructions textarea::placeholder {
+  color: var(--text-secondary) !important;
+}

@@ -2,6 +2,7 @@
 .kitchen-topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
 .kitchen-topbar .breadcrumb { margin-bottom: 8px; }
 .kitchen-topbar h1 { margin: 0; font-size: 25px; }
+.kitchen-title-icon { margin-right: 7px; font-size: 23px; vertical-align: -1px; }
 .kitchen-topbar p { margin: 5px 0 0; color: #718197; font-size: 12px; }
 .kitchen-live-indicator { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #b9ebd0; border-radius: 20px; background: #effbf4; color: #16814a; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .kitchen-live-indicator i { width: 7px; height: 7px; border-radius: 50%; background: #20b26b; box-shadow: 0 0 0 3px #20b26b24; }
@@ -33,3 +34,35 @@
 .kitchen-error { padding: 10px 12px; border-radius: 6px; background: #ffe7e8; color: #a91f2d; font-size: 12px; }
 @media (max-width: 1000px) { .kitchen-columns { grid-template-columns: 1fr; } .kitchen-lane { min-height: 120px; } }
 @media (max-width: 600px) { .kitchen-page { padding: 12px; } .kitchen-topbar { align-items: flex-start; flex-direction: column; } }
+
+/* The global dark-theme rule forces white text; give KDS surfaces matching dark backgrounds. */
+[data-theme="dark"] #root .kitchen-page { color: var(--text-primary) !important; }
+[data-theme="dark"] #root .kitchen-topbar h1 { color: var(--text-primary) !important; }
+[data-theme="dark"] #root .kitchen-topbar p,
+[data-theme="dark"] #root .kitchen-lane-empty,
+[data-theme="dark"] #root .kitchen-empty { color: var(--text-secondary) !important; }
+[data-theme="dark"] #root .kitchen-live-indicator { color: #167347 !important; }
+[data-theme="dark"] #root .kitchen-lane {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+[data-theme="dark"] #root .kitchen-lane-heading h2 { color: var(--text-primary) !important; }
+[data-theme="dark"] #root .kitchen-lane.pending .kitchen-lane-heading span { color: #a45b00 !important; }
+[data-theme="dark"] #root .kitchen-lane.preparing .kitchen-lane-heading span { color: #205bb7 !important; }
+[data-theme="dark"] #root .kitchen-lane.ready .kitchen-lane-heading span { color: #16814a !important; }
+[data-theme="dark"] #root .kitchen-order-card {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  border-left-color: #e0aa3e !important;
+  box-shadow: none !important;
+}
+[data-theme="dark"] #root .preparing .kitchen-order-card { border-left-color: #5795f5 !important; }
+[data-theme="dark"] #root .ready .kitchen-order-card { border-left-color: #32c982 !important; }
+[data-theme="dark"] #root .kitchen-order-heading { border-color: var(--border-color) !important; }
+[data-theme="dark"] #root .kitchen-order-heading strong,
+[data-theme="dark"] #root .kitchen-order-item span { color: var(--text-primary) !important; }
+[data-theme="dark"] #root .kitchen-order-heading span,
+[data-theme="dark"] #root .kitchen-order-heading time { color: var(--text-secondary) !important; }
+[data-theme="dark"] #root .kitchen-order-footer { border-color: var(--border-color) !important; }
+[data-theme="dark"] #root .kitchen-ready-label { color: #5be0a0 !important; }
+[data-theme="dark"] #root .kitchen-error { background: rgba(239, 68, 68, .18) !important; color: #ff9ca8 !important; }
