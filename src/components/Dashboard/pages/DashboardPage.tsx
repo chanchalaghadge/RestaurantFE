@@ -134,7 +134,7 @@ function DashboardPage() {
         <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }]} />
         <div className="dashboard-heading">
           <div>
-            <h1>Dashboard</h1>
+            <h1><span className="page-title-icon" aria-hidden="true">⌂</span> Dashboard</h1>
             <p>Live restaurant sales, orders, customers, and menu performance.</p>
           </div>
         </div>
@@ -155,7 +155,7 @@ function DashboardPage() {
       <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }]} />
       <div className="dashboard-heading">
         <div>
-          <h1>Dashboard</h1>
+          <h1><span className="page-title-icon" aria-hidden="true">⌂</span> Dashboard</h1>
           <p>Live restaurant sales, orders, customers, and menu performance.</p>
         </div>
         <button 

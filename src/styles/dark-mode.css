@@ -918,6 +918,154 @@
 [data-theme="dark"] .edit-instructions,
 [data-theme="dark"] .edit-item-name small,
 [data-theme="dark"] .edit-summary > div { color: var(--text-secondary) !important; }
+
+/* Public authentication screens need coordinated dark surfaces and readable text. */
+[data-theme="dark"] #root .signup-panel,
+[data-theme="dark"] #root .login-panel {
+  background: #171b29 !important;
+}
+
+[data-theme="dark"] .order-status.ready {
+  color: #4ade9a !important;
+  background-color: rgba(34, 197, 94, .18) !important;
+}
+
+[data-theme="dark"] #root .signup-card {
+  border-color: #3d4255 !important;
+  background: #242838 !important;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, .3) !important;
+}
+
+[data-theme="dark"] #root .signup-card,
+[data-theme="dark"] #root .signup-card h1,
+[data-theme="dark"] #root .signup-card .user-field-label,
+[data-theme="dark"] #root .signup-card .signup-login-prompt,
+[data-theme="dark"] #root .signup-social-actions button {
+  color: #e8eaf0 !important;
+}
+
+[data-theme="dark"] #root .signup-card .signup-kicker,
+[data-theme="dark"] #root .signup-card .signup-login-prompt {
+  color: #aeb5c6 !important;
+}
+
+[data-theme="dark"] #root .signup-card .signup-login-prompt a,
+[data-theme="dark"] #root .signup-card .signup-brand strong span {
+  color: #ffb51f !important;
+}
+
+[data-theme="dark"] #root .signup-brand > span:first-child,
+[data-theme="dark"] #root .signup-story-copy h2 span,
+[data-theme="dark"] #root .signup-story-tagline {
+  color: #ffbd39 !important;
+}
+
+[data-theme="dark"] #root .signup-form label > input,
+[data-theme="dark"] #root .signup-form .india-phone-input {
+  border-color: #4a5065 !important;
+  background: #2d3245 !important;
+  color: #f4f5f8 !important;
+}
+
+[data-theme="dark"] #root .signup-form label > input::placeholder,
+[data-theme="dark"] #root .signup-form .india-phone-input input::placeholder {
+  color: #a0a8bb !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] #root .signup-form .india-phone-input > span {
+  border-color: #4a5065 !important;
+  background: #242838 !important;
+  color: #e8eaf0 !important;
+}
+
+[data-theme="dark"] #root .signup-form label:nth-child(n)::after,
+[data-theme="dark"] #root .signup-password-toggle {
+  color: #aeb8cb !important;
+}
+
+[data-theme="dark"] #root .signup-password-toggle:hover {
+  color: #ffbd39 !important;
+  background: #383b4b !important;
+}
+
+[data-theme="dark"] #root .signup-divider {
+  color: #aeb5c6 !important;
+}
+
+[data-theme="dark"] #root .signup-social-actions button {
+  border-color: #454b60 !important;
+  background: #2d3245 !important;
+}
+
+[data-theme="dark"] #root .signup-social-actions .google-mark {
+  color: #75a7ff !important;
+}
+
+[data-theme="dark"] #root .signup-social-actions .apple-mark {
+  color: #fff !important;
+}
+
+[data-theme="dark"] #root .signup-form .user-form-actions .primary-button {
+  color: #182033 !important;
+  background: linear-gradient(100deg, #ffc326, #ff9d19) !important;
+}
+
+[data-theme="dark"] #root .login-panel {
+  background: #202434 !important;
+}
+
+[data-theme="dark"] #root .login-form-wrap h2,
+[data-theme="dark"] #root .login-form-wrap label,
+[data-theme="dark"] #root .login-signup-prompt {
+  color: #eef0f5 !important;
+}
+
+[data-theme="dark"] #root .login-subtitle,
+[data-theme="dark"] #root .remember-login,
+[data-theme="dark"] #root .login-divider {
+  color: #aeb5c6 !important;
+}
+
+[data-theme="dark"] #root .login-input-wrap {
+  border-color: #4a5065 !important;
+  background: #2d3245 !important;
+}
+
+[data-theme="dark"] #root .login-input-wrap input {
+  background: transparent !important;
+  color: #f4f5f8 !important;
+}
+
+[data-theme="dark"] #root .login-input-wrap input::placeholder {
+  color: #a0a8bb !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] #root .login-input-icon,
+[data-theme="dark"] #root .password-visibility-button {
+  color: #aeb8cb !important;
+}
+
+[data-theme="dark"] #root .login-input-wrap:focus-within {
+  border-color: #ffb51f !important;
+  box-shadow: 0 0 0 4px rgba(255, 177, 17, .15) !important;
+}
+
+[data-theme="dark"] #root .login-signup-prompt a,
+[data-theme="dark"] #root .forgot-link {
+  color: #ffbd39 !important;
+}
+
+[data-theme="dark"] #root .login-chef-icon,
+[data-theme="dark"] #root .login-brand-copy strong span {
+  color: #ffbd39 !important;
+}
+
+[data-theme="dark"] #root .login-button {
+  color: #182033 !important;
+  background: linear-gradient(100deg, #ffc326, #ff9d19) !important;
+}
 [data-theme="dark"] .edit-order-header h1,
 [data-theme="dark"] .edit-items-area h2,
 [data-theme="dark"] .edit-summary h2,
@@ -930,3 +1078,37 @@
 [data-theme="dark"] .edit-menu-grid strong,
 [data-theme="dark"] .edit-add-customer { color: #7db3ff !important; }
 [data-theme="dark"] .edit-remove { color: #ff8c8c !important; }
+
+/* Keep Edit Order surfaces and controls legible with the dark theme enabled. */
+[data-theme="dark"] .edit-order-header-main,
+[data-theme="dark"] .edit-order-header-main .breadcrumb,
+[data-theme="dark"] .edit-order-header h1,
+[data-theme="dark"] .edit-order-controls,
+[data-theme="dark"] .edit-item-name,
+[data-theme="dark"] .edit-quantity span {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .edit-order-header-actions .secondary-button {
+  color: var(--text-primary) !important;
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .kot-addition-note {
+  color: #bfdbfe !important;
+  background: rgba(59, 130, 246, .16) !important;
+  border-left-color: #60a5fa !important;
+}
+
+[data-theme="dark"] .edit-order-controls input,
+[data-theme="dark"] .edit-order-controls select,
+[data-theme="dark"] .edit-instructions textarea,
+[data-theme="dark"] .edit-quantity button {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .edit-order-controls input::placeholder,
+[data-theme="dark"] .edit-instructions textarea::placeholder {
+  color: var(--text-secondary) !important;
+}

@@ -180,7 +180,7 @@ function OrdersPage() {
     return (
       <section className="orders-page">
         <div className="orders-topbar">
-          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} />
+          <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} /></div>
           <button className="primary-button" onClick={() => navigate("/orders/new")}>＋ Create Order</button>
         </div>
         <LoadingSpinner text="Loading orders..." fullScreen />
@@ -191,8 +191,8 @@ function OrdersPage() {
   return (
     <section className="orders-page">
       <div className="orders-topbar">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} />
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Orders' }]} /></div>
+        <div className="orders-topbar-actions">
           <button className="secondary-button" onClick={handleExport} disabled={sortedData.length === 0}>
             📥 CSV
           </button>

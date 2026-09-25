@@ -66,7 +66,7 @@ function MenuItemsListPage() {
     return (
       <section className="items-page items-list-page">
         <div className="items-list-topbar">
-          <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
+          <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} /><h1><span className="page-title-icon" aria-hidden="true">▣</span>Menu Items</h1></div>
           <Link className="primary-button" to="/menu/add">
             <span>+</span> Add New Item
           </Link>
@@ -129,7 +129,7 @@ function MenuItemsListPage() {
   return (
     <section className="items-page items-list-page">
       <div className="items-list-topbar">
-        <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} />
+        <div className="section-title-block"><Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Menu', path: '/menu' }, { label: 'All Items' }]} /><h1><span className="page-title-icon" aria-hidden="true">▣</span>Menu Items</h1></div>
         <Link className="primary-button" to="/menu/add">
           <span>+</span> Add New Item
         </Link>

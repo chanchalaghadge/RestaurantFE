@@ -86,6 +86,9 @@ function Sidebar() {
           <NavLink to="/tables" aria-label="View tables">
             ▦ <span>Tables</span>
           </NavLink>
+          <NavLink to="/kitchen" aria-label="Open kitchen display">
+            🍳 <span>Kitchen Display</span>
+          </NavLink>
           <NavLink to="/customers" aria-label="View customers">
             ♟ <span>Customers</span>
           </NavLink>
