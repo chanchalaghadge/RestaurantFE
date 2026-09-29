@@ -49,10 +49,12 @@ function Login() {
         localStorage.removeItem("restaurant-remember-email");
         localStorage.removeItem("restaurant-remembered-email");
       }
-      localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email }));
+      localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email, role: result.user.role, branchId: result.user.branchId }));
       showToast("Login successful", "success", 2000);
       clearAllErrors();
-      navigate("/dashboard");
+      navigate(result.user.role === "Chef" ? "/kitchen"
+        : result.user.role === "Waiter" || result.user.role === "Captain" ? "/orders"
+        : "/dashboard");
     } catch (requestError) {
       const errorContext = createErrorContext("Login", "submitLoginForm", { email: formData.email });
       handleError(requestError instanceof Error ? requestError : new Error("Unable to sign in."), errorContext);

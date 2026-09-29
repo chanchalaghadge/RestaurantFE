@@ -389,6 +389,7 @@
 [data-theme="dark"] .customer-stats article,
 [data-theme="dark"] .users-panel,
 [data-theme="dark"] .user-form section,
+[data-theme="dark"] .user-form label select,
 [data-theme="dark"] .restaurant-table,
 [data-theme="dark"] .table-detail,
 [data-theme="dark"] .category-panel,
@@ -579,6 +580,8 @@
   background: var(--bg-tertiary) !important;
   border-color: var(--border-color) !important;
 }
+
+[data-theme="dark"] .user-form label select { color: var(--text-primary); }
 
 [data-theme="dark"] .menu-item-search,
 [data-theme="dark"] .create-menu-code,
@@ -1175,5 +1178,12 @@
 
 [data-theme="dark"] .category-preview-tip {
   color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .branch-selector,
+[data-theme="dark"] .tenant-selector {
+  color: var(--text-primary);
+  border-color: var(--border-color);
   background: var(--bg-tertiary);
 }

@@ -86,14 +86,16 @@
 .user-field-label { display: inline-flex; align-items: center; gap: 4px; }
 .user-field-label b { color: #dc3545; font-size: 14px; line-height: 1; }
 
-.user-form label input {
+.user-form label input,
+.user-form label select {
   padding: 10px 12px;
   border: 1px solid #dfe6f0;
   border-radius: 6px;
   font-size: 13px;
 }
 
-.user-form label input:focus {
+.user-form label input:focus,
+.user-form label select:focus {
   outline: none;
   border-color: #4b88ee;
   box-shadow: 0 0 0 3px rgba(75, 136, 238, 0.12);
