@@ -47,7 +47,9 @@ class WebSocketService {
         if (token) {
           this.sendMessage({
             type: 'auth',
-            token: token
+            token,
+            tenantId: Number(localStorage.getItem('restaurant-tenant-id')) || undefined,
+            branchId: Number(localStorage.getItem('restaurant-branch-id')) || undefined
           });
         }
 

@@ -1,6 +1,7 @@
 import { api } from "./client";
-export type UserApi = { id: number; firstName: string; lastName: string; email: string; phoneNumber?: string; isActive: boolean; createdDate: string; modifiedDate?: string };
-export type UserCreate = { firstName: string; lastName: string; email: string; phoneNumber?: string; password: string };
+export type UserRole = "RestaurantOwner" | "BranchManager" | "Captain" | "Waiter" | "Chef" | "PlatformAdmin";
+export type UserApi = { id: number; firstName: string; lastName: string; email: string; role: UserRole; branchId?: number | null; phoneNumber?: string; isActive: boolean; createdDate: string; modifiedDate?: string };
+export type UserCreate = { firstName: string; lastName: string; email: string; phoneNumber?: string; password: string; role: UserRole };
 export type UserUpdate = { firstName?: string; lastName?: string; email?: string; phoneNumber?: string };
 export const usersApi = {
   list: () => api<UserApi[]>("/api/Users"),

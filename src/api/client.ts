@@ -63,6 +63,8 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
       Accept: "application/json",
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(localStorage.getItem("restaurant-tenant-id") ? { "X-Tenant-Id": localStorage.getItem("restaurant-tenant-id")! } : {}),
+      ...(localStorage.getItem("restaurant-branch-id") ? { "X-Branch-Id": localStorage.getItem("restaurant-branch-id")! } : {}),
       ...securityHeaders.getHeaders(),
       ...csrfProtection.addToHeaders({}),
       ...init.headers
@@ -146,7 +148,7 @@ export async function cachedApi<T>(path: string, init: RequestInit = {}, ttl: nu
     return api<T>(path, init);
   }
 
-  const cacheKey = `${path}-${JSON.stringify(init)}`;
+  const cacheKey = `${localStorage.getItem("restaurant-tenant-id") ?? "claim-tenant"}-${localStorage.getItem("restaurant-branch-id") ?? "all-branches"}-${path}-${JSON.stringify(init)}`;
   
   // Try to get from localStorage cache first
   const cached = getCached<T>(cacheKey);

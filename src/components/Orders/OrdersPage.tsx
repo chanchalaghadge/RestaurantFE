@@ -17,7 +17,7 @@ import { exportToPdf } from "../../utils/pdfExport";
 import { useToast } from "../common/Toast";
 import { useErrorHandler } from "../../utils/errorHandler";
 import { formatCurrency } from "../../utils/currency";
-import { formatDate } from "../../utils/date";
+import { formatDate, formatDateTime } from "../../utils/date";
 import "./Orders.css";
 import "./OrdersOverrides.css";
 
@@ -47,7 +47,8 @@ function OrdersPage() {
   const load = async () => {
     try {
       setLoading(true);
-      setOrders(await ordersApi.list());
+      const fromDateUtc = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+      setOrders(await ordersApi.list(undefined, fromDateUtc));
     } catch (e) {
       const errorContext = createErrorContext('OrdersPage', 'loadOrders');
       handleError(e instanceof Error ? e : new Error('Unable to load orders.'), errorContext);
@@ -82,11 +83,13 @@ function OrdersPage() {
   const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
   const currentPage = Math.min(page, pageCount);
   const pagedOrders = sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pendingOrdersOnPage = pagedOrders.filter((order) => order.status === "Pending");
+  const deletableSelectedIds = Array.from(selectedIds).filter((id) => orders.some((order) => order.id === id && order.status === "Pending"));
 
   const statuses: Array<"All" | OrderApi["status"]> = ["All", "Pending", "Preparing", "Ready", "Completed", "Cancelled"];
 
   const remove = async () => {
-    if (!deleting) return;
+    if (!deleting || deleting.status !== "Pending") return;
     try {
       setIsDeleting(true);
       await ordersApi.remove(deleting.id);
@@ -144,13 +147,14 @@ function OrdersPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(new Set(pagedOrders.map(order => order.id)));
+      setSelectedIds(new Set(pendingOrdersOnPage.map(order => order.id)));
     } else {
       setSelectedIds(new Set());
     }
   };
 
   const handleSelectOne = (id: number, checked: boolean) => {
+    if (orders.find((order) => order.id === id)?.status !== "Pending") return;
     const newSelected = new Set(selectedIds);
     if (checked) {
       newSelected.add(id);
@@ -161,13 +165,15 @@ function OrdersPage() {
   };
 
   const handleBulkDelete = async () => {
-    if (selectedIds.size === 0) return;
+    const pendingIds = Array.from(selectedIds).filter((id) => orders.some((order) => order.id === id && order.status === "Pending"));
+    if (pendingIds.length === 0) return;
     try {
       setBulkDeleting(true);
-      await Promise.all(Array.from(selectedIds).map(id => ordersApi.remove(id)));
+      await Promise.all(pendingIds.map(id => ordersApi.remove(id)));
+      const deletedCount = pendingIds.length;
       setSelectedIds(new Set());
       setBulkDeleting(false);
-      showToast(`${selectedIds.size} order(s) deleted successfully`, 'success');
+      showToast(`${deletedCount} order(s) deleted successfully`, 'success');
       await load();
     } catch (e) {
       setBulkDeleting(false);
@@ -199,7 +205,7 @@ function OrdersPage() {
           <button className="secondary-button" onClick={handlePdfExport} disabled={sortedData.length === 0}>
             📄 PDF
           </button>
-          {selectedIds.size > 0 && (
+          {deletableSelectedIds.length > 0 && (
             <button
               className="secondary-button"
               onClick={() => setBulkDeleting(true)}
@@ -296,9 +302,10 @@ function OrdersPage() {
                 <th className="checkbox-column">
                   <input
                     type="checkbox"
-                    checked={sortedData.length > 0 && selectedIds.size === sortedData.length}
+                    checked={pendingOrdersOnPage.length > 0 && pendingOrdersOnPage.every((order) => selectedIds.has(order.id))}
                     onChange={(e) => handleSelectAll(e.target.checked)}
-                    aria-label="Select all orders"
+                    disabled={pendingOrdersOnPage.length === 0}
+                    aria-label="Select pending orders on this page"
                   />
                 </th>
                 <th className="sortable" onClick={() => handleSort('id')} aria-sort={sortConfig.key === 'id' ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
@@ -317,17 +324,25 @@ function OrdersPage() {
                 <th className="sortable" onClick={() => handleSort('status')} aria-sort={sortConfig.key === 'status' ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
                   Status {sortConfig.key === 'status' && getSortIcon()}
                 </th>
+                <th className="sortable" onClick={() => handleSort('createdAtUtc')} aria-sort={sortConfig.key === 'createdAtUtc' ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
+                  Date &amp; Time {sortConfig.key === 'createdAtUtc' && getSortIcon()}
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {pagedOrders.length ? pagedOrders.map((order) => (
-                <tr key={order.id}>
+                <tr
+                  key={order.id}
+                  onDoubleClick={() => navigate(order.status === "Completed" || order.status === "Cancelled" ? `/orders/${order.id}` : `/orders/${order.id}/edit`)}
+                  title="Double-click to open this order"
+                >
                   <td className="checkbox-column">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(order.id)}
                       onChange={(e) => handleSelectOne(order.id, e.target.checked)}
+                      disabled={order.status !== "Pending"}
                       aria-label={`Select order #${order.id}`}
                     />
                   </td>
@@ -337,21 +352,27 @@ function OrdersPage() {
                   <td>{order.orderType === "DineIn" ? "Dine In" : order.orderType}</td>
                   <td>{formatCurrency(order.totalAmount)}</td>
                   <td><span className={`order-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
+                  <td><time dateTime={order.createdAtUtc}>{formatDateTime(order.createdAtUtc)}</time></td>
                   <td className="order-actions">
                     <button title="View order details" onClick={() => navigate(`/orders/${order.id}`)} aria-label={`View order #${order.id}`}><EyeIcon /></button>
                     <button
-                      title={order.status === "Completed" ? "Completed orders cannot be edited" : "Edit order"}
+                      title={order.status === "Completed" || order.status === "Cancelled" ? `${order.status} orders cannot be edited` : "Edit order"}
                       onClick={() => navigate(`/orders/${order.id}/edit`)}
-                      disabled={order.status === "Completed"}
-                      aria-label={order.status === "Completed" ? `Order #${order.id} is completed and cannot be edited` : `Edit order #${order.id}`}
+                      disabled={order.status === "Completed" || order.status === "Cancelled"}
+                      aria-label={order.status === "Completed" || order.status === "Cancelled" ? `Order #${order.id} is ${order.status.toLowerCase()} and cannot be edited` : `Edit order #${order.id}`}
                     >✎</button>
-                    {order.status !== "Completed" && <button title="Complete payment" onClick={() => void pay(order)}>💳</button>}
-                    <button title="Delete order" aria-label={`Delete order #${order.id}`} onClick={() => setDeleting(order)} disabled={isDeleting}><TrashIcon /></button>
+                    {order.status !== "Completed" && order.status !== "Cancelled" && <button title="Complete payment" aria-label={`Complete payment for order #${order.id}`} onClick={() => void pay(order)}>💳</button>}
+                    <button
+                      title={order.status === "Pending" ? "Delete pending order" : "Only pending orders can be deleted"}
+                      aria-label={`Delete order #${order.id}${order.status === "Pending" ? "" : ` (disabled: ${order.status})`}`}
+                      onClick={() => setDeleting(order)}
+                      disabled={isDeleting || order.status !== "Pending"}
+                    ><TrashIcon /></button>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <div className="list-empty-state">
                       <span>📋</span>
                       <strong>No orders yet</strong>
@@ -370,7 +391,7 @@ function OrdersPage() {
       {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} isDeleting={isDeleting} />}
       {bulkDeleting && (
         <BulkDeleteModal
-          count={selectedIds.size}
+          count={deletableSelectedIds.length}
           itemType="Order"
           onCancel={() => setBulkDeleting(false)}
           onConfirm={handleBulkDelete}

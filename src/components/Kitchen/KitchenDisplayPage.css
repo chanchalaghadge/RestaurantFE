@@ -1,4 +1,4 @@
-.kitchen-page { min-height: 100%; box-sizing: border-box; padding: 18px; color: #17304d; }
+.kitchen-page { height: 100%; min-height: 0; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; padding: 18px; color: #17304d; }
 .kitchen-topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
 .kitchen-topbar .breadcrumb { margin-bottom: 8px; }
 .kitchen-topbar h1 { margin: 0; font-size: 25px; }
@@ -6,9 +6,11 @@
 .kitchen-topbar p { margin: 5px 0 0; color: #718197; font-size: 12px; }
 .kitchen-live-indicator { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #b9ebd0; border-radius: 20px; background: #effbf4; color: #16814a; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .kitchen-live-indicator i { width: 7px; height: 7px; border-radius: 50%; background: #20b26b; box-shadow: 0 0 0 3px #20b26b24; }
-.kitchen-columns { display: grid; grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: 14px; align-items: start; }
-.kitchen-lane { min-height: 300px; padding: 12px; border: 1px solid #e0e8f0; border-radius: 9px; background: #f5f7fa; }
+.kitchen-columns { display: grid; flex: 1 1 auto; min-height: 0; grid-template-columns: repeat(3, minmax(250px, 1fr)); gap: 14px; align-items: stretch; overflow: hidden; }
+.kitchen-lane { min-height: 0; display: flex; flex-direction: column; overflow: hidden; padding: 12px; border: 1px solid #e0e8f0; border-radius: 9px; background: #f5f7fa; }
 .kitchen-lane-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
+.kitchen-lane-heading { flex: 0 0 auto; }
+.kitchen-lane-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 4px 0 0; }
 .kitchen-lane-heading h2 { margin: 0; font-size: 15px; }
 .kitchen-lane-heading span { display: grid; min-width: 23px; height: 23px; place-items: center; border-radius: 12px; background: #e5ebf3; font-size: 11px; font-weight: 800; }
 .kitchen-lane.pending .kitchen-lane-heading span { color: #a45b00; background: #fff0d6; }
@@ -32,7 +34,7 @@
 .kitchen-ready-label { color: #16814a; font-size: 10px; font-weight: 700; }
 .kitchen-lane-empty, .kitchen-empty { padding: 26px 10px; color: #718197; text-align: center; font-size: 12px; }
 .kitchen-error { padding: 10px 12px; border-radius: 6px; background: #ffe7e8; color: #a91f2d; font-size: 12px; }
-@media (max-width: 1000px) { .kitchen-columns { grid-template-columns: 1fr; } .kitchen-lane { min-height: 120px; } }
+@media (max-width: 1000px) { .kitchen-columns { grid-template-columns: repeat(3, minmax(250px, 1fr)); overflow-x: auto; } }
 @media (max-width: 600px) { .kitchen-page { padding: 12px; } .kitchen-topbar { align-items: flex-start; flex-direction: column; } }
 
 /* The global dark-theme rule forces white text; give KDS surfaces matching dark backgrounds. */

@@ -32,7 +32,7 @@ function UsersPage() {
 
   useEffect(() => { void load(); }, []);
 
-  const filtered = users.filter((user) => `${user.firstName} ${user.lastName} ${user.email} ${user.phoneNumber ?? ""}`.toLowerCase().includes(search.toLowerCase()));
+  const filtered = users.filter((user) => `${user.firstName} ${user.lastName} ${user.email} ${user.phoneNumber ?? ""} ${user.role}`.toLowerCase().includes(search.toLowerCase()));
   const { sortedData } = useTableSort(filtered);
   const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
   const currentPage = Math.min(page, pageCount);
@@ -53,6 +53,7 @@ function UsersPage() {
       { key: 'firstName', label: 'First Name' },
       { key: 'lastName', label: 'Last Name' },
       { key: 'email', label: 'Email' },
+      { key: 'role', label: 'Role' },
       { key: 'phoneNumber', label: 'Phone', formatter: (val: string | undefined) => val || 'N/A' },
       { key: 'isActive', label: 'Status', formatter: (val: boolean) => val ? 'Active' : 'Inactive' },
       { key: 'createdDate', label: 'Created', formatter: formatDate }
@@ -103,6 +104,7 @@ function UsersPage() {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Role</th>
                 <th>Phone</th>
                 <th>Status</th>
                 <th>Created</th>
@@ -119,6 +121,7 @@ function UsersPage() {
                     </div>
                   </td>
                   <td>{user.email}</td>
+                  <td>{user.role === "BranchManager" ? "Branch Manager" : user.role}</td>
                   <td>{user.phoneNumber || "—"}</td>
                   <td><i className={user.isActive ? "user-active" : "user-inactive"}>{user.isActive ? "Active" : "Inactive"}</i></td>
                   <td>{formatDate(user.createdDate)}</td>
@@ -131,7 +134,7 @@ function UsersPage() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <div className="users-empty">
                       <span>♟</span>
                       <strong>No users yet</strong>
