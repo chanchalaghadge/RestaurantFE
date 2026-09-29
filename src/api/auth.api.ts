@@ -3,10 +3,16 @@ import type { UserApi } from "./users.api";
 import { tokenStorage } from "../utils/security";
 
 export type LoginResult = { token: string; expiresAt: string; user: UserApi };
+export type ClientSignupRequest = { restaurantName: string; branchName?: string; ownerFirstName: string; ownerLastName: string; email: string; password: string; phoneNumber?: string };
 export const authApi = {
   login: async (email: string, password: string) => {
     const result = await api<LoginResult>("/api/Auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
     // Store token securely
+    tokenStorage.setToken(result.token);
+    return result;
+  },
+  registerClient: async (body: ClientSignupRequest) => {
+    const result = await api<LoginResult>("/api/auth/signup", { method: "POST", body: JSON.stringify(body) });
     tokenStorage.setToken(result.token);
     return result;
   },

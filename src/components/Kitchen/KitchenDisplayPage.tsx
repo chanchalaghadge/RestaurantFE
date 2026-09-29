@@ -104,7 +104,8 @@ function KitchenDisplayPage() {
                   <h2>{status === "Pending" ? "New" : status}</h2>
                   <span>{laneTickets.length}</span>
                 </header>
-                {laneTickets.length ? laneTickets.map((ticket) => (
+                <div className="kitchen-lane-list">
+                  {laneTickets.length ? laneTickets.map((ticket) => (
                   <article className="kitchen-order-card" key={ticket.id}>
                     <header className="kitchen-order-heading">
                       <div>
@@ -137,7 +138,8 @@ function KitchenDisplayPage() {
                       {ticket.status === "Ready" && <span className="kitchen-ready-label">Waiting for service</span>}
                     </footer>
                   </article>
-                )) : <p className="kitchen-lane-empty">No {status.toLowerCase()} tickets</p>}
+                  )) : <p className="kitchen-lane-empty">No {status.toLowerCase()} tickets</p>}
+                </div>
               </section>
             );
           })}

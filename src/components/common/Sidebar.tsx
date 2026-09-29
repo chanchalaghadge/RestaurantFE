@@ -15,6 +15,11 @@ function Sidebar() {
   const [incompleteOrderCount, setIncompleteOrderCount] = useState(0);
   const location = useLocation();
   const menuIsActive = location.pathname.startsWith("/menu");
+  const sessionUser = JSON.parse(localStorage.getItem("restaurant-user") || "{}");
+  const role = sessionUser.role as string | undefined;
+  const isChef = role === "Chef";
+  const canManage = role === "RestaurantOwner" || role === "PlatformAdmin" || role === "BranchManager";
+  const canOperateOrders = canManage || role === "Captain" || role === "Waiter";
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -34,10 +39,10 @@ function Sidebar() {
       }
     };
 
-    void loadIncompleteOrderCount();
-    const interval = window.setInterval(() => void loadIncompleteOrderCount(), 30000);
-    return () => window.clearInterval(interval);
-  }, [location.pathname]);
+    if (canOperateOrders) void loadIncompleteOrderCount();
+    const interval = canOperateOrders ? window.setInterval(() => void loadIncompleteOrderCount(), 30000) : undefined;
+    return () => { if (interval) window.clearInterval(interval); };
+  }, [location.pathname, canOperateOrders]);
 
   const handleMenuToggle = () => {
     setMenuOpen((current) => !current);
@@ -55,10 +60,10 @@ function Sidebar() {
 
       <div className="sidebar-scroll-area">
         <nav className="sidebar-menu" aria-label="Main navigation">
-          <NavLink to="/dashboard" aria-label="Go to Dashboard">
+          {canManage && <NavLink to="/dashboard" aria-label="Go to Dashboard">
             ⌂ <span>Dashboard</span>
-          </NavLink>
-          <div className={`menu-group ${menuOpen ? "open" : "closed"}`}>
+          </NavLink>}
+          {!isChef && <div className={`menu-group ${menuOpen ? "open" : "closed"}`}>
             <button
               type="button"
               className={`menu-toggle${menuIsActive ? " active" : ""}`}
@@ -72,29 +77,29 @@ function Sidebar() {
             {menuOpen && (
               <div className="submenu" id="menu-submenu">
                 <NavLink to="/menu" end aria-label="View all menu items">All Items</NavLink>
-                <NavLink to="/menu/add" aria-label="Add new menu item">Add Menu Item</NavLink>
+                {canManage && <NavLink to="/menu/add" aria-label="Add new menu item">Add Menu Item</NavLink>}
               </div>
             )}
-          </div>
-          <NavLink to="/categories" aria-label="View menu categories">
+          </div>}
+          {!isChef && canManage && <NavLink to="/categories" aria-label="View menu categories">
             ▦ <span>Categories</span>
-          </NavLink>
-          <NavLink to="/orders" aria-label="View orders">
+          </NavLink>}
+          {canOperateOrders && <NavLink to="/orders" aria-label="View orders">
             ▤ <span>Orders</span>
             {incompleteOrderCount > 0 && <i aria-label={`${incompleteOrderCount} incomplete orders`}>{incompleteOrderCount}</i>}
-          </NavLink>
-          <NavLink to="/tables" aria-label="View tables">
+          </NavLink>}
+          {canOperateOrders && <NavLink to="/tables" aria-label="View tables">
             ▦ <span>Tables</span>
-          </NavLink>
-          <NavLink to="/kitchen" aria-label="Open kitchen display">
+          </NavLink>}
+          {(isChef || canManage) && <NavLink to="/kitchen" aria-label="Open kitchen display">
             🍳 <span>Kitchen Display</span>
-          </NavLink>
-          <NavLink to="/customers" aria-label="View customers">
+          </NavLink>}
+          {!isChef && canOperateOrders && <NavLink to="/customers" aria-label="View customers">
             ♟ <span>Customers</span>
-          </NavLink>
-          <NavLink to="/users" aria-label="View users">
+          </NavLink>}
+          {canManage && <NavLink to="/users" aria-label="View users">
             ♙ <span>Users</span>
-          </NavLink>
+          </NavLink>}
         </nav>
         <div className="sidebar-promo" aria-hidden="true">
           <div className="promo-dish">

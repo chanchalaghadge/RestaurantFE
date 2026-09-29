@@ -3,10 +3,11 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Breadcrumb from "../common/Breadcrumb";
 import { useToast } from "../common/Toast";
 import { usersApi, type UserCreate } from "../../api/users.api";
+import { authApi } from "../../api/auth.api";
 import { validateEmail, validatePassword, validateRequired, hasErrors, validateForm, validatePhone } from "../../utils/validation";
 import "./Users.css";
 
-const newUser = (): UserCreate => ({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "" });
+const newUser = (): UserCreate => ({ firstName: "", lastName: "", email: "", phoneNumber: "", password: "", role: "Waiter" });
 
 function UserFormPage() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ function UserFormPage() {
   const editing = Boolean(id);
   const signingUp = location.pathname === "/signup";
   const [form, setForm] = useState<UserCreate>(newUser);
+  const [restaurantName, setRestaurantName] = useState("");
+  const [branchName, setBranchName] = useState("Main Branch");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -24,7 +27,7 @@ function UserFormPage() {
   const [saving, setSaving] = useState(false);
   useEffect(() => {
     if (!id) return;
-    usersApi.get(Number(id)).then((user) => setForm({ firstName: user.firstName, lastName: user.lastName, email: user.email, phoneNumber: user.phoneNumber ?? "", password: "" })).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load user."));
+    usersApi.get(Number(id)).then((user) => setForm({ firstName: user.firstName, lastName: user.lastName, email: user.email, phoneNumber: user.phoneNumber ?? "", password: "", role: user.role })).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load user."));
   }, [id]);
   const update = <K extends keyof UserCreate>(key: K, value: UserCreate[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -101,6 +104,7 @@ function UserFormPage() {
     }
 
     const formErrors = validateForm(form, validationRules);
+    if (signingUp && !restaurantName.trim()) formErrors.restaurantName = 'Restaurant name is required';
     
     // Check password match for new users
     if (!editing && form.password !== confirmPassword) {
@@ -116,7 +120,23 @@ function UserFormPage() {
     try {
       setSaving(true);
       setError("");
-      if (id) {
+      if (signingUp) {
+        const result = await authApi.registerClient({
+          restaurantName: restaurantName.trim(),
+          branchName: branchName.trim() || "Main Branch",
+          ownerFirstName: form.firstName.trim(),
+          ownerLastName: form.lastName.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          phoneNumber: form.phoneNumber?.trim() || undefined
+        });
+        localStorage.removeItem("restaurant-tenant-id");
+        localStorage.removeItem("restaurant-branch-id");
+        localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email, role: result.user.role }));
+        showToast('Restaurant account created successfully', 'success');
+        navigate("/dashboard");
+        return;
+      } else if (id) {
         await usersApi.update(Number(id), { 
           firstName: form.firstName.trim(), 
           lastName: form.lastName.trim(), 
@@ -166,6 +186,30 @@ function UserFormPage() {
         <section>
           <h2>Account details</h2>
           <div className="user-form-grid">
+            {signingUp && <>
+              <label><span className="user-field-label">Restaurant Name <b aria-hidden="true">*</b></span>
+                <input required autoComplete="organization" placeholder="Your restaurant name" value={restaurantName} onChange={(event) => {
+                  setRestaurantName(event.target.value);
+                  setErrors((previous) => {
+                    const next = { ...previous };
+                    delete next.restaurantName;
+                    return next;
+                  });
+                }} />
+                {errors.restaurantName && <small className="field-error">{errors.restaurantName}</small>}
+              </label>
+              <label><span className="user-field-label">First Branch Name</span>
+                <input autoComplete="off" placeholder="Main Branch" value={branchName} onChange={(event) => setBranchName(event.target.value)} />
+              </label>
+            </>}
+            {!signingUp && !editing && <label><span className="user-field-label">Staff Role <b aria-hidden="true">*</b></span>
+              <select required value={form.role} onChange={(event) => update("role", event.target.value as UserCreate["role"])}>
+                {(JSON.parse(localStorage.getItem("restaurant-user") || "{}")?.role === "BranchManager"
+                  ? ["Captain", "Waiter", "Chef"]
+                  : ["BranchManager", "Captain", "Waiter", "Chef"]
+                ).map((role) => <option key={role} value={role}>{role === "BranchManager" ? "Branch Manager" : role}</option>)}
+              </select>
+            </label>}
             <label><span className="user-field-label">First Name <b aria-hidden="true">*</b></span>
               <input 
                   required

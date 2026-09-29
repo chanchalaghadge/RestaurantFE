@@ -105,9 +105,29 @@ function CategoryForm({ category, mode }: { category?: CategoryApi; mode: "creat
             accept="image/png,image/jpeg,image/webp"
             onChange={(event) => void selectImage(event.target.files?.[0])}
           />
-          <div className="image-preview">
-            <img src={imageUrl(storedImageUrl)} onError={useDefaultImageOnError} alt="Category preview" />
-            {storedImageUrl && <button type="button" onClick={() => setStoredImageUrl("")}>Remove</button>}
+          <div className="category-live-preview" aria-live="polite">
+            <div className={`category-preview-art${storedImageUrl ? " has-image" : ""}`}>
+              {storedImageUrl ? (
+                <img src={imageUrl(storedImageUrl)} onError={useDefaultImageOnError} alt="Category preview" />
+              ) : (
+                <>
+                  <span className="preview-orbit preview-orbit-one" />
+                  <span className="preview-orbit preview-orbit-two" />
+                  <span className="preview-category-symbol" aria-hidden="true">✦</span>
+                  <span className="preview-art-caption">A little preview of your menu</span>
+                </>
+              )}
+              <span className="preview-tag">MENU CATEGORY</span>
+            </div>
+            <div className="category-preview-copy">
+              <div>
+                <small>LIVE PREVIEW</small>
+                <h4>{name.trim() || "Your category name"}</h4>
+                <p>{description.trim() || "Add a short description to help your team identify this section."}</p>
+              </div>
+              {storedImageUrl && <button type="button" onClick={() => setStoredImageUrl("")}>Remove image</button>}
+            </div>
+            <div className="category-preview-tip"><span aria-hidden="true">✧</span><p>Keep category names short and clear so staff can find items quickly.</p></div>
           </div>
         </div>
       </div>
