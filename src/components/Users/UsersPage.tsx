@@ -113,7 +113,10 @@ function UsersPage() {
             </thead>
             <tbody>
               {pagedUsers.length ? pagedUsers.map((user) => (
-                <tr key={user.id}>
+                <tr key={user.id} onDoubleClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a, button, input, label")) return;
+                  navigate(`/users/${user.id}/edit`);
+                }}>
                   <td>
                     <div className="user-name">
                       <span>{`${user.firstName[0] ?? ""}${user.lastName[0] ?? ""}`.toUpperCase()}</span>

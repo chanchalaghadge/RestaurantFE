@@ -223,7 +223,10 @@ function CustomerListPage() {
             </thead>
             <tbody>
               {pagedCustomers.length ? pagedCustomers.map((customer) => (
-                <tr key={customer.id}>
+                <tr key={customer.id} onDoubleClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a, button, input, label")) return;
+                  navigate(`/customers/${customer.id}/edit`);
+                }}>
                   <td className="checkbox-column">
                     <input
                       type="checkbox"

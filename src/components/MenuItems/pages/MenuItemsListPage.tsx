@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { MenuItem } from "../../../types/menu/menu-item.types";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
 import BulkDeleteModal from "../../common/BulkDeleteModal";
@@ -16,6 +16,7 @@ import { formatCurrency } from "../../../utils/currency";
 import { useTableSort } from "../../../hooks/useTableSort";
 
 function MenuItemsListPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [search, setSearch] = useState("");
@@ -265,7 +266,10 @@ function MenuItemsListPage() {
             </thead>
             <tbody>
               {pagedItems.length ? pagedItems.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.id} onDoubleClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a, button, input, label")) return;
+                  navigate(`/menu/${item.id}/edit`);
+                }}>
                   <td className="checkbox-column">
                     <input
                       type="checkbox"
