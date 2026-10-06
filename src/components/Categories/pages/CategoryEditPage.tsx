@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CategoryHeader from "../components/CategoryHeader";
 import CategoryForm from "../components/CategoryForm";
-import Breadcrumb from "../../common/Breadcrumb";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import ErrorAlert from "../../common/ErrorAlert";
 import "../Categories.css";
@@ -25,8 +24,7 @@ function CategoryEditPage() {
 
   return (
     <section className="categories-page category-detail-page">
-      <Breadcrumb items={[{ label: 'Home', path: '/dashboard' }, { label: 'Categories', path: '/categories' }, { label: `Edit ${category.name}` }]} />
-      <CategoryHeader title={`Edit ${category.name}`} description="Update category details." />
+      <CategoryHeader title={`Edit ${category.name}`} description="Update category details." showBreadcrumb={false} />
       <div className="form-panel">
         <CategoryForm category={category} mode="edit" />
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CategoryHeader from "../components/CategoryHeader";
 import { categoriesApi, type CategoryApi } from "../../../api/categories.api";
 import ConfirmDeleteModal from "../../common/ConfirmDeleteModal";
@@ -15,6 +15,7 @@ import Pagination from "../../common/Pagination";
 import "../Categories.css";
 
 function CategoryListPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [categories, setCategories] = useState<CategoryApi[]>([]);
   const [search, setSearch] = useState("");
@@ -169,7 +170,10 @@ function CategoryListPage() {
             </thead>
             <tbody>
               {pagedCategories.length ? pagedCategories.map((category) => (
-                <tr key={category.id}>
+                <tr key={category.id} onDoubleClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a, button, input, label")) return;
+                  navigate(`/categories/${category.id}/edit`);
+                }}>
                   <td className="checkbox-column">
                     <input
                       type="checkbox"

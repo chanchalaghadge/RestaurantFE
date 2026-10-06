@@ -91,6 +91,7 @@ function TablesPage() {
     <article
       className={`restaurant-table ${table.status.toLowerCase()} ${selected?.id === table.id ? "selected" : ""}`}
       key={table.id}
+      onDoubleClick={() => setEditing({ table })}
       onClick={() => {
         const order = getActiveOrder(table.id);
         if (order) navigate(`/orders/${order.id}`);
