@@ -613,6 +613,9 @@
 [data-theme="dark"] .cart-item-price,
 [data-theme="dark"] .order-totals .order-total-line { color: #ffffff !important; }
 
+[data-theme="dark"] .order-cart-item small { color: var(--text-secondary) !important; }
+[data-theme="dark"] .cart-quantity .cart-remove-button { color: #ff7b86 !important; }
+
 /* Customer create/edit form: keep every panel and field readable in dark mode. */
 [data-theme="dark"] .customer-detail-box {
   background: var(--bg-secondary) !important;

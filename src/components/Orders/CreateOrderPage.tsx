@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Breadcrumb from "../common/Breadcrumb";
 import ErrorAlert from "../common/ErrorAlert";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -7,6 +7,7 @@ import { useToast } from "../common/Toast";
 import { menuItemsApi, type MenuItemApi } from "../../api/menu-items.api";
 import { ordersApi, type OrderApi, type OrderItemApi, type RestaurantTableApi } from "../../api/orders.api";
 import { formatCurrency } from "../../utils/currency";
+import { pricingSettingsApi, type PricingSettings } from "../../api/pricing-settings.api";
 import TrashIcon from "../common/TrashIcon";
 import "./CreateOrderPage.css";
 
@@ -15,12 +16,16 @@ type OrderType = OrderApi["orderType"];
 
 function CreateOrderPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { showToast } = useToast();
   const [tables, setTables] = useState<RestaurantTableApi[]>([]);
   const [menu, setMenu] = useState<MenuItemApi[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [orderType, setOrderType] = useState<OrderType>("DineIn");
-  const [tableId, setTableId] = useState<number | undefined>();
+  const [tableId, setTableId] = useState<number | undefined>(() => {
+    const requestedTableId = Number(searchParams.get("tableId"));
+    return Number.isInteger(requestedTableId) && requestedTableId > 0 ? requestedTableId : undefined;
+  });
   const [instructions, setInstructions] = useState("");
   const [items, setItems] = useState<CartItem[]>([]);
   const [category, setCategory] = useState("All");
@@ -28,10 +33,11 @@ function CreateOrderPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [pricing, setPricing] = useState<PricingSettings>({ discountPercent: 0, cgstPercent: 2.5, sgstPercent: 2.5 });
 
   useEffect(() => {
-    void Promise.all([ordersApi.listTables(), menuItemsApi.list({ status: "Active" })])
-      .then(([tableData, menuData]) => { setTables(tableData); setMenu(menuData); })
+    void Promise.all([ordersApi.listTables(), menuItemsApi.list({ status: "Active" }), pricingSettingsApi.get()])
+      .then(([tableData, menuData, pricingData]) => { setTables(tableData); setMenu(menuData); setPricing(pricingData); })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load order data."))
       .finally(() => setLoading(false));
   }, []);
@@ -44,6 +50,11 @@ function CreateOrderPage() {
     return matchesCategory && matchesSearch;
   });
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  const discount = Math.round(subtotal * pricing.discountPercent) / 100;
+  const taxableSubtotal = subtotal - discount;
+  const cgst = Math.round(taxableSubtotal * pricing.cgstPercent) / 100;
+  const sgst = Math.round(taxableSubtotal * pricing.sgstPercent) / 100;
+  const total = taxableSubtotal + cgst + sgst;
 
   const addItem = (item: MenuItemApi) => setItems((current) => {
     const existing = current.find((entry) => entry.itemName === item.name);
@@ -91,13 +102,34 @@ function CreateOrderPage() {
           <section className="order-menu-panel">
             <label className="menu-item-search"><span>Search items</span><input value={itemSearch} onChange={(event) => setItemSearch(event.target.value)} placeholder="Filter by item name or item code..." /></label>
             <div className="menu-category-tabs">{categories.map((value) => <button key={value} type="button" className={category === value ? "active" : ""} onClick={() => setCategory(value)}>{value}</button>)}</div>
-            <div className="create-menu-grid">{visibleMenu.length ? visibleMenu.map((item) => <article key={item.id} className="create-menu-card">{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <div className="menu-image-placeholder">🍽</div>}<strong>{item.name}</strong><small className="create-menu-code">{item.code}</small><span>{formatCurrency(item.price)}</span><button type="button" onClick={() => addItem(item)}>＋ Add</button></article>) : <p className="menu-no-results">No menu items match that search.</p>}</div>
+            <div className="create-menu-grid">{visibleMenu.length ? visibleMenu.map((item) => <article
+              key={item.id}
+              className="create-menu-card"
+              role="button"
+              tabIndex={0}
+              aria-label={`Double-click to add ${item.name} to the order`}
+              title={`Add ${item.name} to the order`}
+              onDoubleClick={() => addItem(item)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  addItem(item);
+                }
+              }}
+            >{item.imageUrl ? <img src={item.imageUrl} alt="" /> : <div className="menu-image-placeholder">🍽</div>}<strong>{item.name}</strong><small className="create-menu-code">{item.code}</small><span>{formatCurrency(item.price)}</span></article>) : <p className="menu-no-results">No menu items match that search.</p>}</div>
           </section>
           <aside className="order-summary-panel">
             <div className="order-panel-heading"><div><h2>Current Order</h2><p>{items.length ? `${items.length} item${items.length === 1 ? "" : "s"} added` : "No items added yet"}</p></div></div>
-            <div className="order-cart">{items.length ? items.map((item, index) => <div className="order-cart-item" key={`${item.itemName}-${index}`}><div><strong>{item.itemName}</strong><small>{formatCurrency(item.unitPrice)} each</small><div className="cart-quantity"><button type="button" aria-label={`Decrease ${item.itemName}`} onClick={() => changeQuantity(index, -1)}>−</button><span>{item.quantity}</span><button type="button" aria-label={`Increase ${item.itemName}`} onClick={() => changeQuantity(index, 1)}>＋</button></div></div><div className="cart-item-price">{formatCurrency(item.unitPrice * item.quantity)}<button type="button" aria-label={`Remove ${item.itemName}`} title={`Remove ${item.itemName}`} onClick={() => setItems((current) => current.filter((_, position) => position !== index))}><TrashIcon /></button></div></div>) : <div className="cart-empty"><span>🧾</span><p>Your selected items will appear here.</p></div>}</div>
+            <div className="order-cart">{items.length ? items.map((item, index) => {
+              const menuItem = menu.find((entry) => entry.name === item.itemName);
+              return <div className="order-cart-item" key={`${item.itemName}-${index}`}>
+                <div className="order-cart-image">{menuItem?.imageUrl ? <img src={menuItem.imageUrl} alt="" /> : <span aria-hidden="true">🍽</span>}</div>
+                <div className="order-cart-description"><strong>{item.itemName}</strong><small>{formatCurrency(item.unitPrice)} each</small><div className="cart-quantity"><button type="button" aria-label={`Decrease ${item.itemName}`} onClick={() => changeQuantity(index, -1)}>−</button><span>{item.quantity}</span><button type="button" aria-label={`Increase ${item.itemName}`} onClick={() => changeQuantity(index, 1)}>＋</button><button className="cart-remove-button" type="button" aria-label={`Remove ${item.itemName}`} title={`Remove ${item.itemName}`} onClick={() => setItems((current) => current.filter((_, position) => position !== index))}><TrashIcon /></button></div></div>
+                <div className="cart-item-price">{formatCurrency(item.unitPrice * item.quantity)}</div>
+              </div>;
+            }) : <div className="cart-empty"><span>🧾</span><p>Your selected items will appear here.</p></div>}</div>
             <label className="instructions-field">Special instructions<textarea value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="Any special requests..." rows={3} /></label>
-            <div className="order-totals"><div><span>Subtotal</span><strong>{formatCurrency(subtotal)}</strong></div><div className="order-total-line"><span>Total</span><strong>{formatCurrency(subtotal)}</strong></div></div>
+            <div className="order-totals"><div><span>Subtotal</span><strong>{formatCurrency(subtotal)}</strong></div><div><span>Discount ({pricing.discountPercent}%)</span><strong>−{formatCurrency(discount)}</strong></div><div><span>CGST ({pricing.cgstPercent}%)</span><strong>{formatCurrency(cgst)}</strong></div><div><span>SGST ({pricing.sgstPercent}%)</span><strong>{formatCurrency(sgst)}</strong></div><div className="order-total-line"><span>Total</span><strong>{formatCurrency(total)}</strong></div></div>
             <div className="create-order-actions"><button className="primary-button" type="submit" disabled={saving}>{saving ? "Creating..." : "Place Order"}</button></div>
           </aside>
         </div>
