@@ -79,7 +79,7 @@ function CategoryForm({ category, mode }: { category?: CategoryApi; mode: "creat
         <div className="category-information">
           <h3>Category Information</h3>
           <label>
-            Category Name <b>*</b>
+            <span>Category Name <b>*</b></span>
             <input required value={name} onChange={(event) => setName(event.target.value)} />
           </label>
           <label>
