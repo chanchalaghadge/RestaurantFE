@@ -59,6 +59,7 @@
 .chart-bar-column,
 .popular-item span,
 .dashboard-table-wrap table { font-weight: 600; }
+.dashboard-order-row { cursor: pointer; }
 
 .dashboard-panel-heading p { font-size: 10px; }
 .chart-legend,
