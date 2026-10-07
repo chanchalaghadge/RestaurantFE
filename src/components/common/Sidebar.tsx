@@ -19,6 +19,7 @@ function Sidebar() {
   const role = sessionUser.role as string | undefined;
   const isChef = role === "Chef";
   const canManage = role === "RestaurantOwner" || role === "PlatformAdmin" || role === "BranchManager";
+  const canManagePricing = role === "RestaurantOwner" || role === "BranchManager";
   const canOperateOrders = canManage || role === "Captain" || role === "Waiter";
 
   useEffect(() => {
@@ -99,6 +100,9 @@ function Sidebar() {
           </NavLink>}
           {canManage && <NavLink to="/users" aria-label="View users">
             ♙ <span>Users</span>
+          </NavLink>}
+          {canManagePricing && <NavLink to="/settings" aria-label="Manage order pricing settings">
+            ⚙ <span>Pricing Settings</span>
           </NavLink>}
         </nav>
         <div className="sidebar-promo" aria-hidden="true">

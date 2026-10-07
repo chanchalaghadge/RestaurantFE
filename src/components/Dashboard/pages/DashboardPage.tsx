@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
@@ -13,6 +13,7 @@ import { formatDate } from "../../../utils/date";
 import "../Dashboard.css";
 
 function DashboardPage() {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const { handleError, createErrorContext } = useErrorHandler();
   const [data, setData] = useState<DashboardApi | null>(null);
@@ -314,7 +315,16 @@ function DashboardPage() {
                 </thead>
                 <tbody>
                   {data.recent.map((order) => (
-                    <tr key={order.id}>
+                    <tr
+                      key={order.id}
+                      className="dashboard-order-row"
+                      onDoubleClick={() => {
+                        const status = order.status.toLowerCase();
+                        navigate(status === "completed" || status === "cancelled"
+                          ? `/orders/${order.id}`
+                          : `/orders/${order.id}/edit`);
+                      }}
+                    >
                       <td>#{order.id}</td>
                       <td>{order.customerName}</td>
                       <td>{order.itemCount}</td>

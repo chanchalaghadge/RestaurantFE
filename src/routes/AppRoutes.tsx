@@ -37,6 +37,7 @@ const TablesPage = lazy(() => import("../components/Tables/TablesPage"));
 const KitchenDisplayPage = lazy(() => import("../components/Kitchen/KitchenDisplayPage"));
 const UsersPage = lazy(() => import("../components/Users/UsersPage"));
 const UserFormPage = lazy(() => import("../components/Users/UserFormPage"));
+const PricingSettingsPage = lazy(() => import("../components/Settings/PricingSettingsPage"));
 
 // Loading fallback for lazy-loaded components
 function RouteLoadingFallback() {
@@ -96,7 +97,7 @@ function AppRoutes() {
             <Route path="/users/new" element={<UserFormPage />} />
             <Route path="/users/:id/edit" element={<UserFormPage />} />
             <Route path="/reports" element={<UnderDevelopment />} />
-            <Route path="/settings" element={<UnderDevelopment />} />
+            <Route path="/settings" element={<PricingSettingsPage />} />
 
           </Route>
 

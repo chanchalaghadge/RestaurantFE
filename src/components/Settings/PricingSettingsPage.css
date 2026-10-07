@@ -1,0 +1,17 @@
+.pricing-settings-page { max-width: 1050px; margin: 0 auto; padding: 18px; color: #17304d; }
+.pricing-settings-page > header { margin: 10px 0 18px; }
+.pricing-settings-page h1 { margin-bottom: 4px; font-size: 23px; }
+.pricing-settings-page header p { color: #718197; font-size: 12px; }
+.pricing-settings-card { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 20px; border: 1px solid #e4ebf3; border-radius: 9px; background: #fff; box-shadow: 0 2px 7px #1b33520a; }
+.pricing-settings-card label { display: flex; flex-direction: column; gap: 7px; color: #506582; font-size: 12px; font-weight: 700; }
+.pricing-settings-card input { min-height: 40px; padding: 8px 10px; border: 1px solid #dbe5ef; border-radius: 6px; color: #17304d; background: #fff; font: inherit; }
+.pricing-settings-note { grid-column: 1 / -1; color: #718197; font-size: 11px; }
+.pricing-settings-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; border-top: 1px solid #e4ebf3; padding-top: 14px; }
+.pricing-settings-actions button { min-height: 38px; padding: 8px 14px; border: 0; border-radius: 6px; color: #fff; background: #347ff1; font-weight: 700; cursor: pointer; }
+[data-theme="dark"] .pricing-settings-page { color: var(--text-primary); }
+[data-theme="dark"] .pricing-settings-page header p, [data-theme="dark"] .pricing-settings-note { color: var(--text-secondary); }
+[data-theme="dark"] .pricing-settings-card { border-color: var(--border-color); background: var(--bg-secondary); }
+[data-theme="dark"] .pricing-settings-card label { color: var(--text-primary); }
+[data-theme="dark"] .pricing-settings-card input { border-color: var(--border-color); color: var(--text-primary); background: var(--bg-tertiary); }
+[data-theme="dark"] .pricing-settings-actions { border-color: var(--border-color); }
+@media (max-width: 650px) { .pricing-settings-card { grid-template-columns: 1fr; }.pricing-settings-note, .pricing-settings-actions { grid-column: auto; } }
