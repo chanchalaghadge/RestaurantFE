@@ -20,6 +20,8 @@ import { formatCurrency } from "../../utils/currency";
 import { formatDate, formatDateTime } from "../../utils/date";
 import "./Orders.css";
 import "./OrdersOverrides.css";
+import PaymentMethodModal from "./PaymentMethodModal";
+import type { PaymentDetails } from "../../api/orders.api";
 
 type OrderType = OrderApi["orderType"];
 
@@ -30,6 +32,8 @@ function OrdersPage() {
   const { handleError, createErrorContext } = useErrorHandler();
   const [orders, setOrders] = useState<OrderApi[]>([]);
   const [editing, setEditing] = useState<OrderApi | null | "new">(null);
+  const [payingOrder, setPayingOrder] = useState<OrderApi | null>(null);
+  const [savingPayment, setSavingPayment] = useState(false);
   const [deleting, setDeleting] = useState<OrderApi | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -105,15 +109,19 @@ function OrdersPage() {
     }
   };
 
-  const pay = async (order: OrderApi) => {
+  const pay = async (order: OrderApi, details: PaymentDetails) => {
     try {
-      await ordersApi.completePayment(order.id);
-      showToast('Payment completed successfully', 'success', 2000);
+      setSavingPayment(true);
+      await ordersApi.completePayment(order.id, details);
+      setPayingOrder(null);
+      showToast('Payment saved and order completed', 'success', 2000);
       await load();
     } catch (e) {
       const errorContext = createErrorContext('OrdersPage', 'completePayment', { orderId: order.id });
       handleError(e instanceof Error ? e : new Error('Unable to complete payment.'), errorContext);
       setError(e instanceof Error ? e.message : "Unable to complete payment.");
+    } finally {
+      setSavingPayment(false);
     }
   };
 
@@ -361,7 +369,7 @@ function OrdersPage() {
                       disabled={order.status === "Completed" || order.status === "Cancelled"}
                       aria-label={order.status === "Completed" || order.status === "Cancelled" ? `Order #${order.id} is ${order.status.toLowerCase()} and cannot be edited` : `Edit order #${order.id}`}
                     >✎</button>
-                    {order.status !== "Completed" && order.status !== "Cancelled" && <button title="Complete payment" aria-label={`Complete payment for order #${order.id}`} onClick={() => void pay(order)}>💳</button>}
+                    {order.status !== "Completed" && order.status !== "Cancelled" && <button title="Complete payment" aria-label={`Complete payment for order #${order.id}`} onClick={() => setPayingOrder(order)}>💳</button>}
                     <button
                       title={order.status === "Pending" ? "Delete pending order" : "Only pending orders can be deleted"}
                       aria-label={`Delete order #${order.id}${order.status === "Pending" ? "" : ` (disabled: ${order.status})`}`}
@@ -388,6 +396,7 @@ function OrdersPage() {
         <Pagination count={sortedData.length} page={currentPage} pageSize={pageSize} label="orders" onChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />
       </div>
       {editing && editing !== "new" && <OrderForm order={editing} onClose={() => setEditing(null)} onSaved={load} />}
+      {payingOrder && <PaymentMethodModal total={payingOrder.totalAmount} orderNumber={payingOrder.id} saving={savingPayment} onCancel={() => setPayingOrder(null)} onConfirm={(details) => void pay(payingOrder, details)} />}
       {deleting && <ConfirmDeleteModal itemName={`Order #${deleting.id}`} itemType="Order" onCancel={() => setDeleting(null)} onConfirm={() => void remove()} isDeleting={isDeleting} />}
       {bulkDeleting && (
         <BulkDeleteModal
@@ -450,7 +459,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
         <div className="order-editor-top">
           <label>Customer<input required value={customerName} onChange={(e) => setCustomerName(e.target.value)} /></label>
           <label>Order Type<select value={orderType} onChange={(e) => setOrderType(e.target.value as OrderType)}><option value="DineIn">Dine In</option><option value="Takeaway">Takeaway</option><option value="Delivery">Delivery</option></select></label>
-          <label>Status<select value={status} onChange={(e) => setStatus(e.target.value as OrderApi["status"])}>{["Pending", "Preparing", "Ready", "Completed", "Cancelled"].map((value) => <option key={value}>{value}</option>)}</select></label>
+          <label>Status<select value={status} onChange={(e) => setStatus(e.target.value as OrderApi["status"])}>{["Pending", "Preparing", "Ready", "Cancelled"].map((value) => <option key={value}>{value}</option>)}</select></label>
           {orderType === "DineIn" && <label>Table<select required value={tableId ?? ""} onChange={(e) => setTableId(Number(e.target.value))}><option value="">Select table</option>{tables.filter((table) => table.status !== "Occupied" || table.id === order?.restaurantTableId).map((table) => <option key={table.id} value={table.id}>{table.tableNumber}</option>)}</select></label>}
         </div>
         <div className="item-order-workspace">

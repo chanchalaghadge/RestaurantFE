@@ -1,0 +1,19 @@
+.payment-modal-backdrop { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:18px; background:rgba(8,15,29,.62); }
+.payment-method-modal { width:min(440px,100%); padding:22px; border:1px solid var(--border-color,#dce5ef); border-radius:14px; color:var(--text-primary,#1d2c44); background:var(--bg-primary,#fff); box-shadow:0 24px 70px rgba(0,0,0,.3); }
+.payment-method-modal header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
+.payment-method-modal header p { margin:0 0 5px; color:var(--text-secondary,#687a92); font-size:12px; }
+.payment-method-modal header h2 { margin:0; font-size:25px; }
+.payment-method-modal header button { border:0; color:var(--text-secondary,#687a92); background:transparent; font-size:25px; cursor:pointer; }
+.payment-method-modal fieldset { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; padding:0; border:0; }
+.payment-method-modal legend { margin-bottom:10px; color:var(--text-secondary,#52637e); font-size:12px; font-weight:700; }
+.payment-method-option { display:grid; gap:7px; padding:12px 10px; border:1px solid var(--border-color,#dce5ef); border-radius:9px; cursor:pointer; }
+.payment-method-option.selected { border-color:var(--accent-primary,#4b7ef0); box-shadow:0 0 0 2px color-mix(in srgb,var(--accent-primary,#4b7ef0) 18%,transparent); }
+.payment-method-option input { margin:0; accent-color:var(--accent-primary,#4b7ef0); }
+.payment-method-option span { font-size:13px; font-weight:800; }
+.payment-method-option small { color:var(--text-secondary,#71829a); font-size:9px; }
+.split-payment-fields { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+.split-payment-fields label { display:grid; gap:6px; color:var(--text-secondary,#52637e); font-size:11px; font-weight:700; }
+.split-payment-fields input,.split-payment-fields output { width:100%; min-height:38px; padding:9px; border:1px solid var(--border-color,#dce5ef); border-radius:7px; color:var(--text-primary,#1d2c44); background:var(--bg-secondary,#f8f9fa); font:inherit; }
+.payment-method-modal footer { display:flex; justify-content:flex-end; gap:9px; margin-top:22px; }
+.payment-method-modal footer button:first-child { padding:9px 13px; border:1px solid var(--border-color,#dce5ef); border-radius:7px; color:var(--text-primary,#1d2c44); background:var(--bg-secondary,#f8f9fa); cursor:pointer; }
+@media(max-width:430px) { .payment-method-modal { padding:17px; }.payment-method-modal fieldset { gap:5px; }.payment-method-option { padding:9px 7px; } }
