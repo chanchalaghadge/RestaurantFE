@@ -4,10 +4,11 @@ import Breadcrumb from "../common/Breadcrumb";
 import ErrorAlert from "../common/ErrorAlert";
 import LoadingSpinner from "../common/LoadingSpinner";
 import { useToast } from "../common/Toast";
-import { ordersApi, type OrderApi } from "../../api/orders.api";
+import { ordersApi, type OrderApi, type PaymentDetails } from "../../api/orders.api";
 import { formatCurrency } from "../../utils/currency";
 import { formatDate } from "../../utils/date";
 import "./OrderDetailsPage.css";
+import PaymentMethodModal from "./PaymentMethodModal";
 
 const statusSteps: OrderApi["status"][] = ["Pending", "Preparing", "Ready", "Completed"];
 
@@ -24,6 +25,7 @@ function OrderDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState("");
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const load = async () => {
     if (!Number.isInteger(orderId) || orderId <= 0) { setError("Invalid order number."); setLoading(false); return; }
@@ -36,9 +38,22 @@ function OrderDetailsPage() {
   const stepIndex = useMemo(() => order ? statusSteps.indexOf(order.status) : -1, [order]);
   const updateStatus = async (status: OrderApi["status"]) => {
     if (!order) return;
+    if (status === "Completed") { setPaymentModalOpen(true); return; }
     try { setUpdating(true); setOrder(await ordersApi.updateStatus(order.id, status)); showToast(`Order marked as ${status}`, "success", 1800); }
     catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to update order status."); }
     finally { setUpdating(false); }
+  };
+
+  const savePayment = async (details: PaymentDetails) => {
+    if (!order) return;
+    try {
+      setUpdating(true);
+      setOrder(await ordersApi.completePayment(order.id, details));
+      setPaymentModalOpen(false);
+      showToast("Payment saved and order completed", "success", 1800);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to save payment.");
+    } finally { setUpdating(false); }
   };
 
   if (loading) return <section className="order-details-page"><LoadingSpinner text="Loading order details..." fullScreen /></section>;
@@ -58,10 +73,11 @@ function OrderDetailsPage() {
         <article className="detail-card overview-card"><div className="order-number-icon">▣</div><div className="overview-content"><h2>Order #{order.id}</h2><div className="detail-meta-grid"><span><small>Table</small><strong>{order.tableNumber ? `Table ${order.tableNumber}` : "No table"}</strong></span><span><small>Order Type</small><strong>{order.orderType === "DineIn" ? "Dine In" : order.orderType}</strong></span><span><small>Customer</small><strong>{order.customerName || "Walk-in customer"}</strong></span></div></div><time>Created at<br /><strong>{formatDate(order.createdAtUtc)}</strong></time></article>
         <article className="detail-card"><h2>Order Items</h2><div className="detail-items"><div className="detail-items-head"><span>Item</span><span>Variant</span><span>Qty</span><span>Unit price</span><span>Total</span></div>{order.items.map((item, index) => <div className="detail-item" key={`${item.itemName}-${index}`}><strong>{item.itemName}</strong><span>{item.variant || "Standard"}</span><span>{item.quantity}</span><span>{formatCurrency(item.unitPrice)}</span><strong>{formatCurrency(item.lineTotal ?? item.quantity * item.unitPrice)}</strong></div>)}</div></article>
         {order.specialInstructions && <article className="detail-card instructions-summary"><h2>Special instructions</h2><p>{order.specialInstructions}</p></article>}
-        <div className="detail-bottom"><article className="detail-card payment-card"><span>Payment Status</span><strong className={`payment-status ${paymentIsPaid ? "paid" : "unpaid"}`}>● {paymentIsPaid ? "Paid" : "Unpaid"}</strong></article><article className="detail-card totals-card"><div><span>Subtotal</span><strong>{formatCurrency(order.subtotal)}</strong></div><div><span>Tax</span><strong>{formatCurrency(order.taxAmount)}</strong></div><div className="detail-grand-total"><span>Total</span><strong>{formatCurrency(order.totalAmount)}</strong></div></article></div>
+        <div className="detail-bottom"><article className="detail-card payment-card"><div><span>Payment Status</span>{paymentIsPaid && order.paymentMethod && <small className="payment-method-summary">{order.paymentMethod === "Split" ? `Split · Cash ${formatCurrency(order.cashAmount ?? 0)} + UPI ${formatCurrency(order.upiAmount ?? 0)}` : `${order.paymentMethod} · ${formatCurrency(order.totalAmount)}`}</small>}</div><strong className={`payment-status ${paymentIsPaid ? "paid" : "unpaid"}`}>● {paymentIsPaid ? "Paid" : "Unpaid"}</strong></article><article className="detail-card totals-card"><div><span>Subtotal</span><strong>{formatCurrency(order.subtotal)}</strong></div><div><span>Tax</span><strong>{formatCurrency(order.taxAmount)}</strong></div><div className="detail-grand-total"><span>Total</span><strong>{formatCurrency(order.totalAmount)}</strong></div></article></div>
       </div>
       <aside className="detail-sidebar"><article className="detail-card timeline-card"><h2>Order Timeline</h2><ol>{statusSteps.map((status, index) => <li key={status} className={index <= stepIndex && order.status !== "Cancelled" ? "done" : ""}><i>{index < stepIndex ? "✓" : ""}</i><div><strong>{status}</strong><small>{index === stepIndex ? "Current order status" : index < stepIndex ? "Completed" : "Waiting"}</small></div></li>)}{order.status === "Cancelled" && <li className="cancelled"><i>×</i><div><strong>Cancelled</strong><small>Order was cancelled</small></div></li>}</ol></article><div className="detail-status-actions">{!completedOrCancelled && nextStatus && <button className="primary-button" disabled={updating} onClick={() => void updateStatus(nextStatus)}>{updating ? "Updating..." : `Mark as ${nextStatus}`}</button>}{!completedOrCancelled && <button className="danger-outline" disabled={updating} onClick={() => void updateStatus("Cancelled")}>Cancel Order</button>}</div></aside>
     </div>
+    {paymentModalOpen && <PaymentMethodModal total={order.totalAmount} orderNumber={order.id} saving={updating} onCancel={() => setPaymentModalOpen(false)} onConfirm={(details) => void savePayment(details)} />}
   </section>;
 }
 export default OrderDetailsPage;

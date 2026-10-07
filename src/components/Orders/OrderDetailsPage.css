@@ -43,3 +43,5 @@
 .detail-meta-grid strong { color: #274560; font-size: 12px; }
 [data-theme="dark"] .detail-meta-grid small { color: var(--text-secondary) !important; }
 [data-theme="dark"] .detail-meta-grid strong { color: var(--text-primary) !important; }
+[data-theme="light"] .payment-method-summary { color:#70829a; }
+[data-theme="dark"] .payment-method-summary { color:var(--text-secondary); }
