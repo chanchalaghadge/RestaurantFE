@@ -16,6 +16,10 @@ function UserFormPage() {
   const { id } = useParams();
   const editing = Boolean(id);
   const signingUp = location.pathname === "/signup";
+  const currentUserRole = JSON.parse(localStorage.getItem("restaurant-user") || "{}")?.role;
+  const availableStaffRoles = currentUserRole === "BranchManager"
+    ? ["Captain", "Waiter", "Chef"]
+    : ["BranchManager", "Captain", "Waiter", "Chef"];
   const [form, setForm] = useState<UserCreate>(newUser);
   const [restaurantName, setRestaurantName] = useState("");
   const [branchName, setBranchName] = useState("Main Branch");
@@ -141,7 +145,8 @@ function UserFormPage() {
           firstName: form.firstName.trim(), 
           lastName: form.lastName.trim(), 
           email: form.email.trim(), 
-          phoneNumber: form.phoneNumber?.trim() || undefined 
+          phoneNumber: form.phoneNumber?.trim() || undefined,
+          role: form.role
         });
         showToast('User updated successfully', 'success');
       } else {
@@ -202,12 +207,9 @@ function UserFormPage() {
                 <input autoComplete="off" placeholder="Main Branch" value={branchName} onChange={(event) => setBranchName(event.target.value)} />
               </label>
             </>}
-            {!signingUp && !editing && <label><span className="user-field-label">Staff Role <b aria-hidden="true">*</b></span>
+            {!signingUp && <label><span className="user-field-label">Staff Role <b aria-hidden="true">*</b></span>
               <select required value={form.role} onChange={(event) => update("role", event.target.value as UserCreate["role"])}>
-                {(JSON.parse(localStorage.getItem("restaurant-user") || "{}")?.role === "BranchManager"
-                  ? ["Captain", "Waiter", "Chef"]
-                  : ["BranchManager", "Captain", "Waiter", "Chef"]
-                ).map((role) => <option key={role} value={role}>{role === "BranchManager" ? "Branch Manager" : role}</option>)}
+                {availableStaffRoles.map((role) => <option key={role} value={role}>{role === "BranchManager" ? "Branch Manager" : role}</option>)}
               </select>
             </label>}
             <label><span className="user-field-label">First Name <b aria-hidden="true">*</b></span>
