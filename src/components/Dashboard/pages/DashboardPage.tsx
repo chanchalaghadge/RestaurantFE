@@ -1,15 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
 import RevenueOrdersChart from "../components/RevenueOrdersChart";
-import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
 import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
 import { formatCurrency } from "../../../utils/currency";
 import { formatDate } from "../../../utils/date";
+import { ordersApi, type OrderApi } from "../../../api/orders.api";
+import OrderPerformanceMetrics from "../../Orders/OrderPerformanceMetrics";
+import { filterOrdersByPeriod, type OrderDatePeriod } from "../../../utils/orderDatePeriod";
 import "../Dashboard.css";
 
 function DashboardPage() {
@@ -17,6 +19,8 @@ function DashboardPage() {
   const { showToast } = useToast();
   const { handleError, createErrorContext } = useErrorHandler();
   const [data, setData] = useState<DashboardApi | null>(null);
+  const [orders, setOrders] = useState<OrderApi[]>([]);
+  const [performancePeriod, setPerformancePeriod] = useState<OrderDatePeriod>("today");
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,8 +32,8 @@ function DashboardPage() {
     if (isLoadingRef.current) return;
     
     isLoadingRef.current = true;
-    return dashboardApi.get()
-      .then(setData)
+    return Promise.all([dashboardApi.get(), ordersApi.list().catch(() => [])])
+      .then(([dashboardData, orderData]) => { setData(dashboardData); setOrders(orderData); })
       .catch((reason: unknown) => {
         const errorContext = createErrorContext('DashboardPage', 'loadDashboard');
         handleError(reason instanceof Error ? reason : new Error('Unable to load dashboard.'), errorContext);
@@ -41,17 +45,7 @@ function DashboardPage() {
       });
   };
 
-  // Auto-refresh every 60 seconds (increased from 30 to reduce API calls)
-  const { refresh, isRefreshing } = useAutoRefresh({
-    interval: 60000,
-    enabled: true,
-    onRefresh: () => {
-      if (data) {
-        console.log('Auto-refreshing dashboard');
-        return load();
-      }
-    }
-  });
+  const performanceOrders = useMemo(() => filterOrdersByPeriod(orders, performancePeriod), [orders, performancePeriod]);
 
   // WebSocket integration for real-time updates
   useEffect(() => {
@@ -145,10 +139,10 @@ function DashboardPage() {
   }
 
   const metrics = data ? [
-    { icon: "₹", tone: "green", label: "Total Revenue", value: formatCurrency(data.totalRevenue), sub: `${formatCurrency(data.todayRevenue)} today` },
-    { icon: "▤", tone: "blue", label: "Total Orders", value: data.totalOrders, sub: `${data.todayOrders} today` },
-    { icon: "♟", tone: "orange", label: "Customers", value: data.totalCustomers, sub: "From backend" },
-    { icon: "▣", tone: "purple", label: "Active Menu Items", value: data.activeMenuItems, sub: "From backend" },
+    { icon: "₹", graphic: "trend", tone: "green", label: "Total Revenue", value: formatCurrency(data.totalRevenue), sub: `${formatCurrency(data.todayRevenue)} today` },
+    { icon: "▤", graphic: "trend", tone: "blue", label: "Total Orders", value: data.totalOrders, sub: `${data.todayOrders} today` },
+    { icon: "♟", graphic: "person", tone: "orange", label: "Customers", value: data.totalCustomers, sub: "From backend" },
+    { icon: "▦", graphic: "cloche", tone: "purple", label: "Active Menu Items", value: data.activeMenuItems, sub: "From backend" },
   ] : [];
 
   return (
@@ -159,25 +153,17 @@ function DashboardPage() {
           <h1><span className="page-title-icon" aria-hidden="true">⌂</span> Dashboard</h1>
           <p>Live restaurant sales, orders, customers, and menu performance.</p>
         </div>
-        <button 
-          className="secondary-button refresh-button" 
-          onClick={() => {
-            refresh();
-            showToast('Dashboard refreshed', 'success', 2000);
-          }}
-          disabled={isRefreshing}
-          title="Refresh dashboard data"
-          aria-label="Refresh dashboard"
-        >
-          {isRefreshing ? '⏳' : '🔄'}
-        </button>
       </div>
 
       {error && <p role="alert">{error}</p>}
       {data && data.totalOrders === 0 && <button className="primary-button dashboard-seed" onClick={() => void seed()} disabled={seeding}>{seeding ? "Creating sample data..." : "Create Sample Sales Data"}</button>}
 
       <div className="metrics-grid">
-        {metrics.map((metric) => <article className="dashboard-metric" key={metric.label}><div className={`metric-icon ${metric.tone}`}>{metric.icon}</div><div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.sub}</small></div></article>)}
+        {metrics.map((metric) => <article className={`dashboard-metric metric-${metric.tone}`} key={metric.label}>
+          <div className={`metric-icon ${metric.tone}`} aria-hidden="true">{metric.icon}</div>
+          <div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.sub}</small></div>
+          {metric.graphic === "trend" ? <svg className="metric-decoration metric-trend" viewBox="0 0 80 36" aria-hidden="true"><polyline points="2,29 14,23 25,26 37,13 48,17 59,8 77,3" /></svg> : <span className={`metric-decoration metric-symbol ${metric.graphic}`} aria-hidden="true">{metric.graphic === "person" ? "♟" : "♨"}</span>}
+        </article>)}
       </div>
 
       {data && <>
@@ -191,17 +177,17 @@ function DashboardPage() {
             </div>
             <RevenueOrdersChart days={data.days} />
             <div className="sales-stats">
-              <div className="stat-item">
-                <span>Total Revenue</span>
-                <strong>{formatCurrency(data.totalRevenue)}</strong>
+              <div className="stat-item stat-revenue">
+                <span className="sales-stat-icon" aria-hidden="true">₹</span>
+                <div className="sales-stat-copy"><span>Total Revenue</span><strong>{formatCurrency(data.totalRevenue)}</strong></div>
               </div>
-              <div className="stat-item">
-                <span>Average Daily</span>
-                <strong>{formatCurrency(data.totalRevenue / 7)}</strong>
+              <div className="stat-item stat-average">
+                <span className="sales-stat-icon" aria-hidden="true">▥</span>
+                <div className="sales-stat-copy"><span>Average Daily</span><strong>{formatCurrency(data.totalRevenue / 7)}</strong></div>
               </div>
-              <div className="stat-item">
-                <span>Best Day</span>
-                <strong>{data.days.reduce((best, day) => day.revenue > best.revenue ? day : best).label}</strong>
+              <div className="stat-item stat-best-day">
+                <span className="sales-stat-icon" aria-hidden="true">▦</span>
+                <div className="sales-stat-copy"><span>Best Day</span><strong>{data.days.reduce((best, day) => day.revenue > best.revenue ? day : best).label}</strong></div>
               </div>
             </div>
           </section>
@@ -251,46 +237,7 @@ function DashboardPage() {
           </section>
         </div>
 
-        <div className="dashboard-middle enhanced-metrics">
-          <section className="dashboard-panel performance-panel">
-            <div className="dashboard-panel-heading">
-              <div>
-                <h2>Performance Metrics</h2>
-                <p>Key business indicators</p>
-              </div>
-            </div>
-            <div className="performance-grid">
-              <div className="performance-card">
-                <span className="performance-icon">📊</span>
-                <div>
-                  <strong>{formatCurrency(data.totalRevenue / (data.totalOrders || 1))}</strong>
-                  <small>Avg Order Value</small>
-                </div>
-              </div>
-              <div className="performance-card">
-                <span className="performance-icon">⚡</span>
-                <div>
-                  <strong>{data.todayOrders}</strong>
-                  <small>Today's Orders</small>
-                </div>
-              </div>
-              <div className="performance-card">
-                <span className="performance-icon">🎯</span>
-                <div>
-                  <strong>{data.activeMenuItems}</strong>
-                  <small>Active Items</small>
-                </div>
-              </div>
-              <div className="performance-card">
-                <span className="performance-icon">👥</span>
-                <div>
-                  <strong>{data.totalCustomers}</strong>
-                  <small>Total Customers</small>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
+        <OrderPerformanceMetrics orders={performanceOrders} period={performancePeriod} onPeriodChange={setPerformancePeriod} />
 
         <div className="dashboard-tables">
           <section className="dashboard-panel table-panel">

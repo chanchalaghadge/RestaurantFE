@@ -158,6 +158,55 @@
   font-size: 10px;
 }
 
+/* Compact dashboard KPI cards styled to match the dark reference design. */
+.dashboard-page .dashboard-metric {
+  min-height: 88px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 5px 16px #0002;
+}
+.dashboard-page .dashboard-metric.metric-green { border-color: #087c70; background: linear-gradient(115deg, #06292f, #082533); }
+.dashboard-page .dashboard-metric.metric-blue { border-color: #2458b0; background: linear-gradient(115deg, #10284e, #111f40); }
+.dashboard-page .dashboard-metric.metric-orange { border-color: #8a531c; background: linear-gradient(115deg, #30271f, #24252b); }
+.dashboard-page .dashboard-metric.metric-purple { border-color: #7738c5; background: linear-gradient(115deg, #251646, #211a3d); }
+.dashboard-page .dashboard-metric .metric-icon { width: 38px; height: 38px; font-size: 17px; box-shadow: 0 0 16px currentColor; }
+.dashboard-page .dashboard-metric .metric-icon.green { color: #fff; background: #08a985; }
+.dashboard-page .dashboard-metric .metric-icon.blue { color: #fff; background: #2875ff; }
+.dashboard-page .dashboard-metric .metric-icon.orange { color: #fff; background: #ee941d; }
+.dashboard-page .dashboard-metric .metric-icon.purple { color: #fff; background: #9142ed; }
+.dashboard-page .dashboard-metric .metric-copy { position: relative; z-index: 1; min-width: 0; }
+.dashboard-page .dashboard-metric .metric-copy span { margin: 0; color: #c6d1e1; font-size: 10px; font-weight: 500; }
+.dashboard-page .dashboard-metric .metric-copy strong { margin: 3px 0 0; color: #f5f8fc; font-size: 18px; line-height: 1.2; }
+.dashboard-page .dashboard-metric .metric-copy small { margin-top: 4px; color: #aebbd0; font-size: 8px; }
+.dashboard-page .metric-decoration { position: absolute; right: 10px; bottom: 10px; width: 66px; height: 31px; pointer-events: none; }
+.dashboard-page .metric-trend { overflow: visible; }
+.dashboard-page .metric-trend polyline { fill: none; stroke: #08d8ad; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }
+.dashboard-page .metric-blue .metric-trend polyline { stroke: #4788ff; }
+.dashboard-page .metric-symbol { display: grid; place-items: center; width: 28px; height: 28px; opacity: .72; font-size: 25px; }
+.dashboard-page .metric-symbol.person { color: #f8a02a; }
+.dashboard-page .metric-symbol.cloche { color: #bb72ff; }
+.dashboard-page .sales-stats { gap: 10px; padding: 10px; }
+.dashboard-page .sales-stats .stat-item { display:flex; min-width:0; min-height:58px; align-items:center; gap:10px; padding:9px; border:1px solid #253c5c; border-radius:8px; background:linear-gradient(115deg,#102746,#10223d); text-align:left; }
+.dashboard-page .sales-stat-icon { display:grid; width:30px; height:30px; flex:0 0 auto; place-items:center; border-radius:50%; color:#fff; background:#078f82; font-size:15px; font-weight:700; }
+.dashboard-page .stat-average .sales-stat-icon, .dashboard-page .stat-best-day .sales-stat-icon { background:#2164c7; }
+.dashboard-page .sales-stat-copy { min-width:0; }
+.dashboard-page .sales-stat-copy span { display:block; margin:0 0 3px; color:#c2cde0; font-size:9px; font-weight:500; }
+.dashboard-page .sales-stat-copy strong { display:block; color:#f4f7fc; font-size:14px; line-height:1.2; }
+[data-theme="light"] .dashboard-page .dashboard-metric.metric-green { border-color:#a7e5d8; background:linear-gradient(115deg,#effcf8,#e5f8f2); }
+[data-theme="light"] .dashboard-page .dashboard-metric.metric-blue { border-color:#b9d4fb; background:linear-gradient(115deg,#f0f6ff,#e7f0ff); }
+[data-theme="light"] .dashboard-page .dashboard-metric.metric-orange { border-color:#f2d3aa; background:linear-gradient(115deg,#fff8ed,#fff1df); }
+[data-theme="light"] .dashboard-page .dashboard-metric.metric-purple { border-color:#dcc3fb; background:linear-gradient(115deg,#f8f2ff,#f1e8ff); }
+[data-theme="light"] .dashboard-page .dashboard-metric .metric-copy span,
+[data-theme="light"] .dashboard-page .dashboard-metric .metric-copy small { color:#65738a; }
+[data-theme="light"] .dashboard-page .dashboard-metric .metric-copy strong { color:#17253b; }
+[data-theme="light"] .dashboard-page .metric-trend polyline { stroke:#079b7b; }
+[data-theme="light"] .dashboard-page .metric-blue .metric-trend polyline { stroke:#2868d6; }
+[data-theme="light"] .dashboard-page .sales-stats .stat-item { border-color:#dce5f1; background:linear-gradient(115deg,#fff,#f2f6fc); }
+[data-theme="light"] .dashboard-page .sales-stat-copy span { color:#687991; }
+[data-theme="light"] .dashboard-page .sales-stat-copy strong { color:#1d2c44; }
+
 /* Dark mode support for enhanced analytics */
 [data-theme="dark"] .enhanced-chart-container {
   background: var(--bg-tertiary);

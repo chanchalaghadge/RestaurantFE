@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type {
   ForgotPasswordMethod,
   ForgotPasswordRequest,
 } from "../../../types/auth/auth.types";
 import { authApi } from "../../../api/auth.api";
-import "./ForgotPassword.css";
+import { RecoveryLayout } from "../RecoveryLayout";
 
 function ForgotPassword() {
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "info">("info");
 
@@ -49,6 +51,8 @@ function ForgotPassword() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    // State updates render asynchronously; the ref also blocks rapid repeat submits.
+    if (submittingRef.current) return;
 
     const method: ForgotPasswordMethod = identifier.includes("@") ? "email" : "phone";
     const request: ForgotPasswordRequest = {
@@ -60,100 +64,63 @@ function ForgotPassword() {
       if (!validateIdentifier(request)) {
         return;
       }
-
-      try {
-        await authApi.forgotPassword(request.identifier, request.method === "email" ? "Email" : "Sms");
-        sessionStorage.setItem("restaurant-password-reset-user", request.identifier);
-        setOtpSent(true);
-        setMessage(`OTP sent successfully to ${request.identifier}.`);
-        setMessageType("success");
-      } catch (error) {
-        setMessage(error instanceof Error ? error.message : "Unable to send OTP.");
-        setMessageType("error");
-      }
-      return;
     }
 
-    if (!otp.trim()) {
+    if (otpSent && !otp.trim()) {
       setMessage("Please enter the OTP.");
       setMessageType("error");
       return;
     }
 
+    submittingRef.current = true;
+    setSubmitting(true);
     try {
-      await authApi.verifyOtp(identifier, otp.trim());
-      setMessage("OTP verified successfully. Redirecting to reset password...");
-      setMessageType("success");
-      setTimeout(() => navigate("/reset-password"), 800);
+      if (!otpSent) {
+        await authApi.forgotPassword(request.identifier, request.method === "email" ? "Email" : "Sms");
+        sessionStorage.setItem("restaurant-password-reset-user", request.identifier);
+        setOtpSent(true);
+        setMessage(`OTP sent successfully to ${request.identifier}.`);
+        setMessageType("success");
+      } else {
+        await authApi.verifyOtp(identifier, otp.trim());
+        setMessage("OTP verified successfully. Redirecting to reset password...");
+        setMessageType("success");
+        setTimeout(() => navigate("/reset-password"), 800);
+      }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Wrong OTP. Please try again.");
+      setMessage(error instanceof Error ? error.message : otpSent ? "Wrong OTP. Please try again." : "Unable to send OTP.");
       setMessageType("error");
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card forgot-card">
-        <div className="auth-brand">
-          <span className="brand-icon">🍽️</span>
-          <span className="brand-text">Restaurant</span>
-        </div>
-
-        <div className="auth-heading">
-          <h1>Forgot Password?</h1>
-          <p>Choose how you want to receive the OTP.</p>
-        </div>
-
-        <form className="auth-form" onSubmit={handleSubmit}>
+    <RecoveryLayout title="Forgot Password?" subtitle="Enter your email address or phone number and we’ll send you a verification code." footer={<><span>Remember your password?</span><Link to="/login">Back to Sign In</Link></>}>
+        <form className="recovery-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="identifier">
-              Email or Phone Number
-            </label>
-            <input
-              id="identifier"
-              name="identifier"
-              type="text"
-              value={identifier}
-              onChange={(event) => setIdentifier(event.target.value)}
-              placeholder="Enter email or phone number"
-              autoComplete="username"
-              inputMode="email"
-              className="form-control"
-            />
+            <label htmlFor="identifier">Email or Phone Number</label>
+            <div className="recovery-input-wrap"><span className="recovery-input-icon" aria-hidden="true">✉</span><input id="identifier" name="identifier" type="text" value={identifier} onChange={(event) => setIdentifier(event.target.value)} placeholder="Enter your email address or phone" autoComplete="username" inputMode="email" /></div>
           </div>
 
           {otpSent && (
             <div className="form-group otp-group">
               <label htmlFor="otp">Enter OTP</label>
-              <input
-                id="otp"
-                name="otp"
-                type="text"
-                value={otp}
-                onChange={(event) => setOtp(event.target.value)}
-                placeholder="Enter 6 digit OTP"
-                className="form-control"
-              />
+              <div className="recovery-input-wrap"><span className="recovery-input-icon" aria-hidden="true">♙</span><input id="otp" name="otp" type="text" value={otp} onChange={(event) => setOtp(event.target.value)} placeholder="Enter 6 digit OTP" autoComplete="one-time-code" /></div>
             </div>
           )}
 
           {message && (
-            <div className={`auth-message ${messageType}`}>{message}</div>
+            <div className={`recovery-message ${messageType}`} role="status">{message}</div>
           )}
 
-          <button type="submit" className="primary-button full-button">
-            {otpSent ? "Verify OTP" : "Send OTP"}
+          <button type="submit" className="recovery-button" disabled={submitting}>
+            {submitting ? (otpSent ? "Verifying..." : "Sending OTP...") : otpSent ? "Verify OTP" : "Send OTP"}
+            <span aria-hidden="true">→</span>
           </button>
         </form>
-
-        <div className="auth-footer">
-          <span>Remember your password?</span>
-          <Link to="/login" className="text-link">
-            Back to Login
-          </Link>
-        </div>
-      </div>
-    </div>
+    </RecoveryLayout>
   );
 }
 
