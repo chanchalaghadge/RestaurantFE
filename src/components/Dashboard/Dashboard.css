@@ -73,6 +73,23 @@
 [data-theme="dark"] .dashboard-period-filter { border-color: #33445e; background: #111f34; color: #c5d2e5; }
 [data-theme="dark"] .dashboard-period-filter select { color: #f3f6fb; }
 
+/* Let the status visualization use the full height and width of its dashboard panel. */
+.dashboard-page .order-status-panel { display: flex; min-height: 100%; flex-direction: column; }
+.dashboard-page .order-status-panel .status-chart { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(125px, .95fr) minmax(0, 1.05fr); align-items: center; gap: clamp(14px, 3vw, 30px); padding: 18px clamp(16px, 2vw, 28px) 24px; }
+.dashboard-page .order-status-panel .donut-chart { width: min(100%, 190px); height: auto; aspect-ratio: 1; justify-self: center; }
+.dashboard-page .order-status-panel .donut-chart::after { inset: 17%; }
+.dashboard-page .order-status-panel .donut-chart strong { font-size: clamp(20px, 2vw, 28px); }
+.dashboard-page .order-status-panel .donut-chart span { font-size: clamp(9px, .9vw, 11px); }
+.dashboard-page .order-status-panel .status-chart ul { width: 100%; }
+.dashboard-page .order-status-panel .status-chart li { grid-template-columns: 12px minmax(0, 1fr) auto; gap: 8px; margin: clamp(12px, 2vh, 20px) 0; font-size: clamp(10px, 1vw, 12px); }
+.dashboard-page .order-status-panel .status-chart li i { width: 9px; height: 9px; }
+.dashboard-page .order-status-panel .status-chart li b { font-size: inherit; }
+
+@media (max-width: 700px) {
+  .dashboard-page .order-status-panel .status-chart { grid-template-columns: minmax(110px, .85fr) minmax(0, 1.15fr); gap: 12px; padding: 16px 12px 20px; }
+  .dashboard-page .order-status-panel .status-chart li { gap: 6px; margin: 10px 0; }
+}
+
 /* Enhanced Analytics Styles */
 .enhanced-analytics {
   display: flex;
