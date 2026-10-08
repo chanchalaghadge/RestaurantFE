@@ -380,3 +380,84 @@
     color: black;
   }
 }
+
+/* Responsive application shell and shared mobile layout rules. */
+@media (max-width: 900px) {
+  .main-layout { height: 100dvh; min-height: 0; overflow: hidden; }
+  .layout-body { position: relative; min-height: 0; overflow: hidden; }
+  .header { z-index: 1200; display: flex; width: 100%; height: auto; min-height: 58px; flex-direction: row !important; flex-wrap: nowrap; gap: 8px; padding: 8px 12px; }
+  .header-left { display: flex; width: auto; min-width: 0; flex: 1 1 auto; align-items: center; gap: 8px; }
+  .header .mobile-menu-toggle { display: grid !important; visibility: visible; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border: 1px solid var(--border-color, #dce4ef); border-radius: 8px; color: var(--text-primary, #253751); background: var(--bg-secondary, #fff); font-size: 20px; line-height: 1; cursor: pointer; }
+  .global-search { width: auto; min-width: 0; height: 38px; flex: 1 1 auto; padding: 0 10px; }
+  .global-search input { min-width: 0; }
+  .header-center { display: none; }
+  .header-right { order: initial; width: auto; min-width: 0; flex: 0 0 auto; gap: 6px; }
+  .header-right .branch-selector, .header-right .tenant-selector { max-width: 105px; min-width: 0; }
+  .header-right .theme-toggle { width: 38px; height: 38px; min-width: 38px; }
+  .notification { width: 36px; height: 38px; font-size: 18px; }
+  .sidebar { position: fixed; z-index: 1102; top: 58px; bottom: 0; left: 0; width: min(82vw, 280px); flex: 0 0 auto; padding-bottom: env(safe-area-inset-bottom); box-shadow: 10px 0 30px #07142655; visibility: hidden; transform: translateX(-105%); transition: transform .22s ease, visibility .22s ease; }
+  .sidebar.mobile-open { visibility: visible; transform: translateX(0); }
+  .sidebar-backdrop { position: fixed; z-index: 1101; inset: 58px 0 0; width: 100%; height: calc(100% - 58px); border: 0; background: #07142688; }
+  .main-content { width: 100%; min-width: 0; padding: 12px 12px max(20px, env(safe-area-inset-bottom)); overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 680px) {
+  .main-content { padding: 10px 10px 22px; }
+  .main-content :where(.orders-page, .tables-page, .users-page, .customers-page, .categories-page, .menu-item-page, .items-list-page, .dashboard-page, .pricing-settings-page, .kitchen-page, .create-order-page, .edit-order-page, .order-details-page) { width: 100%; max-width: 100%; min-width: 0; }
+  .main-content :where(.page-heading, .orders-heading, .orders-topbar, .tables-heading, .tables-topbar, .users-header, .customer-page-header, .items-heading, .items-list-topbar, .create-order-heading, .edit-order-header, .detail-topbar, .kitchen-topbar) { align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+  .main-content :where(.orders-topbar-actions, .detail-actions, .form-actions, .user-form-actions, .create-order-heading > div:last-child, .edit-order-header-actions) { flex-wrap: wrap; gap: 8px; }
+  .main-content :where(.form-actions, .detail-actions) { justify-content: flex-start; }
+  .main-content :where(.form-actions button, .detail-actions button, .orders-topbar-actions button, .create-order-heading button, .edit-order-header-actions button) { width: auto; min-width: 0; }
+  .main-content :where(.primary-button, .secondary-button) { width: auto; max-width: 100%; min-height: 44px; white-space: normal; }
+  .main-content :where(input, select, textarea) { max-width: 100%; }
+  .main-content :where(.orders-table-wrap, .order-table-wrap, .users-table-wrap, .customers-table-wrap, .table-wrap, .items-table-wrap, .dashboard-table-wrap, .detail-items) { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .main-content :where(.orders-table, .users-table, .customers-table, .items-table, .detail-items-head, .detail-item) { min-width: 560px; }
+  .main-content :where(.modal-content, .category-modal, .order-editor, .table-editor, .payment-method-modal, .history-modal, .confirm-delete-modal) { width: min(calc(100% - 24px), 560px); max-width: 560px; max-height: calc(100dvh - 24px); margin: 12px; overflow: auto; }
+  .main-content :where(.form-grid, .category-form-columns, .menu-item-top-grid, .menu-item-bottom-grid, .create-order-details, .item-order-workspace, .edit-order-layout, .order-detail-grid) { grid-template-columns: minmax(0, 1fr); }
+  .main-content :where(.category-information, .category-image-column) { padding-right: 0; padding-left: 0; border-right: 0; }
+  .main-content :where(.order-tabs, .orders-tabs, .items-tabs) { max-width: 100%; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .main-content :where(.order-tabs button, .orders-tabs button, .items-tabs button) { flex: 0 0 auto; }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .dashboard-right-rail { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .dashboard-middle { grid-template-columns: minmax(0, 1fr); }
+  .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-period-filter { align-self: stretch; justify-content: space-between; }
+  .dashboard-page .order-status-panel .status-chart { grid-template-columns: minmax(100px, .8fr) minmax(0, 1.2fr); gap: 10px; padding: 14px 10px 18px; }
+  .create-order-page, .edit-order-page, .order-details-page { padding: 12px; }
+  .create-order-heading { align-items: flex-start; flex-direction: column; }
+  .edit-item { grid-template-columns: 46px minmax(0, 1fr) 65px 24px; gap: 6px; }
+  .kitchen-columns { grid-template-columns: repeat(3, minmax(260px, 1fr)); overflow-x: auto; }
+}
+
+@media (max-width: 420px) {
+  .header { min-height: 54px; padding-inline: 8px; }
+  .global-search { display: none; }
+  .header-right { gap: 3px; }
+  .header-right .branch-selector, .header-right .tenant-selector { max-width: 82px; height: 34px; padding-inline: 4px; font-size: 9px; }
+  .header-right .theme-toggle { width: 34px; height: 34px; min-width: 34px; }
+  .notification { width: 32px; height: 34px; }
+  .sidebar { top: 54px; }
+  .sidebar-backdrop { inset-block-start: 54px; height: calc(100% - 54px); }
+  .metrics-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-page .order-status-panel .status-chart { grid-template-columns: minmax(90px, .8fr) minmax(0, 1.2fr); }
+  .order-performance-grid { grid-template-columns: minmax(0, 1fr); }
+  .main-content :where(.profile-meta, .detail-bottom, .detail-sidebar, .customer-stats, .item-stats) { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 360px) {
+  .header { min-height: 104px; align-content: center; flex-wrap: wrap; row-gap: 2px; }
+  .header-left, .header-right { width: 100%; flex: 1 0 100%; }
+  .header-left { min-height: 42px; }
+  .header-right { justify-content: flex-end; gap: 3px; }
+  .header-right .branch-selector, .header-right .tenant-selector { max-width: 60px; height: 32px; padding-inline: 3px; font-size: 8px; }
+  .header-right .theme-toggle { width: 32px; height: 32px; min-width: 32px; }
+  .notification { width: 30px; height: 32px; }
+  .sidebar { top: 104px; }
+  .sidebar-backdrop { inset-block-start: 104px; height: calc(100% - 104px); }
+  .dashboard-period-filter { padding: 7px 9px; }
+  .dashboard-period-filter select { min-width: 0; width: auto; max-width: 70%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar { transition: none; }
+}
