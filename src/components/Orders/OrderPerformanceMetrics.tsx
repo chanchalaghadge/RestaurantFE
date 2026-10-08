@@ -3,10 +3,11 @@ import { formatCurrency } from "../../utils/currency";
 import { orderDatePeriodOptions, type OrderDatePeriod } from "../../utils/orderDatePeriod";
 import "./OrderPerformanceMetrics.css";
 
-function OrderPerformanceMetrics({ orders, period, onPeriodChange }: {
+function OrderPerformanceMetrics({ orders, period, onPeriodChange, showPeriodFilter = true }: {
   orders: OrderApi[];
   period: OrderDatePeriod;
   onPeriodChange: (period: OrderDatePeriod) => void;
+  showPeriodFilter?: boolean;
 }) {
   const groups = [
     { key: "all", title: "Total Orders", icon: "📊", orders },
@@ -17,9 +18,9 @@ function OrderPerformanceMetrics({ orders, period, onPeriodChange }: {
 
   return <section className="order-performance-panel" aria-label="Order performance metrics">
     <div className="order-performance-heading"><div><h2>Performance Metrics</h2><p>Order count and sales for the selected period</p></div>
-      <label>Period<select value={period} onChange={(event) => onPeriodChange(event.target.value as OrderDatePeriod)} aria-label="Performance metric period">
+      {showPeriodFilter && <label>Period<select value={period} onChange={(event) => onPeriodChange(event.target.value as OrderDatePeriod)} aria-label="Performance metric period">
         {orderDatePeriodOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select></label>
+      </select></label>}
     </div>
     <div className="order-performance-grid">{groups.map((group) => {
       const sales = group.orders.reduce((sum, order) => sum + order.totalAmount, 0);
