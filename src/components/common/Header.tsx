@@ -7,7 +7,7 @@ import { api } from "../../api/client";
 import { formatDate, formatTime } from "../../utils/date";
 import "./Header.css";
 
-function Header() {
+function Header({ onMenuToggle, isMenuOpen }: { onMenuToggle: () => void; isMenuOpen: boolean }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, availableLanguages, t } = useLanguage();
@@ -90,6 +90,9 @@ function Header() {
   return (
     <header className="header" role="banner">
       <div className="header-left">
+        <button className="mobile-menu-toggle" type="button" aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"} aria-expanded={isMenuOpen} aria-controls="main-navigation" onClick={onMenuToggle}>
+          <span aria-hidden="true">{isMenuOpen ? "×" : "☰"}</span>
+        </button>
         <label className="global-search">
           <span aria-hidden="true">⌕</span>
           <input placeholder={t.common.search + " categories, menu items..."} />

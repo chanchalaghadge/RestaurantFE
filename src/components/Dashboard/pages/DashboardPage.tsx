@@ -1,22 +1,75 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { dashboardApi, type DashboardApi } from "../../../api/dashboard.api";
 import LoadingSpinner from "../../common/LoadingSpinner";
 import Breadcrumb from "../../common/Breadcrumb";
 import RevenueOrdersChart from "../components/RevenueOrdersChart";
-import { useAutoRefresh } from "../../../hooks/useAutoRefresh";
 import { useToast } from "../../common/Toast";
 import { useErrorHandler } from "../../../utils/errorHandler";
 import { webSocketService } from "../../../utils/websocket";
 import { formatCurrency } from "../../../utils/currency";
 import { formatDate } from "../../../utils/date";
+import { ordersApi, type OrderApi } from "../../../api/orders.api";
+import OrderPerformanceMetrics from "../../Orders/OrderPerformanceMetrics";
+import { filterOrdersByPeriod, orderDatePeriodOptions, type OrderDatePeriod } from "../../../utils/orderDatePeriod";
 import "../Dashboard.css";
+
+const statusNames = ["Pending", "Preparing", "Ready", "Completed", "Cancelled"] as const;
+
+function buildPeriodDays(orders: OrderApi[], period: OrderDatePeriod): DashboardApi["days"] {
+  const now = new Date();
+  const buckets: DashboardApi["days"] = [];
+  if (period === "today" || period === "yesterday") {
+    const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (period === "yesterday" ? 1 : 0));
+    for (let hour = 0; hour < 24; hour += 4) {
+      const start = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hour);
+      buckets.push({ date: start.toISOString(), label: start.toLocaleTimeString([], { hour: "numeric" }), revenue: 0, orders: 0 });
+    }
+    orders.forEach((order) => {
+      const hour = new Date(order.createdAtUtc).getHours();
+      const bucket = buckets[Math.floor(hour / 4)];
+      if (bucket) { bucket.revenue += order.totalAmount; bucket.orders += 1; }
+    });
+    return buckets;
+  }
+  if (period === "last7Days") {
+    for (let offset = 6; offset >= 0; offset--) {
+      const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset);
+      buckets.push({ date: date.toISOString(), label: date.toLocaleDateString([], { weekday: "short" }), revenue: 0, orders: 0 });
+    }
+  } else if (period === "thisMonth") {
+    for (let day = 1; day <= now.getDate(); day++) {
+      const date = new Date(now.getFullYear(), now.getMonth(), day);
+      buckets.push({ date: date.toISOString(), label: String(day), revenue: 0, orders: 0 });
+    }
+  } else if (period === "lastMonth") {
+    const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+    const month = (now.getMonth() + 11) % 12;
+    const weeks = Math.ceil(new Date(year, month + 1, 0).getDate() / 7);
+    for (let week = 0; week < weeks; week++) buckets.push({ date: new Date(year, month, week * 7 + 1).toISOString(), label: `Week ${week + 1}`, revenue: 0, orders: 0 });
+  } else {
+    const year = now.getFullYear() - 1;
+    for (let month = 0; month < 12; month++) buckets.push({ date: new Date(year, month, 1).toISOString(), label: new Date(year, month, 1).toLocaleDateString([], { month: "short" }), revenue: 0, orders: 0 });
+  }
+  orders.forEach((order) => {
+    const date = new Date(order.createdAtUtc);
+    const index = period === "last7Days"
+      ? Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() - new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()) / 86400000) * -1 + 6
+      : period === "thisMonth" ? date.getDate() - 1
+        : period === "lastMonth" ? Math.floor((date.getDate() - 1) / 7) : date.getMonth();
+    const bucket = buckets[index];
+    if (bucket) { bucket.revenue += order.totalAmount; bucket.orders += 1; }
+  });
+  return buckets;
+}
 
 function DashboardPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const { handleError, createErrorContext } = useErrorHandler();
   const [data, setData] = useState<DashboardApi | null>(null);
+  const [orders, setOrders] = useState<OrderApi[]>([]);
+  const [performancePeriod, setPerformancePeriod] = useState<OrderDatePeriod>("today");
   const [error, setError] = useState("");
   const [seeding, setSeeding] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,8 +81,8 @@ function DashboardPage() {
     if (isLoadingRef.current) return;
     
     isLoadingRef.current = true;
-    return dashboardApi.get()
-      .then(setData)
+    return Promise.all([dashboardApi.get(), ordersApi.list().catch(() => [])])
+      .then(([dashboardData, orderData]) => { setData(dashboardData); setOrders(orderData); })
       .catch((reason: unknown) => {
         const errorContext = createErrorContext('DashboardPage', 'loadDashboard');
         handleError(reason instanceof Error ? reason : new Error('Unable to load dashboard.'), errorContext);
@@ -41,17 +94,32 @@ function DashboardPage() {
       });
   };
 
-  // Auto-refresh every 60 seconds (increased from 30 to reduce API calls)
-  const { refresh, isRefreshing } = useAutoRefresh({
-    interval: 60000,
-    enabled: true,
-    onRefresh: () => {
-      if (data) {
-        console.log('Auto-refreshing dashboard');
-        return load();
-      }
-    }
-  });
+  const performanceOrders = useMemo(() => filterOrdersByPeriod(orders, performancePeriod), [orders, performancePeriod]);
+  const periodRevenue = useMemo(() => performanceOrders.reduce((sum, order) => sum + order.totalAmount, 0), [performanceOrders]);
+  const periodDays = useMemo(() => buildPeriodDays(performanceOrders, performancePeriod), [performanceOrders, performancePeriod]);
+  const periodDayCount = performancePeriod === "today" || performancePeriod === "yesterday" ? 1
+    : performancePeriod === "last7Days" ? 7
+      : performancePeriod === "thisMonth" ? new Date().getDate()
+      : performancePeriod === "lastMonth" ? new Date(new Date().getFullYear(), new Date().getMonth(), 0).getDate()
+      : new Date(new Date().getFullYear() - 1, 1, 29).getMonth() === 1 ? 366 : 365;
+  const periodStatusCounts = useMemo(() => Object.fromEntries(statusNames.map((status) => [status, performanceOrders.filter((order) => order.status === status).length])), [performanceOrders]);
+  const statusDonut = useMemo(() => {
+    const colors = ["#ffad1e", "#3480f3", "#25b982", "#12c99a", "#f55366"];
+    const total = statusNames.reduce((sum, status) => sum + periodStatusCounts[status], 0);
+    let cursor = 0;
+    const segments = statusNames.map((status, index) => {
+      const start = cursor;
+      cursor += total ? periodStatusCounts[status] / total * 100 : 0;
+      return `${colors[index]} ${start}% ${cursor}%`;
+    });
+    return `conic-gradient(${segments.join(", ")})`;
+  }, [periodStatusCounts]);
+  const recentOrders = useMemo(() => [...performanceOrders].sort((a, b) => Date.parse(b.createdAtUtc) - Date.parse(a.createdAtUtc)).slice(0, 6), [performanceOrders]);
+
+  const openOrder = (order: OrderApi) => {
+    const status = order.status.toLowerCase();
+    navigate(status === "completed" || status === "cancelled" ? `/orders/${order.id}` : `/orders/${order.id}/edit`);
+  };
 
   // WebSocket integration for real-time updates
   useEffect(() => {
@@ -144,11 +212,12 @@ function DashboardPage() {
     );
   }
 
+  const uniqueCustomers = new Set(performanceOrders.map((order) => order.customerName.trim()).filter((name) => name && name.toLowerCase() !== "unknown")).size;
   const metrics = data ? [
-    { icon: "₹", tone: "green", label: "Total Revenue", value: formatCurrency(data.totalRevenue), sub: `${formatCurrency(data.todayRevenue)} today` },
-    { icon: "▤", tone: "blue", label: "Total Orders", value: data.totalOrders, sub: `${data.todayOrders} today` },
-    { icon: "♟", tone: "orange", label: "Customers", value: data.totalCustomers, sub: "From backend" },
-    { icon: "▣", tone: "purple", label: "Active Menu Items", value: data.activeMenuItems, sub: "From backend" },
+    { icon: "₹", graphic: "trend", tone: "green", label: "Total Revenue", value: formatCurrency(periodRevenue), sub: "Selected period" },
+    { icon: "▤", graphic: "trend", tone: "blue", label: "Total Orders", value: performanceOrders.length, sub: "Selected period" },
+    { icon: "♟", graphic: "person", tone: "orange", label: "Customers", value: uniqueCustomers, sub: "Selected period" },
+    { icon: "▦", graphic: "cloche", tone: "purple", label: "Active Menu Items", value: data.activeMenuItems, sub: "From backend" },
   ] : [];
 
   return (
@@ -159,67 +228,69 @@ function DashboardPage() {
           <h1><span className="page-title-icon" aria-hidden="true">⌂</span> Dashboard</h1>
           <p>Live restaurant sales, orders, customers, and menu performance.</p>
         </div>
-        <button 
-          className="secondary-button refresh-button" 
-          onClick={() => {
-            refresh();
-            showToast('Dashboard refreshed', 'success', 2000);
-          }}
-          disabled={isRefreshing}
-          title="Refresh dashboard data"
-          aria-label="Refresh dashboard"
-        >
-          {isRefreshing ? '⏳' : '🔄'}
-        </button>
+        <label className="dashboard-period-filter">
+          <span>Period</span>
+          <select aria-label="Dashboard date range" value={performancePeriod} onChange={(event) => setPerformancePeriod(event.target.value as OrderDatePeriod)}>
+            {orderDatePeriodOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </label>
       </div>
 
       {error && <p role="alert">{error}</p>}
       {data && data.totalOrders === 0 && <button className="primary-button dashboard-seed" onClick={() => void seed()} disabled={seeding}>{seeding ? "Creating sample data..." : "Create Sample Sales Data"}</button>}
 
-      <div className="metrics-grid">
-        {metrics.map((metric) => <article className="dashboard-metric" key={metric.label}><div className={`metric-icon ${metric.tone}`}>{metric.icon}</div><div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.sub}</small></div></article>)}
-      </div>
+      <div className="dashboard-grid">
+        <div className="dashboard-main-column">
+          <div className="metrics-grid">
+            {metrics.map((metric) => <article className={`dashboard-metric metric-${metric.tone}`} key={metric.label}>
+              <div className={`metric-icon ${metric.tone}`} aria-hidden="true">{metric.icon}</div>
+              <div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.sub}</small></div>
+              {metric.graphic === "trend" ? <svg className="metric-decoration metric-trend" viewBox="0 0 80 36" aria-hidden="true"><polyline points="2,29 14,23 25,26 37,13 48,17 59,8 77,3" /></svg> : <span className={`metric-decoration metric-symbol ${metric.graphic}`} aria-hidden="true">{metric.graphic === "person" ? "♟" : "♨"}</span>}
+            </article>)}
+          </div>
 
       {data && <>
         <div className="dashboard-middle">
           <section className="dashboard-panel sales-panel enhanced-analytics">
             <div className="dashboard-panel-heading">
-              <div>
-                <h2>Sales Overview</h2>
-                <p>Revenue for the last 7 days</p>
+              <div className="analytics-panel-title">
+                <span className="analytics-panel-icon sales-panel-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V12M10 19V6M16 19V10M22 19V3" /><path d="m3 9 6-5 5 4 7-6" /></svg>
+                </span>
+                <div><h2>Sales Overview</h2><p>Revenue and orders for the selected period</p></div>
               </div>
             </div>
-            <RevenueOrdersChart days={data.days} />
+            <RevenueOrdersChart days={periodDays} />
             <div className="sales-stats">
-              <div className="stat-item">
-                <span>Total Revenue</span>
-                <strong>{formatCurrency(data.totalRevenue)}</strong>
+              <div className="stat-item stat-revenue">
+                <span className="sales-stat-icon" aria-hidden="true">₹</span>
+                <div className="sales-stat-copy"><span>Total Revenue</span><strong>{formatCurrency(periodRevenue)}</strong></div>
               </div>
-              <div className="stat-item">
-                <span>Average Daily</span>
-                <strong>{formatCurrency(data.totalRevenue / 7)}</strong>
+              <div className="stat-item stat-average">
+                <span className="sales-stat-icon" aria-hidden="true">▥</span>
+                <div className="sales-stat-copy"><span>Average Daily</span><strong>{formatCurrency(periodRevenue / periodDayCount)}</strong></div>
               </div>
-              <div className="stat-item">
-                <span>Best Day</span>
-                <strong>{data.days.reduce((best, day) => day.revenue > best.revenue ? day : best).label}</strong>
+              <div className="stat-item stat-best-day">
+                <span className="sales-stat-icon" aria-hidden="true">▦</span>
+                <div className="sales-stat-copy"><span>Best Period</span><strong>{periodDays.reduce((best, day) => day.revenue > best.revenue ? day : best, periodDays[0]).label}</strong></div>
               </div>
             </div>
           </section>
           
           <section className="dashboard-panel order-status-panel">
             <div className="dashboard-panel-heading">
-              <div>
-                <h2>Order Status</h2>
-                <p>Current status totals</p>
+              <div className="analytics-panel-title">
+                <span className="analytics-panel-icon status-panel-icon" aria-hidden="true">⚙</span>
+                <div><h2>Order Status</h2><p>Current status totals</p></div>
               </div>
             </div>
             <div className="status-chart">
-              <div className="donut-chart">
-                <strong>{data.totalOrders}</strong>
+              <div className="donut-chart" style={{ background: statusDonut }}>
+                <strong>{performanceOrders.length}</strong>
                 <span>Total Orders</span>
               </div>
               <ul>
-                {Object.entries(data.statusCounts).map(([status, count]) => (
+                {Object.entries(periodStatusCounts).map(([status, count]) => (
                   <li key={status}>
                     <i className={status.toLowerCase()} />
                     {status}
@@ -230,67 +301,9 @@ function DashboardPage() {
             </div>
           </section>
           
-          <section className="dashboard-panel popular-panel">
-            <div className="dashboard-panel-heading">
-              <div>
-                <h2>Popular Menu Items</h2>
-                <p>Best sellers from orders</p>
-              </div>
-            </div>
-            <div className="popular-list">
-              {data.popular.length ? data.popular.map((item) => (
-                <div className="popular-item" key={item.name}>
-                  <div>
-                    <strong>{item.name}</strong>
-                    <span>{item.quantity} sold</span>
-                  </div>
-                  <b>{formatCurrency(item.revenue)}</b>
-                </div>
-              )) : <p>No item sales yet.</p>}
-            </div>
-          </section>
         </div>
 
-        <div className="dashboard-middle enhanced-metrics">
-          <section className="dashboard-panel performance-panel">
-            <div className="dashboard-panel-heading">
-              <div>
-                <h2>Performance Metrics</h2>
-                <p>Key business indicators</p>
-              </div>
-            </div>
-            <div className="performance-grid">
-              <div className="performance-card">
-                <span className="performance-icon">📊</span>
-                <div>
-                  <strong>{formatCurrency(data.totalRevenue / (data.totalOrders || 1))}</strong>
-                  <small>Avg Order Value</small>
-                </div>
-              </div>
-              <div className="performance-card">
-                <span className="performance-icon">⚡</span>
-                <div>
-                  <strong>{data.todayOrders}</strong>
-                  <small>Today's Orders</small>
-                </div>
-              </div>
-              <div className="performance-card">
-                <span className="performance-icon">🎯</span>
-                <div>
-                  <strong>{data.activeMenuItems}</strong>
-                  <small>Active Items</small>
-                </div>
-              </div>
-              <div className="performance-card">
-                <span className="performance-icon">👥</span>
-                <div>
-                  <strong>{data.totalCustomers}</strong>
-                  <small>Total Customers</small>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
+        <OrderPerformanceMetrics orders={performanceOrders} period={performancePeriod} onPeriodChange={setPerformancePeriod} showPeriodFilter={false} />
 
         <div className="dashboard-tables">
           <section className="dashboard-panel table-panel">
@@ -314,20 +327,15 @@ function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.recent.map((order) => (
+                  {recentOrders.map((order) => (
                     <tr
                       key={order.id}
                       className="dashboard-order-row"
-                      onDoubleClick={() => {
-                        const status = order.status.toLowerCase();
-                        navigate(status === "completed" || status === "cancelled"
-                          ? `/orders/${order.id}`
-                          : `/orders/${order.id}/edit`);
-                      }}
+                      onDoubleClick={() => openOrder(order)}
                     >
                       <td>#{order.id}</td>
                       <td>{order.customerName}</td>
-                      <td>{order.itemCount}</td>
+                      <td>{order.items.reduce((count, item) => count + item.quantity, 0)}</td>
                       <td>{formatCurrency(order.totalAmount)}</td>
                       <td><span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
                       <td>{formatDate(order.createdAtUtc)}</td>
@@ -339,6 +347,37 @@ function DashboardPage() {
           </section>
         </div>
       </>}
+        </div>
+
+        {data && <aside className="dashboard-right-rail">
+          <section className="dashboard-panel rail-status-card" aria-label="Order status overview">
+            <span className="rail-status-icon" aria-hidden="true">♨</span>
+            <div><h2>Order Status <i aria-hidden="true" /></h2><p>Current status totals</p></div>
+            <span className="rail-status-expand" aria-hidden="true">↗</span>
+          </section>
+          <section className="dashboard-panel rail-recent-card">
+            <div className="rail-recent-heading">
+              <div><span aria-hidden="true">◷</span><h2>Recent Orders</h2></div>
+              <Link to="/orders">View All →</Link>
+            </div>
+            <div className="rail-recent-list">
+              {recentOrders.map((order) => {
+                const itemCount = order.items.reduce((count, item) => count + item.quantity, 0);
+                return <div className="rail-recent-order" role="link" tabIndex={0} key={order.id} onDoubleClick={() => openOrder(order)} onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openOrder(order); }
+                }} title="Double-click or press Enter to open order">
+                  <span className="rail-order-main"><strong>#{order.id}</strong><small>{formatDate(order.createdAtUtc)}</small></span>
+                  <span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span>
+                  <small className="rail-order-meta">{itemCount} {itemCount === 1 ? "item" : "items"} · {order.orderType === "DineIn" ? "Dine In" : order.orderType}</small>
+                  <strong className="rail-order-total">{formatCurrency(order.totalAmount)}</strong>
+                  <span className="rail-order-chevron" aria-hidden="true">›</span>
+                </div>;
+              })}
+              {!recentOrders.length && <p className="rail-empty">No orders in this period.</p>}
+            </div>
+          </section>
+        </aside>}
+      </div>
     </section>
   );
 }

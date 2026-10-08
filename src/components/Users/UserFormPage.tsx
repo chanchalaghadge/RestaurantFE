@@ -125,7 +125,7 @@ function UserFormPage() {
       setSaving(true);
       setError("");
       if (signingUp) {
-        const result = await authApi.registerClient({
+        await authApi.registerClient({
           restaurantName: restaurantName.trim(),
           branchName: branchName.trim() || "Main Branch",
           ownerFirstName: form.firstName.trim(),
@@ -136,9 +136,8 @@ function UserFormPage() {
         });
         localStorage.removeItem("restaurant-tenant-id");
         localStorage.removeItem("restaurant-branch-id");
-        localStorage.setItem("restaurant-user", JSON.stringify({ id: result.user.id, name: `${result.user.firstName} ${result.user.lastName}`.trim(), email: result.user.email, role: result.user.role }));
-        showToast('Restaurant account created successfully', 'success');
-        navigate("/dashboard");
+        showToast('Account created successfully. Please sign in.', 'success');
+        navigate("/login", { replace: true });
         return;
       } else if (id) {
         await usersApi.update(Number(id), { 
