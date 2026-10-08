@@ -38,6 +38,12 @@ function isRetryable(status: number): boolean {
   return RETRYABLE_STATUS_CODES.includes(status);
 }
 
+// Automatically retry only idempotent requests. Retrying a POST after a 429 or
+// network timeout can repeat side effects such as sending multiple OTPs.
+function canRetry(init: RequestInit): boolean {
+  return ["GET", "HEAD", "OPTIONS"].includes((init.method ?? "GET").toUpperCase());
+}
+
 function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -86,7 +92,7 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
         const retryAfter = response.headers.get('Retry-After');
         const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : RETRY_DELAY;
         
-        if (retryCount < MAX_RETRIES) {
+        if (canRetry(init) && retryCount < MAX_RETRIES) {
           console.warn(`Rate limited. Retrying after ${waitTime}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
           await delay(waitTime);
           return api<T>(path, init, retryCount + 1);
@@ -94,7 +100,7 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
       }
       
       // Retry on server errors
-      if (isRetryable(response.status) && retryCount < MAX_RETRIES) {
+      if (canRetry(init) && isRetryable(response.status) && retryCount < MAX_RETRIES) {
         console.warn(`Request failed with status ${response.status}. Retrying... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
         await delay(RETRY_DELAY * (retryCount + 1)); // Exponential backoff
         return api<T>(path, init, retryCount + 1);
@@ -120,7 +126,7 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
   } catch (error) {
     // Handle network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      if (retryCount < MAX_RETRIES) {
+      if (canRetry(init) && retryCount < MAX_RETRIES) {
         console.warn(`Network error. Retrying... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
         await delay(RETRY_DELAY * (retryCount + 1));
         return api<T>(path, init, retryCount + 1);

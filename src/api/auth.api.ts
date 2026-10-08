@@ -12,9 +12,7 @@ export const authApi = {
     return result;
   },
   registerClient: async (body: ClientSignupRequest) => {
-    const result = await api<LoginResult>("/api/auth/signup", { method: "POST", body: JSON.stringify(body) });
-    tokenStorage.setToken(result.token);
-    return result;
+    return api<LoginResult>("/api/auth/signup", { method: "POST", body: JSON.stringify(body) });
   },
   logout: () => {
     tokenStorage.removeToken();

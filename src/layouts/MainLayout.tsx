@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/common/Header";
 import Sidebar from "../components/common/Sidebar";
 import SkipLink from "../components/common/SkipLink";
@@ -8,6 +8,7 @@ import "./MainLayout.css";
 function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("restaurant-user") || "{}");
   const role = user.role as string | undefined;
 
@@ -20,13 +21,16 @@ function MainLayout() {
     }
   }, [location.pathname, navigate, role]);
 
+  useEffect(() => { setMobileNavOpen(false); }, [location.pathname]);
+
   return (
     <div className="main-layout">
       <SkipLink />
-      <Header />
+      <Header isMenuOpen={mobileNavOpen} onMenuToggle={() => setMobileNavOpen((open) => !open)} />
 
       <div className="layout-body">
-        <Sidebar />
+        <Sidebar isOpen={mobileNavOpen} onNavigate={() => setMobileNavOpen(false)} />
+        {mobileNavOpen && <button className="sidebar-backdrop" type="button" aria-label="Close navigation menu" onClick={() => setMobileNavOpen(false)} />}
 
         <main className="main-content" id="main-content">
           <Outlet />

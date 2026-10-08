@@ -22,6 +22,8 @@ import "./Orders.css";
 import "./OrdersOverrides.css";
 import PaymentMethodModal from "./PaymentMethodModal";
 import type { PaymentDetails } from "../../api/orders.api";
+import OrderPerformanceMetrics from "./OrderPerformanceMetrics";
+import { filterOrdersByPeriod, type OrderDatePeriod } from "../../utils/orderDatePeriod";
 
 type OrderType = OrderApi["orderType"];
 
@@ -42,7 +44,7 @@ function OrdersPage() {
   const [statusFilter, setStatusFilter] = useState<"All" | OrderApi["status"]>("All");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"All" | OrderType>("All");
-  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
+  const [period, setPeriod] = useState<OrderDatePeriod>("today");
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -51,8 +53,7 @@ function OrdersPage() {
   const load = async () => {
     try {
       setLoading(true);
-      const fromDateUtc = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
-      setOrders(await ordersApi.list(undefined, fromDateUtc));
+      setOrders(await ordersApi.list());
     } catch (e) {
       const errorContext = createErrorContext('OrdersPage', 'loadOrders');
       handleError(e instanceof Error ? e : new Error('Unable to load orders.'), errorContext);
@@ -72,17 +73,16 @@ function OrdersPage() {
     if (searchParams.has("edit")) setSearchParams({}, { replace: true });
   }, [editing, orders, searchParams, setSearchParams]);
 
-  const visibleOrders = useMemo(() => orders.filter((order) => {
+  const periodOrders = useMemo(() => filterOrdersByPeriod(orders, period), [orders, period]);
+  const visibleOrders = useMemo(() => periodOrders.filter((order) => {
     const matchesStatus = statusFilter === "All" || order.status === statusFilter;
     const matchesType = typeFilter === "All" || order.orderType === typeFilter;
     const matchesSearch = `${order.id} ${order.customerName} ${order.tableNumber ?? ""}`.toLowerCase().includes(search.toLowerCase());
-    const matchesDateRange = (!dateRange.startDate || !dateRange.endDate) ||
-      (new Date(order.createdAtUtc) >= new Date(dateRange.startDate) && new Date(order.createdAtUtc) <= new Date(dateRange.endDate));
     const matchesAmountRange = (!amountRange.min || !amountRange.max) ||
       (order.totalAmount >= Number(amountRange.min) && order.totalAmount <= Number(amountRange.max));
 
-    return matchesStatus && matchesType && matchesSearch && matchesDateRange && matchesAmountRange;
-  }), [orders, search, statusFilter, typeFilter, dateRange, amountRange]);
+    return matchesStatus && matchesType && matchesSearch && matchesAmountRange;
+  }), [periodOrders, search, statusFilter, typeFilter, amountRange]);
   const { sortedData, sortConfig, handleSort, getSortIcon } = useTableSort(visibleOrders);
   const pageCount = Math.max(1, Math.ceil(sortedData.length / pageSize));
   const currentPage = Math.min(page, pageCount);
@@ -230,10 +230,11 @@ function OrdersPage() {
       <div className="order-tabs-compact">
         {statuses.map((status) => (
           <button key={status} className={`tab-compact ${statusFilter === status ? "active" : ""}`} onClick={() => setStatusFilter(status)}>
-            {status} <span className="count-badge">{status === "All" ? orders.length : orders.filter((order) => order.status === status).length}</span>
+            {status} <span className="count-badge">{status === "All" ? periodOrders.length : periodOrders.filter((order) => order.status === status).length}</span>
           </button>
         ))}
       </div>
+      <OrderPerformanceMetrics orders={periodOrders} period={period} onPeriodChange={setPeriod} />
       <div className="orders-card">
         <div className="order-tools-compact">
           <div className="filter-row">
@@ -257,23 +258,6 @@ function OrdersPage() {
               <option value="Takeaway">Takeaway</option>
               <option value="Delivery">Delivery</option>
             </select>
-            <div className="date-range-compact">
-              <input
-                type="date"
-                value={dateRange.startDate}
-                onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                className="date-input-compact"
-                aria-label="Start date"
-              />
-              <span className="date-separator">→</span>
-              <input
-                type="date"
-                value={dateRange.endDate}
-                onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                className="date-input-compact"
-                aria-label="End date"
-              />
-            </div>
             <div className="amount-range-compact">
               <input
                 type="number"
@@ -296,7 +280,7 @@ function OrdersPage() {
             <button 
               type="button" 
               className="reset-btn-compact"
-              onClick={() => { setSearch(""); setStatusFilter("All"); setTypeFilter("All"); setDateRange({ startDate: '', endDate: '' }); setAmountRange({ min: '', max: '' }); }}
+              onClick={() => { setSearch(""); setStatusFilter("All"); setTypeFilter("All"); setPeriod("today"); setAmountRange({ min: '', max: '' }); }}
               title="Reset filters"
             >
               ↻

@@ -9,7 +9,7 @@ const promoImages = [
   "https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=480&q=80",
 ];
 
-function Sidebar() {
+function Sidebar({ isOpen, onNavigate }: { isOpen: boolean; onNavigate: () => void }) {
   const [menuOpen, setMenuOpen] = useState(true);
   const [promoImageIndex, setPromoImageIndex] = useState(0);
   const [incompleteOrderCount, setIncompleteOrderCount] = useState(0);
@@ -50,7 +50,7 @@ function Sidebar() {
   };
 
   return (
-    <aside className="sidebar" aria-label="Main navigation">
+    <aside id="main-navigation" className={`sidebar${isOpen ? " mobile-open" : ""}`} aria-label="Main navigation">
       <div className="sidebar-title">
         <div className="brand-mark" aria-hidden="true">👨‍🍳</div>
         <div>
@@ -60,7 +60,9 @@ function Sidebar() {
       </div>
 
       <div className="sidebar-scroll-area">
-        <nav className="sidebar-menu" aria-label="Main navigation">
+        <nav className="sidebar-menu" aria-label="Main navigation" onClick={(event) => {
+          if ((event.target as HTMLElement).closest("a")) onNavigate();
+        }}>
           {canManage && <NavLink to="/dashboard" aria-label="Go to Dashboard">
             ⌂ <span>Dashboard</span>
           </NavLink>}
