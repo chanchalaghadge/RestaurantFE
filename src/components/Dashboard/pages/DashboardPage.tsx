@@ -114,17 +114,12 @@ function DashboardPage() {
     });
     return `conic-gradient(${segments.join(", ")})`;
   }, [periodStatusCounts]);
-  const popularItems = useMemo(() => {
-    const totals = new Map<string, { name: string; quantity: number; revenue: number }>();
-    performanceOrders.forEach((order) => order.items.forEach((item) => {
-      const current = totals.get(item.itemName) ?? { name: item.itemName, quantity: 0, revenue: 0 };
-      current.quantity += item.quantity;
-      current.revenue += item.lineTotal ?? item.unitPrice * item.quantity;
-      totals.set(item.itemName, current);
-    }));
-    return [...totals.values()].sort((a, b) => b.quantity - a.quantity).slice(0, 5);
-  }, [performanceOrders]);
   const recentOrders = useMemo(() => [...performanceOrders].sort((a, b) => Date.parse(b.createdAtUtc) - Date.parse(a.createdAtUtc)).slice(0, 6), [performanceOrders]);
+
+  const openOrder = (order: OrderApi) => {
+    const status = order.status.toLowerCase();
+    navigate(status === "completed" || status === "cancelled" ? `/orders/${order.id}` : `/orders/${order.id}/edit`);
+  };
 
   // WebSocket integration for real-time updates
   useEffect(() => {
@@ -244,21 +239,25 @@ function DashboardPage() {
       {error && <p role="alert">{error}</p>}
       {data && data.totalOrders === 0 && <button className="primary-button dashboard-seed" onClick={() => void seed()} disabled={seeding}>{seeding ? "Creating sample data..." : "Create Sample Sales Data"}</button>}
 
-      <div className="metrics-grid">
-        {metrics.map((metric) => <article className={`dashboard-metric metric-${metric.tone}`} key={metric.label}>
-          <div className={`metric-icon ${metric.tone}`} aria-hidden="true">{metric.icon}</div>
-          <div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.sub}</small></div>
-          {metric.graphic === "trend" ? <svg className="metric-decoration metric-trend" viewBox="0 0 80 36" aria-hidden="true"><polyline points="2,29 14,23 25,26 37,13 48,17 59,8 77,3" /></svg> : <span className={`metric-decoration metric-symbol ${metric.graphic}`} aria-hidden="true">{metric.graphic === "person" ? "♟" : "♨"}</span>}
-        </article>)}
-      </div>
+      <div className="dashboard-grid">
+        <div className="dashboard-main-column">
+          <div className="metrics-grid">
+            {metrics.map((metric) => <article className={`dashboard-metric metric-${metric.tone}`} key={metric.label}>
+              <div className={`metric-icon ${metric.tone}`} aria-hidden="true">{metric.icon}</div>
+              <div className="metric-copy"><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.sub}</small></div>
+              {metric.graphic === "trend" ? <svg className="metric-decoration metric-trend" viewBox="0 0 80 36" aria-hidden="true"><polyline points="2,29 14,23 25,26 37,13 48,17 59,8 77,3" /></svg> : <span className={`metric-decoration metric-symbol ${metric.graphic}`} aria-hidden="true">{metric.graphic === "person" ? "♟" : "♨"}</span>}
+            </article>)}
+          </div>
 
       {data && <>
         <div className="dashboard-middle">
           <section className="dashboard-panel sales-panel enhanced-analytics">
             <div className="dashboard-panel-heading">
-              <div>
-                <h2>Sales Overview</h2>
-                <p>Revenue and orders for the selected period</p>
+              <div className="analytics-panel-title">
+                <span className="analytics-panel-icon sales-panel-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V12M10 19V6M16 19V10M22 19V3" /><path d="m3 9 6-5 5 4 7-6" /></svg>
+                </span>
+                <div><h2>Sales Overview</h2><p>Revenue and orders for the selected period</p></div>
               </div>
             </div>
             <RevenueOrdersChart days={periodDays} />
@@ -280,9 +279,9 @@ function DashboardPage() {
           
           <section className="dashboard-panel order-status-panel">
             <div className="dashboard-panel-heading">
-              <div>
-                <h2>Order Status</h2>
-                <p>Current status totals</p>
+              <div className="analytics-panel-title">
+                <span className="analytics-panel-icon status-panel-icon" aria-hidden="true">⚙</span>
+                <div><h2>Order Status</h2><p>Current status totals</p></div>
               </div>
             </div>
             <div className="status-chart">
@@ -302,25 +301,6 @@ function DashboardPage() {
             </div>
           </section>
           
-          <section className="dashboard-panel popular-panel">
-            <div className="dashboard-panel-heading">
-              <div>
-                <h2>Popular Menu Items</h2>
-                <p>Best sellers from orders</p>
-              </div>
-            </div>
-            <div className="popular-list">
-              {popularItems.length ? popularItems.map((item) => (
-                <div className="popular-item" key={item.name}>
-                  <div>
-                    <strong>{item.name}</strong>
-                    <span>{item.quantity} sold</span>
-                  </div>
-                  <b>{formatCurrency(item.revenue)}</b>
-                </div>
-              )) : <p>No item sales yet.</p>}
-            </div>
-          </section>
         </div>
 
         <OrderPerformanceMetrics orders={performanceOrders} period={performancePeriod} onPeriodChange={setPerformancePeriod} showPeriodFilter={false} />
@@ -351,12 +331,7 @@ function DashboardPage() {
                     <tr
                       key={order.id}
                       className="dashboard-order-row"
-                      onDoubleClick={() => {
-                        const status = order.status.toLowerCase();
-                        navigate(status === "completed" || status === "cancelled"
-                          ? `/orders/${order.id}`
-                          : `/orders/${order.id}/edit`);
-                      }}
+                      onDoubleClick={() => openOrder(order)}
                     >
                       <td>#{order.id}</td>
                       <td>{order.customerName}</td>
@@ -372,6 +347,37 @@ function DashboardPage() {
           </section>
         </div>
       </>}
+        </div>
+
+        {data && <aside className="dashboard-right-rail">
+          <section className="dashboard-panel rail-status-card" aria-label="Order status overview">
+            <span className="rail-status-icon" aria-hidden="true">♨</span>
+            <div><h2>Order Status <i aria-hidden="true" /></h2><p>Current status totals</p></div>
+            <span className="rail-status-expand" aria-hidden="true">↗</span>
+          </section>
+          <section className="dashboard-panel rail-recent-card">
+            <div className="rail-recent-heading">
+              <div><span aria-hidden="true">◷</span><h2>Recent Orders</h2></div>
+              <Link to="/orders">View All →</Link>
+            </div>
+            <div className="rail-recent-list">
+              {recentOrders.map((order) => {
+                const itemCount = order.items.reduce((count, item) => count + item.quantity, 0);
+                return <div className="rail-recent-order" role="link" tabIndex={0} key={order.id} onDoubleClick={() => openOrder(order)} onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openOrder(order); }
+                }} title="Double-click or press Enter to open order">
+                  <span className="rail-order-main"><strong>#{order.id}</strong><small>{formatDate(order.createdAtUtc)}</small></span>
+                  <span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span>
+                  <small className="rail-order-meta">{itemCount} {itemCount === 1 ? "item" : "items"} · {order.orderType === "DineIn" ? "Dine In" : order.orderType}</small>
+                  <strong className="rail-order-total">{formatCurrency(order.totalAmount)}</strong>
+                  <span className="rail-order-chevron" aria-hidden="true">›</span>
+                </div>;
+              })}
+              {!recentOrders.length && <p className="rail-empty">No orders in this period.</p>}
+            </div>
+          </section>
+        </aside>}
+      </div>
     </section>
   );
 }
