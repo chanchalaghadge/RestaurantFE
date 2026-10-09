@@ -65,6 +65,7 @@ function Header({ onMenuToggle, isMenuOpen }: { onMenuToggle: () => void; isMenu
   const changeBranch = (branchId: string) => {
     if (!branchId || branchId === activeBranchId) return;
     localStorage.setItem("restaurant-branch-id", branchId);
+    void import("../../utils/dataCache").then(({ clearLocalCache }) => clearLocalCache());
     setActiveBranchId(branchId);
     window.location.reload();
   };
@@ -73,12 +74,13 @@ function Header({ onMenuToggle, isMenuOpen }: { onMenuToggle: () => void; isMenu
     if (!tenantId || tenantId === activeTenantId) return;
     localStorage.setItem("restaurant-tenant-id", tenantId);
     localStorage.removeItem("restaurant-branch-id");
+    void import("../../utils/dataCache").then(({ clearLocalCache }) => clearLocalCache());
     setActiveTenantId(tenantId);
     window.location.reload();
   };
 
-  const handleLogout = () => {
-    authApi.logout();
+  const handleLogout = async () => {
+    await authApi.logout();
     localStorage.removeItem("restaurant-user");
     localStorage.removeItem("restaurant-tenant-id");
     localStorage.removeItem("restaurant-branch-id");

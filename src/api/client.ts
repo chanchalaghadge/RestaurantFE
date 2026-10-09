@@ -1,5 +1,5 @@
 import { cacheLocally, getCached } from "../utils/dataCache";
-import { tokenStorage, securityHeaders, csrfProtection } from "../utils/security";
+import { securityHeaders, csrfProtection } from "../utils/security";
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net";
 
@@ -55,20 +55,10 @@ function notifyServiceUnavailable(error: ApiError) {
 }
 
 export async function api<T>(path: string, init: RequestInit = {}, retryCount: number = 0): Promise<T> {
-  const token = tokenStorage.getToken();
-  
-  // Check if token is expired before making request
-  if (token && tokenStorage.isTokenExpired()) {
-    tokenStorage.removeToken();
-    window.location.href = '/login';
-    throw new ApiError("Session expired. Please login again.", 401);
-  }
-  
   try {
     const headers = {
       Accept: "application/json",
       ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(localStorage.getItem("restaurant-tenant-id") ? { "X-Tenant-Id": localStorage.getItem("restaurant-tenant-id")! } : {}),
       ...(localStorage.getItem("restaurant-branch-id") ? { "X-Branch-Id": localStorage.getItem("restaurant-branch-id")! } : {}),
       ...securityHeaders.getHeaders(),
@@ -78,6 +68,7 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
     
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...init,
+      credentials: "include",
       headers,
     });
     
@@ -108,7 +99,12 @@ export async function api<T>(path: string, init: RequestInit = {}, retryCount: n
       
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
-        tokenStorage.removeToken();
+        localStorage.removeItem("restaurant-access-token");
+        localStorage.removeItem("restaurant-user");
+        localStorage.removeItem("restaurant-tenant-id");
+        localStorage.removeItem("restaurant-branch-id");
+        const { clearLocalCache } = await import("../utils/dataCache");
+        clearLocalCache();
         window.location.href = '/login';
         throw new ApiError("Session expired. Please login again.", response.status, errorCode);
       }

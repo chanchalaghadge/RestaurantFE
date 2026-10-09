@@ -76,6 +76,15 @@
 .chart-right-axis,
 .chart-bar-column { font-size: 9px; }
 .dashboard-table-wrap table { font-size: 9px; }
+.popular-items-table { table-layout: fixed; }
+.dashboard-tables { align-items: start; }
+.popular-items-panel { width: min(100%, 520px); }
+.dashboard-table-wrap .popular-items-table { min-width: 0; }
+.popular-items-table th:first-child, .popular-items-table td:first-child { width: 5%; }
+.popular-items-table th:nth-child(2) { width: 46%; }
+.popular-items-table th:nth-child(3), .popular-items-table th:nth-child(4) { width: 24%; }
+.popular-items-table .popular-item-name { max-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.popular-items-table .popular-empty { padding: 18px 8px; color: #8190a5; text-align: center; }
 
 [data-theme="dark"] .dashboard-period-filter { border-color: #33445e; background: #111f34; color: #c5d2e5; }
 [data-theme="dark"] .dashboard-period-filter select { color: #f3f6fb; }
