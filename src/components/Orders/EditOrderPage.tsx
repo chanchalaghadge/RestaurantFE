@@ -10,7 +10,7 @@ import { formatCurrency } from "../../utils/currency";
 import { pricingSettingsApi, type PricingSettings } from "../../api/pricing-settings.api";
 import "./EditOrderPage.css";
 
-type EditableItem = { menuItemId: number; itemName: string; variant?: string; quantity: number; unitPrice: number };
+type EditableItem = { itemName: string; variant?: string; quantity: number; unitPrice: number };
 
 function TrashIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M9 7l1-3h4l1 3m-9 0 1 13h10l1-13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -35,7 +35,7 @@ function EditOrderPage() {
   const [pricing, setPricing] = useState<PricingSettings>({ discountPercent: 0, cgstPercent: 2.5, sgstPercent: 2.5 });
 
   useEffect(() => { void Promise.all([ordersApi.get(orderId), ordersApi.listTables(), menuItemsApi.list({ status: "Active" }), pricingSettingsApi.get()])
-    .then(([orderData, tableData, menuData, pricingData]) => { setOrder(orderData); setTables(tableData); setMenu(menuData); setPricing(pricingData); setCustomerName(orderData.customerName); setTableId(orderData.restaurantTableId); setInstructions(orderData.specialInstructions ?? ""); setItems(orderData.items.map((item) => ({ menuItemId: menuData.find((menuItem) => menuItem.name === item.itemName)?.id ?? 0, itemName: item.itemName, variant: item.variant, quantity: item.quantity, unitPrice: item.unitPrice }))); })
+    .then(([orderData, tableData, menuData, pricingData]) => { setOrder(orderData); setTables(tableData); setMenu(menuData); setPricing(pricingData); setCustomerName(orderData.customerName); setTableId(orderData.restaurantTableId); setInstructions(orderData.specialInstructions ?? ""); setItems(orderData.items.map((item) => ({ itemName: item.itemName, variant: item.variant, quantity: item.quantity, unitPrice: item.unitPrice }))); })
     .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to load this order."))
     .finally(() => setLoading(false)); }, [orderId]);
 
@@ -45,8 +45,8 @@ function EditOrderPage() {
   const cgst = useMemo(() => Math.round(taxableSubtotal * pricing.cgstPercent) / 100, [taxableSubtotal, pricing.cgstPercent]);
   const sgst = useMemo(() => Math.round(taxableSubtotal * pricing.sgstPercent) / 100, [taxableSubtotal, pricing.sgstPercent]);
   const changeQuantity = (index: number, delta: number) => setItems((current) => current.flatMap((item, position) => position !== index ? [item] : item.quantity + delta > 0 ? [{ ...item, quantity: item.quantity + delta }] : []));
-  const addItem = (menuItem: MenuItemApi) => setItems((current) => { const found = current.find((item) => item.menuItemId === menuItem.id); return found ? current.map((item) => item.menuItemId === menuItem.id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { menuItemId: menuItem.id, itemName: menuItem.name, quantity: 1, unitPrice: menuItem.price }]; });
-  const save = async (event: React.FormEvent) => { event.preventDefault(); if (!order || !items.length) { setError("Add at least one order item before updating."); return; } if (items.some((item) => !item.menuItemId)) { setError("One or more existing menu items are no longer available. Ask a manager to update the menu before editing this order."); return; } if (order.orderType === "DineIn" && !tableId) { setError("Select a table for this dine-in order."); return; } try { setSaving(true); setError(""); await ordersApi.update(order.id, { customerName, orderType: order.orderType, restaurantTableId: order.orderType === "DineIn" ? tableId : undefined, specialInstructions: instructions.trim() || undefined, items }); showToast("Order updated successfully", "success", 1800); navigate(`/orders/${order.id}`); } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to update the order."); } finally { setSaving(false); } };
+  const addItem = (menuItem: MenuItemApi) => setItems((current) => { const found = current.find((item) => item.itemName === menuItem.name); return found ? current.map((item) => item.itemName === menuItem.name ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { itemName: menuItem.name, quantity: 1, unitPrice: menuItem.price }]; });
+  const save = async (event: React.FormEvent) => { event.preventDefault(); if (!order || !items.length) { setError("Add at least one order item before updating."); return; } if (order.orderType === "DineIn" && !tableId) { setError("Select a table for this dine-in order."); return; } try { setSaving(true); setError(""); await ordersApi.update(order.id, { customerName, orderType: order.orderType, restaurantTableId: order.orderType === "DineIn" ? tableId : undefined, specialInstructions: instructions.trim() || undefined, items }); showToast("Order updated successfully", "success", 1800); navigate(`/orders/${order.id}`); } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to update the order."); } finally { setSaving(false); } };
 
   if (loading) return <section className="edit-order-page"><LoadingSpinner text="Loading order editor..." fullScreen /></section>;
   if (!order) return <section className="edit-order-page"><ErrorAlert message={error || "Order not found."} onDismiss={() => navigate("/orders")} /></section>;

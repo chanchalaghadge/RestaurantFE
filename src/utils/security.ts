@@ -2,6 +2,37 @@
  * Security utilities for the frontend application
  */
 
+// Token storage utilities - using localStorage for now, but httpOnly cookies would be more secure
+export const tokenStorage = {
+  getToken: (): string | null => {
+    return localStorage.getItem('restaurant-access-token');
+  },
+  
+  setToken: (token: string): void => {
+    localStorage.setItem('restaurant-access-token', token);
+  },
+  
+  removeToken: (): void => {
+    localStorage.removeItem('restaurant-access-token');
+  },
+  
+  // Check if token is expired (if JWT)
+  isTokenExpired: (): boolean => {
+    const token = tokenStorage.getToken();
+    if (!token) return true;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp;
+      if (!exp) return false;
+      
+      return Date.now() >= exp * 1000;
+    } catch {
+      return true;
+    }
+  }
+};
+
 // Input sanitization
 export const sanitizeInput = (input: string): string => {
   if (typeof input !== 'string') return '';

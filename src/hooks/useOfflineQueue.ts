@@ -8,7 +8,7 @@ export function useOfflineQueue() {
   useEffect(() => {
     // Register service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, { scope: import.meta.env.BASE_URL })
+      navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
           console.log('Service Worker registered:', registration);
 
@@ -35,11 +35,14 @@ export function useOfflineQueue() {
 
     // Listen for online/offline events
     const handleOnline = () => {
-      console.log('Connection restored.');
+      console.log('Connection restored. Processing queued requests...');
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'PROCESS_QUEUE' });
+      }
     };
 
     const handleOffline = () => {
-      console.log('Connection lost. New requests require a connection.');
+      console.log('Connection lost. Requests will be queued.');
     };
 
     window.addEventListener('online', handleOnline);
