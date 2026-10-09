@@ -1,4 +1,3 @@
-import { tokenStorage } from './security';
 
 export type WebSocketEventType = 
   | 'order:created' 
@@ -20,6 +19,8 @@ class WebSocketService {
   private eventHandlers: Map<WebSocketEventType, Set<WebSocketEventHandler>> = new Map();
   private isConnecting = false;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private reconnectEnabled = true;
 
   async connect(): Promise<void> {
     if (this.isConnecting || (this.ws?.readyState === WebSocket.OPEN)) {
@@ -27,9 +28,9 @@ class WebSocketService {
     }
 
     this.isConnecting = true;
+    this.reconnectEnabled = true;
 
     try {
-      const token = tokenStorage.getToken();
       const apiUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 
         'https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net';
 
@@ -43,15 +44,12 @@ class WebSocketService {
         this.reconnectAttempts = 0;
         this.isConnecting = false;
 
-        // Send authentication token
-        if (token) {
-          this.sendMessage({
-            type: 'auth',
-            token,
-            tenantId: Number(localStorage.getItem('restaurant-tenant-id')) || undefined,
-            branchId: Number(localStorage.getItem('restaurant-branch-id')) || undefined
-          });
-        }
+        // The API authenticates the WebSocket upgrade with the HttpOnly session cookie.
+        this.sendMessage({
+          type: 'auth',
+          tenantId: Number(localStorage.getItem('restaurant-tenant-id')) || undefined,
+          branchId: Number(localStorage.getItem('restaurant-branch-id')) || undefined
+        });
 
         // Subscribe to default channels
         this.subscribeToOrders();
@@ -79,12 +77,13 @@ class WebSocketService {
         this.stopPingInterval();
         
         // Attempt reconnection
-        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        if (this.reconnectEnabled && this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++;
           const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
           console.log(`Reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
           
-          setTimeout(() => {
+          this.reconnectTimer = setTimeout(() => {
+            this.reconnectTimer = null;
             this.connect();
           }, delay);
         } else {
@@ -186,7 +185,12 @@ class WebSocketService {
   }
 
   async disconnect(): Promise<void> {
+    this.reconnectEnabled = false;
     this.stopPingInterval();
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     
     if (this.ws) {
       this.ws.close();
