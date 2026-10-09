@@ -66,8 +66,8 @@ function ForgotPassword() {
       }
     }
 
-    if (otpSent && !otp.trim()) {
-      setMessage("Please enter the OTP.");
+    if (otpSent && !/^\d{6}$/.test(otp.trim())) {
+      setMessage("Enter the 6-digit verification code.");
       setMessageType("error");
       return;
     }
@@ -76,10 +76,10 @@ function ForgotPassword() {
     setSubmitting(true);
     try {
       if (!otpSent) {
-        await authApi.forgotPassword(request.identifier, request.method === "email" ? "Email" : "Sms");
+        await authApi.forgotPassword(request.identifier, request.method === "email" ? "Email" : "Phone");
         sessionStorage.setItem("restaurant-password-reset-user", request.identifier);
         setOtpSent(true);
-        setMessage(`OTP sent successfully to ${request.identifier}.`);
+        setMessage("If an active account matches those details, a verification code will be sent.");
         setMessageType("success");
       } else {
         await authApi.verifyOtp(identifier, otp.trim());
@@ -107,7 +107,7 @@ function ForgotPassword() {
           {otpSent && (
             <div className="form-group otp-group">
               <label htmlFor="otp">Enter OTP</label>
-              <div className="recovery-input-wrap"><span className="recovery-input-icon" aria-hidden="true">♙</span><input id="otp" name="otp" type="text" value={otp} onChange={(event) => setOtp(event.target.value)} placeholder="Enter 6 digit OTP" autoComplete="one-time-code" /></div>
+              <div className="recovery-input-wrap"><span className="recovery-input-icon" aria-hidden="true">♙</span><input id="otp" name="otp" type="text" inputMode="numeric" maxLength={6} pattern="[0-9]{6}" value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))} placeholder="Enter 6 digit OTP" autoComplete="one-time-code" /></div>
             </div>
           )}
 

@@ -11,7 +11,7 @@ import { pricingSettingsApi, type PricingSettings } from "../../api/pricing-sett
 import TrashIcon from "../common/TrashIcon";
 import "./CreateOrderPage.css";
 
-type CartItem = Pick<OrderItemApi, "itemName" | "quantity" | "unitPrice">;
+type CartItem = Pick<OrderItemApi, "menuItemId" | "itemName" | "quantity" | "unitPrice"> & { menuItemId: number };
 type OrderType = OrderApi["orderType"];
 
 function CreateOrderPage() {
@@ -60,7 +60,7 @@ function CreateOrderPage() {
     const existing = current.find((entry) => entry.itemName === item.name);
     return existing
       ? current.map((entry) => entry.itemName === item.name ? { ...entry, quantity: entry.quantity + 1 } : entry)
-      : [...current, { itemName: item.name, quantity: 1, unitPrice: item.price }];
+      : [...current, { menuItemId: item.id, itemName: item.name, quantity: 1, unitPrice: item.price }];
   });
 
   const changeQuantity = (index: number, amount: number) => setItems((current) => current.flatMap((item, position) => {
