@@ -115,6 +115,16 @@ function DashboardPage() {
     return `conic-gradient(${segments.join(", ")})`;
   }, [periodStatusCounts]);
   const recentOrders = useMemo(() => [...performanceOrders].sort((a, b) => Date.parse(b.createdAtUtc) - Date.parse(a.createdAtUtc)).slice(0, 6), [performanceOrders]);
+  const popularItems = useMemo(() => {
+    const totals = new Map<string, { name: string; quantity: number; revenue: number }>();
+    performanceOrders.forEach((order) => order.items.forEach((item) => {
+      const current = totals.get(item.itemName) ?? { name: item.itemName, quantity: 0, revenue: 0 };
+      current.quantity += item.quantity;
+      current.revenue += item.lineTotal ?? item.unitPrice * item.quantity;
+      totals.set(item.itemName, current);
+    }));
+    return [...totals.values()].sort((a, b) => b.quantity - a.quantity || b.revenue - a.revenue).slice(0, 5);
+  }, [performanceOrders]);
 
   const openOrder = (order: OrderApi) => {
     const status = order.status.toLowerCase();
@@ -306,41 +316,32 @@ function DashboardPage() {
         <OrderPerformanceMetrics orders={performanceOrders} period={performancePeriod} onPeriodChange={setPerformancePeriod} showPeriodFilter={false} />
 
         <div className="dashboard-tables">
-          <section className="dashboard-panel table-panel">
+          <section className="dashboard-panel table-panel popular-items-panel">
             <div className="dashboard-panel-heading">
               <div>
-                <h2>Recent Orders</h2>
-                <p>Latest orders from your customers</p>
+                <h2>Popular Menu Items</h2>
+                <p>Best-selling items for the selected period</p>
               </div>
-              <Link to="/orders">View All →</Link>
+              <Link to="/menu">View Menu →</Link>
             </div>
             <div className="dashboard-table-wrap">
-              <table>
+              <table className="popular-items-table">
                 <thead>
                   <tr>
-                    <th>Order #</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Time</th>
+                    <th>#</th>
+                    <th>Item</th>
+                    <th>Quantity Sold</th>
+                    <th>Revenue</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentOrders.map((order) => (
-                    <tr
-                      key={order.id}
-                      className="dashboard-order-row"
-                      onDoubleClick={() => openOrder(order)}
-                    >
-                      <td>#{order.id}</td>
-                      <td>{order.customerName}</td>
-                      <td>{order.items.reduce((count, item) => count + item.quantity, 0)}</td>
-                      <td>{formatCurrency(order.totalAmount)}</td>
-                      <td><span className={`dashboard-status ${order.status.toLowerCase()}`}>{order.status}</span></td>
-                      <td>{formatDate(order.createdAtUtc)}</td>
-                    </tr>
-                  ))}
+                  {popularItems.map((item, index) => <tr key={item.name}>
+                    <td>{index + 1}</td>
+                    <td className="popular-item-name">{item.name}</td>
+                    <td>{item.quantity}</td>
+                    <td>{formatCurrency(item.revenue)}</td>
+                  </tr>)}
+                  {!popularItems.length && <tr><td colSpan={4} className="popular-empty">No item sales in this period.</td></tr>}
                 </tbody>
               </table>
             </div>
