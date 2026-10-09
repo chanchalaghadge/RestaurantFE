@@ -402,7 +402,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
   const [orderType, setOrderType] = useState<OrderType>(order?.orderType ?? "DineIn");
   const [status, setStatus] = useState<OrderApi["status"]>(order?.status ?? "Pending");
   const [tableId, setTableId] = useState<number | undefined>(order?.restaurantTableId);
-  const [items, setItems] = useState<Array<{ menuItemId?: number; itemName: string; quantity: number; unitPrice: number }>>(order?.items.map((x) => ({ itemName: x.itemName, quantity: x.quantity, unitPrice: x.unitPrice })) ?? []);
+  const [items, setItems] = useState(order?.items.map((x) => ({ itemName: x.itemName, quantity: x.quantity, unitPrice: x.unitPrice })) ?? []);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -414,7 +414,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
 
   const add = (item: MenuItemApi) => setItems((current) => {
     const found = current.find((x) => x.itemName === item.name);
-    return found ? current.map((x) => x.itemName === item.name ? { ...x, quantity: x.quantity + 1 } : x) : [...current, { menuItemId: item.id, itemName: item.name, quantity: 1, unitPrice: item.price }];
+    return found ? current.map((x) => x.itemName === item.name ? { ...x, quantity: x.quantity + 1 } : x) : [...current, { itemName: item.name, quantity: 1, unitPrice: item.price }];
   });
 
   const submit = async (event: React.FormEvent) => {
@@ -424,7 +424,7 @@ function OrderForm({ order, onClose, onSaved }: { order?: OrderApi; onClose: () 
       return;
     }
     try {
-      const body = { customerName, orderType, restaurantTableId: orderType === "DineIn" ? tableId : undefined, items: items.map((item) => ({ ...item, menuItemId: menu.find((menuItem) => menuItem.name === item.itemName)?.id ?? 0 })) };
+      const body = { customerName, orderType, restaurantTableId: orderType === "DineIn" ? tableId : undefined, items };
       const saved = order ? await ordersApi.update(order.id, body) : await ordersApi.create(body);
       if (status !== saved.status) await ordersApi.updateStatus(saved.id, status);
       await onSaved();

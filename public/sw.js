@@ -1,13 +1,15 @@
 const CACHE_VERSION = 'v2';
 const CACHE_NAME = `restaurant-be-${CACHE_VERSION}`;
-const APP_BASE_URL = new URL(self.registration.scope);
 const urlsToCache = [
-  APP_BASE_URL.href,
-  new URL('index.html', APP_BASE_URL).href,
-  new URL('manifest.json', APP_BASE_URL).href,
-  new URL('icon-192x192.svg', APP_BASE_URL).href,
-  new URL('icon-512x512.svg', APP_BASE_URL).href
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/icon-192x192.svg',
+  '/icon-512x512.svg'
 ];
+
+// Dynamic cache for API responses
+const API_CACHE_NAME = `restaurant-be-api-${CACHE_VERSION}`;
 
 // Cache strategies
 const CACHE_STRATEGIES = {
@@ -60,7 +62,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName.startsWith('restaurant-be-') && cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME) {
             console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -80,8 +82,9 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(event.request.url);
 
-  // Never persist API responses: they may contain tenant-specific or personal data.
+  // API requests - Network First with cache fallback
   if (url.pathname.startsWith('/api/')) {
+    event.respondWith(networkFirstStrategy(event.request));
     return;
   }
 
@@ -138,7 +141,7 @@ async function networkFirstStrategy(request) {
     
     // Return cached index.html for navigation requests
     if (request.headers.get('accept')?.includes('text/html')) {
-      const cachedIndex = await caches.match(new URL('index.html', APP_BASE_URL).href);
+      const cachedIndex = await caches.match('/index.html');
       if (cachedIndex) {
         return cachedIndex;
       }
@@ -196,6 +199,15 @@ async function staleWhileRevalidateStrategy(request) {
   return fetchPromise;
 }
 
+// Handle background sync (for offline actions)
+self.addEventListener('sync', (event) => {
+  console.log('[Service Worker] Background sync:', event.tag);
+  // Handle different sync events here
+  if (event.tag === 'sync-orders') {
+    event.waitUntil(syncOrders());
+  }
+});
+
 // Handle push notifications
 self.addEventListener('push', (event) => {
   console.log('[Service Worker] Push received');
@@ -223,9 +235,23 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
   event.waitUntil(
-    clients.openWindow(APP_BASE_URL.href)
+    clients.openWindow('/')
   );
 });
+
+// Helper function to sync orders when back online
+async function syncOrders() {
+  console.log('[Service Worker] Syncing orders...');
+  // Implement order sync logic here
+  // This would typically involve reading from IndexedDB and sending to API
+}
+
+// Broadcast channel for communicating with clients
+const broadcastChannel = new BroadcastChannel('sw-messages');
+
+function broadcastMessage(type, data) {
+  broadcastChannel.postMessage({ type, data });
+}
 
 // Broadcast channel for communicating with clients
 const broadcastChannel = new BroadcastChannel('sw-messages');
