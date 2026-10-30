@@ -30,8 +30,9 @@ class WebSocketService {
 
     try {
       const token = tokenStorage.getToken();
+      // Previous API: https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net
       const apiUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || 
-        'https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net';
+        'https://rohitgabane1234-001-site1.htempurl.com';
 
       // Convert HTTPS to WSS for WebSocket
       const wsUrl = apiUrl.replace(/^https?/, 'wss') + '/ws';

@@ -1,7 +1,8 @@
 import { cacheLocally, getCached } from "../utils/dataCache";
 import { tokenStorage, securityHeaders, csrfProtection } from "../utils/security";
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net";
+// Previous API: https://restaurantbe-api-apgwf4dac2gfaqaq.southindia-01.azurewebsites.net
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") || "https://rohitgabane1234-001-site1.htempurl.com";
 
 // Add configuration validation
 if (!import.meta.env.VITE_API_BASE_URL && import.meta.env.DEV) {

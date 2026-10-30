@@ -37,7 +37,7 @@ npm run preview   # serve the built app locally
 npm run lint      # ESLint
 ```
 
-The API base URL is configured with `VITE_API_BASE_URL`. If it is absent, the client falls back to the Azure API URL defined in `src/api/client.ts`. `.env.example` shows the variable name and current example value. Do not put private credentials in a Vite environment variable: `VITE_*` values are bundled into browser code.
+The API base URL is configured with `VITE_API_BASE_URL`. If it is absent, the client falls back to the SmarterASP.NET API URL defined in `src/api/client.ts`. `.env.example` shows the variable name and current example value. Do not put private credentials in a Vite environment variable: `VITE_*` values are bundled into browser code.
 
 ## 3. Routes and screens
 
